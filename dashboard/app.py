@@ -25,13 +25,13 @@ def main():
             "About": "https://github.com/quack-ai/contribution-api",
         },
     )
-    st.title("Guideline curation dashboard")
+    st.title("Guideline edition dashboard")
     st.header("Editor")
     # Sidebar
     st.sidebar.title("Credentials")
     # Authentication
     gh_token = st.sidebar.text_input("GitHub token", type="password", value=st.session_state.get("gh_token", ""))
-    if st.sidebar.button("Authenticate"):
+    if st.sidebar.button("Authenticate", disabled=len(gh_token) == 0):
         st.session_state["gh_token"] = gh_token
         with st.spinner("Authenticating..."):
             st.session_state["token"] = st.session_state.get(
@@ -119,32 +119,31 @@ def main():
         ][0]
 
     # Guideline registration
-    if st.session_state.get("token") is not None and st.session_state.get("selected_repo") is not None:
+    if st.sidebar.button("Add new guideline", disabled=len(st.session_state["guidelines"]) == 0):
         gh_repo = [
             repo
             for repo in st.session_state.get("available_repos", [])
             if repo["full_name"] == st.session_state["selected_repo"]
         ][0]
-        if st.sidebar.button("Add new guideline"):
-            # Create an entry
-            payload = {
-                "repo_id": gh_repo["id"],
-                "title": f"Guideline title {len(st.session_state['guidelines'])}",
-                "details": "Guideline description",
-            }
-            response = requests.post(
-                f"{API_ENDPOINT}/guidelines",
-                json=payload,
-                headers={"Authorization": f"Bearer {st.session_state['token']}"},
-                timeout=HTTP_TIMEOUT,
-            )
-            if response.status_code == 201:
-                st.sidebar.success(f"Guideline {payload['title']} created", icon="✅")
-                st.session_state["guidelines"].append(st.session_state["selected_guideline"])
-                st.session_state["default_guideline_idx"] = len(st.session_state["guidelines"]) - 1
-                st.session_state["selected_guideline"] = response.json()
-            else:
-                st.error("Unable to create guideline", icon="🚨")
+        # Create an entry
+        payload = {
+            "repo_id": gh_repo["id"],
+            "title": f"Guideline title {len(st.session_state['guidelines'])}",
+            "details": "Guideline description",
+        }
+        response = requests.post(
+            f"{API_ENDPOINT}/guidelines",
+            json=payload,
+            headers={"Authorization": f"Bearer {st.session_state['token']}"},
+            timeout=HTTP_TIMEOUT,
+        )
+        if response.status_code == 201:
+            st.sidebar.success(f"Guideline {payload['title']} created", icon="✅")
+            st.session_state["guidelines"].append(st.session_state["selected_guideline"])
+            st.session_state["default_guideline_idx"] = len(st.session_state["guidelines"]) - 1
+            st.session_state["selected_guideline"] = response.json()
+        else:
+            st.error("Unable to create guideline", icon="🚨")
 
     if st.sidebar.button("Delete guideline", disabled=st.session_state.get("selected_guideline") is None):
         # Push the edit to the API
@@ -166,9 +165,16 @@ def main():
             )
 
     guideline_title = st.text_input(
-        "Title", max_chars=100, value=st.session_state.get("selected_guideline", {}).get("title", "")
+        "Title",
+        max_chars=100,
+        value=st.session_state.get("selected_guideline", {}).get("title", ""),
+        disabled=len(st.session_state["guidelines"]) == 0,
     )
-    guideline_details = st.text_area("Details", value=st.session_state.get("selected_guideline", {}).get("details", ""))
+    guideline_details = st.text_area(
+        "Details",
+        value=st.session_state.get("selected_guideline", {}).get("details", ""),
+        disabled=len(st.session_state["guidelines"]) == 0,
+    )
     if st.button("Save guideline", disabled=st.session_state.get("selected_guideline") is None):
         # Form check
         if len(guideline_title) == 0 or len(guideline_details) == 0:
