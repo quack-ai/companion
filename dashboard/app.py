@@ -30,7 +30,9 @@ def main():
     # Sidebar
     st.sidebar.title("Credentials")
     # Authentication
-    gh_token = st.sidebar.text_input("GitHub token", type="password", value=st.session_state.get("gh_token", ""))
+    gh_token = st.sidebar.text_input(
+        "GitHub token", type="password", value=st.session_state.get("gh_token", "")
+    )
     if st.sidebar.button("Authenticate", disabled=len(gh_token) == 0):
         st.session_state["gh_token"] = gh_token
         with st.spinner("Authenticating..."):
@@ -48,19 +50,30 @@ def main():
             with st.spinner("Fetching repos..."):
                 st.session_state["available_repos"] = requests.get(
                     f"{GHAPI_ENDPOINT}/user/repos",
-                    params={"affiliation": "owner", "visibility": "public", "per_page": 100},
+                    params={
+                        "affiliation": "owner",
+                        "visibility": "public",
+                        "per_page": 100,
+                    },
                     headers={"Authorization": f"Bearer {st.session_state['gh_token']}"},
                     timeout=HTTP_TIMEOUT,
                 ).json()
 
     st.sidebar.title("Selection")
-    selected_repo = st.sidebar.selectbox(
+    repo_idx = st.sidebar.selectbox(
         "Available repos",
-        tuple(repo["full_name"] for repo in st.session_state.get("available_repos", [])),
+        range(len(st.session_state.get("available_repos", []))),
+        format_func=lambda idx: st.session_state.get("available_repos", [])[idx][
+            "full_name"
+        ],
     )
-    st.session_state["is_repo_selected"] = st.session_state.get("is_repo_selected", False)
-    st.session_state["is_repo_registered"] = st.session_state.get("is_repo_registered", False)
-    if isinstance(selected_repo, str):
+    st.session_state["is_repo_selected"] = st.session_state.get(
+        "is_repo_selected", False
+    )
+    st.session_state["is_repo_registered"] = st.session_state.get(
+        "is_repo_registered", False
+    )
+    if isinstance(repo_idx, int):
         st.session_state["is_repo_selected"] = True
         # Installed repos
         installed_repos = requests.get(
@@ -69,62 +82,69 @@ def main():
             timeout=HTTP_TIMEOUT,
         ).json()
         installed_names = [repo["full_name"] for repo in installed_repos]
-        st.session_state["is_repo_registered"] = selected_repo in installed_names
+        st.session_state["is_repo_registered"] = (
+            st.session_state["available_repos"][repo_idx]["full_name"]
+            in installed_names
+        )
 
-    if st.session_state["is_repo_selected"] and not st.session_state["is_repo_registered"]:
+    if (
+        st.session_state["is_repo_selected"]
+        and not st.session_state["is_repo_registered"]
+    ):
         # Register the repo
-        st.sidebar.info(f"The repository {selected_repo} is not yet registered. Would you like to install it?")
+        st.sidebar.info(
+            f"The repository {st.session_state['available_repos'][repo_idx]['full_name']} is not yet registered. Would you like to install it?"
+        )
         if st.sidebar.button("Register repository"):
-            gh_repo = [
-                repo for repo in st.session_state.get("available_repos", []) if repo["full_name"] == selected_repo
-            ][0]
+            gh_repo = st.session_state["available_repos"][repo_idx]
             response = requests.post(
                 f"{API_ENDPOINT}/repos",
-                json={"id": gh_repo["id"], "owner_id": gh_repo["owner"]["id"], "full_name": gh_repo["full_name"]},
+                json={
+                    "id": gh_repo["id"],
+                    "owner_id": gh_repo["owner"]["id"],
+                    "full_name": gh_repo["full_name"],
+                },
                 headers={"Authorization": f"Bearer {st.session_state['token']}"},
                 timeout=HTTP_TIMEOUT,
             )
             if response.status_code == 201:
                 st.session_state["is_repo_registered"] = True
                 st.balloons()
-                st.sidebar.success(f"Repository {selected_repo} registered", icon="✅")
+                st.sidebar.success(
+                    f"Repository {st.session_state['available_repos'][repo_idx]['full_name']} registered",
+                    icon="✅",
+                )
 
     if st.session_state["is_repo_selected"] and st.session_state["is_repo_registered"]:
-        st.session_state["selected_repo"] = selected_repo
+        st.session_state["repo_idx"] = repo_idx
 
     # Fetch guidelines
     st.session_state["guidelines"] = []
-    if st.session_state.get("token") is not None and st.session_state.get("selected_repo") is not None:
-        gh_repo = [
-            repo
-            for repo in st.session_state.get("available_repos", [])
-            if repo["full_name"] == st.session_state["selected_repo"]
-        ][0]
+    if (
+        st.session_state.get("token") is not None
+        and st.session_state.get("repo_idx") is not None
+    ):
+        gh_repo = st.session_state["available_repos"][repo_idx]
         with st.spinner("Fetching guidelines..."):
             st.session_state["guidelines"] = requests.get(
                 f"{API_ENDPOINT}/guidelines/from/{gh_repo['id']}",
                 headers={"Authorization": f"Bearer {st.session_state['token']}"},
                 timeout=HTTP_TIMEOUT,
             ).json()
-    st.session_state["default_guideline_idx"] = 0
-    selected_title = st.sidebar.selectbox(
+    guideline_idx = st.sidebar.selectbox(
         "Repo guidelines",
-        tuple(guideline["title"] for guideline in st.session_state["guidelines"]),
-        # index=st.session_state["default_guideline_idx"],
+        range(len(st.session_state["guidelines"])),
+        format_func=lambda idx: f"{idx} - {st.session_state['guidelines'][idx]['title']}",
     )
     # Guideline selection
-    if isinstance(selected_title, str):
-        st.session_state["selected_guideline"] = [
-            _guideline for _guideline in st.session_state["guidelines"] if _guideline["title"] == selected_title
-        ][0]
+    if isinstance(guideline_idx, int):
+        st.session_state["guideline_idx"] = guideline_idx
 
     # Guideline registration
-    if st.sidebar.button("Add new guideline", disabled=len(st.session_state["guidelines"]) == 0):
-        gh_repo = [
-            repo
-            for repo in st.session_state.get("available_repos", [])
-            if repo["full_name"] == st.session_state["selected_repo"]
-        ][0]
+    if st.sidebar.button(
+        "Add new guideline", disabled=len(st.session_state["guidelines"]) == 0
+    ):
+        gh_repo = st.session_state["available_repos"][repo_idx]
         # Create an entry
         payload = {
             "repo_id": gh_repo["id"],
@@ -139,56 +159,65 @@ def main():
         )
         if response.status_code == 201:
             st.sidebar.success(f"Guideline {payload['title']} created", icon="✅")
-            st.session_state["guidelines"].append(st.session_state["selected_guideline"])
-            st.session_state["default_guideline_idx"] = len(st.session_state["guidelines"]) - 1
-            st.session_state["selected_guideline"] = response.json()
+            st.session_state["guidelines"].append(response.json())
+            st.session_state["guideline_idx"] = len(st.session_state["guidelines"]) - 1
         else:
             st.error("Unable to create guideline", icon="🚨")
 
-    if st.sidebar.button("Delete guideline", disabled=st.session_state.get("selected_guideline") is None):
+    if st.sidebar.button(
+        "Delete guideline", disabled=st.session_state.get("guideline_idx") is None
+    ):
         # Push the edit to the API
         response = requests.delete(
-            f"{API_ENDPOINT}/guidelines/{st.session_state['selected_guideline']['id']}",
+            f"{API_ENDPOINT}/guidelines/{st.session_state['guidelines'][st.session_state['guideline_idx']]['id']}",
             headers={"Authorization": f"Bearer {st.session_state['token']}"},
             timeout=HTTP_TIMEOUT,
         )
         if response.status_code == 200:
-            st.sidebar.success(f"Guideline {st.session_state['selected_guideline']['title']} deleted", icon="✅")
-            st.session_state["guidelines"] = [
-                guideline
-                for guideline in st.session_state["guidelines"]
-                if guideline["id"] != st.session_state["selected_guideline"]["id"]
-            ]
-            st.session_state["default_guideline_idx"] = 0
-            st.session_state["selected_guideline"] = (
-                st.session_state["guidelines"][0] if len(st.session_state["guidelines"]) > 0 else None
+            st.sidebar.success(
+                f"Guideline {st.session_state['guidelines'][st.session_state['guideline_idx']]['title']} deleted",
+                icon="✅",
+            )
+            del st.session_state["guidelines"][st.session_state["guideline_idx"]]
+            st.session_state["guideline_idx"] = (
+                0 if len(st.session_state["guidelines"]) > 0 else None
             )
 
     guideline_title = st.text_input(
         "Title",
         max_chars=100,
-        value=st.session_state.get("selected_guideline", {}).get("title", ""),
+        value=st.session_state["guidelines"][st.session_state["guideline_idx"]]["title"]
+        if isinstance(st.session_state.get("guideline_idx"), int)
+        else "",
         disabled=len(st.session_state["guidelines"]) == 0,
     )
     guideline_details = st.text_area(
         "Details",
-        value=st.session_state.get("selected_guideline", {}).get("details", ""),
+        value=st.session_state["guidelines"][st.session_state["guideline_idx"]][
+            "details"
+        ]
+        if isinstance(st.session_state.get("guideline_idx"), int)
+        else "",
         disabled=len(st.session_state["guidelines"]) == 0,
     )
-    if st.button("Save guideline", disabled=st.session_state.get("selected_guideline") is None):
+    if st.button(
+        "Save guideline", disabled=st.session_state.get("guideline_idx") is None
+    ):
         # Form check
         if len(guideline_title) == 0 or len(guideline_details) == 0:
             st.error("Both the title & details sections need to be filled", icon="🚨")
 
         # Push the edit to the API
         response = requests.put(
-            f"{API_ENDPOINT}/guidelines/{st.session_state['selected_guideline']['id']}",
+            f"{API_ENDPOINT}/guidelines/{st.session_state['guidelines'][st.session_state['guideline_idx']]['id']}",
             json={"title": guideline_title, "details": guideline_details},
             headers={"Authorization": f"Bearer {st.session_state['token']}"},
             timeout=HTTP_TIMEOUT,
         )
         if response.status_code == 200:
-            st.session_state["selected_guideline"] = response.json()
+            st.session_state["guidelines"][
+                st.session_state["guideline_idx"]
+            ] = response.json()
             st.balloons()
             st.sidebar.success(f"Guideline {guideline_title} saved", icon="✅")
 
