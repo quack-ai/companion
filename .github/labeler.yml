@@ -1,0 +1,65 @@
+'ext: tests':
+- src/tests/*
+
+'ext: scripts':
+- scripts/*
+
+'module: database':
+- src/app/db.py
+
+'module: services':
+- src/app/services/*
+
+'module: core':
+- src/app/main.py
+- src/app/core/*
+
+'module: models':
+- src/app/models.py
+
+'module: schemas':
+- src/app/schemas/*
+
+'module: crud':
+- src/app/crud/*
+
+'endpoint: login':
+- src/app/api/*/endpoints/login.py
+
+'endpoint: users':
+- src/app/api/*/endpoints/users.py
+
+'endpoint: repos':
+- src/app/api/*/endpoints/repos.py
+
+'endpoint: guidelines':
+- src/app/api/*/endpoints/guidelines.py
+
+'topic: build':
+- pyproject.toml
+- poetry.lock
+
+'topic: migration':
+- src/alembic.ini
+- src/alembic/*
+
+'topic: ci':
+- .github/*
+
+'topic: docker':
+- docker-compose.yml
+- docker-compose.test.yml
+- Dockerfile
+- traefik/*
+
+'topic: documentation':
+- README.md
+- CONTRIBUTING.md
+- CODE_OF_CONDUCT.md
+
+'topic: security':
+- src/app/api/dependencies.py
+- src/app/security.py
+
+'type: code quality':
+- .pre-commit-config.yaml

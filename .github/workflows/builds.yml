@@ -1,0 +1,38 @@
+name: builds
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  docker:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+      - uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: "1.5.0"
+      - name: Resolve dependencies
+        run: poetry export -f requirements.txt --without-hashes --output requirements.txt
+      - name: Build & run docker
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          SUPERUSER_LOGIN: ${{ secrets.SUPERUSER_LOGIN }}
+          SUPERUSER_PWD: ${{ secrets.SUPERUSER_PWD }}
+        run: docker-compose up -d --build
+      - name: Docker sanity check
+        run: sleep 20 && nc -vz api.localhost 8050
+      - name: Debug
+        run: docker-compose logs
+      - name: Ping server
+        run: curl http://api.localhost:8050/docs
