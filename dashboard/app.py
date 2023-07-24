@@ -4,7 +4,9 @@
 # See LICENSE or go to <https://www.gnu.org/licenses/agpl-3.0.txt> for full license details.
 
 import os
+from operator import itemgetter
 
+import pandas as pd
 import requests
 import streamlit as st
 
@@ -25,8 +27,8 @@ def main():
             "About": "https://github.com/quack-ai/contribution-api",
         },
     )
-    st.title("Guideline edition dashboard")
-    st.header("Editor")
+    st.title("Guideline management dashboard")
+
     # Sidebar
     st.sidebar.title("Credentials")
     # Authentication
@@ -107,10 +109,7 @@ def main():
             if response.status_code == 201:
                 st.session_state["is_repo_registered"] = True
                 st.balloons()
-                st.sidebar.success(
-                    f"Repository {st.session_state['available_repos'][repo_idx]['full_name']} registered",
-                    icon="✅",
-                )
+                st.toast("Repository registered", icon="✅")
 
     if st.session_state["is_repo_selected"] and st.session_state["is_repo_registered"]:
         st.session_state["repo_idx"] = repo_idx
@@ -123,22 +122,28 @@ def main():
     ):
         gh_repo = st.session_state["available_repos"][repo_idx]
         with st.spinner("Fetching guidelines..."):
-            st.session_state["guidelines"] = requests.get(
-                f"{API_ENDPOINT}/guidelines/from/{gh_repo['id']}",
-                headers={"Authorization": f"Bearer {st.session_state['token']}"},
-                timeout=HTTP_TIMEOUT,
-            ).json()
+            st.session_state["guidelines"] = sorted(
+                requests.get(
+                    f"{API_ENDPOINT}/guidelines/from/{gh_repo['id']}",
+                    headers={"Authorization": f"Bearer {st.session_state['token']}"},
+                    timeout=HTTP_TIMEOUT,
+                ).json(),
+                key=itemgetter("order"),
+            )
     guideline_placeholder = st.sidebar.empty()
 
     # Guideline registration
     if st.sidebar.button(
-        "Create guideline", disabled=len(st.session_state["guidelines"]) == 0
+        "Create guideline",
+        disabled=not st.session_state["is_repo_selected"]
+        or not st.session_state["is_repo_registered"],
     ):
         gh_repo = st.session_state["available_repos"][repo_idx]
         # Create an entry
         payload = {
             "repo_id": gh_repo["id"],
             "title": f"Guideline title {len(st.session_state['guidelines'])}",
+            "order": len(st.session_state["guidelines"]),
             "details": "Guideline description",
         }
         response = requests.post(
@@ -148,11 +153,12 @@ def main():
             timeout=HTTP_TIMEOUT,
         )
         if response.status_code == 201:
-            st.sidebar.success(f"Guideline {payload['title']} created", icon="✅")
+            st.toast("Guideline created", icon="🎉")
+            # Avoid another API call
             st.session_state["guidelines"].append(response.json())
             st.session_state["guideline_idx"] = len(st.session_state["guidelines"]) - 1
         else:
-            st.error("Unable to create guideline", icon="🚨")
+            st.sidebar.error("Unable to create guideline", icon="🚨")
 
     if st.sidebar.button(
         "Delete guideline",
@@ -166,14 +172,14 @@ def main():
             timeout=HTTP_TIMEOUT,
         )
         if response.status_code == 200:
-            st.sidebar.success(
-                f"Guideline {st.session_state['guidelines'][st.session_state['guideline_idx']]['title']} deleted",
-                icon="✅",
-            )
+            st.toast("Guideline deleted", icon="✅")
+            # Avoid another API call
             del st.session_state["guidelines"][st.session_state["guideline_idx"]]
             st.session_state["guideline_idx"] = (
                 0 if len(st.session_state["guidelines"]) > 0 else None
             )
+        else:
+            st.sidebar.error("Unable to delete guideline", icon="🚨")
 
     guideline_idx = guideline_placeholder.selectbox(
         "Repo guidelines",
@@ -185,45 +191,112 @@ def main():
     if isinstance(guideline_idx, int):
         st.session_state["guideline_idx"] = guideline_idx
 
-    guideline_title = st.text_input(
-        "Title",
-        max_chars=100,
-        value=st.session_state["guidelines"][st.session_state["guideline_idx"]]["title"]
-        if len(st.session_state["guidelines"]) > 0
-        and isinstance(st.session_state.get("guideline_idx"), int)
-        else "",
-        disabled=len(st.session_state["guidelines"]) == 0,
-    )
-    guideline_details = st.text_area(
-        "Details",
-        value=st.session_state["guidelines"][st.session_state["guideline_idx"]][
-            "details"
-        ]
-        if isinstance(st.session_state.get("guideline_idx"), int)
-        else "",
-        disabled=len(st.session_state["guidelines"]) == 0,
-    )
-    if st.button(
-        "Save guideline",
-        disabled=st.session_state.get("guideline_idx") is None,
-    ):
-        # Form check
-        if len(guideline_title) == 0 or len(guideline_details) == 0:
-            st.error("Both the title & details sections need to be filled", icon="🚨")
+    content_panel, order_panel = st.tabs(["Content editor", "Order editor"])
+    with content_panel:
+        with st.form("guideline_form"):
+            guideline_title = st.text_input(
+                "Title",
+                max_chars=100,
+                value=st.session_state["guidelines"][st.session_state["guideline_idx"]][
+                    "title"
+                ]
+                if len(st.session_state["guidelines"]) > 0
+                and isinstance(st.session_state.get("guideline_idx"), int)
+                else "",
+                disabled=len(st.session_state["guidelines"]) == 0,
+            )
+            guideline_details = st.text_area(
+                "Details",
+                value=st.session_state["guidelines"][st.session_state["guideline_idx"]][
+                    "details"
+                ]
+                if len(st.session_state["guidelines"]) > 0
+                and isinstance(st.session_state.get("guideline_idx"), int)
+                else "",
+                disabled=len(st.session_state["guidelines"]) == 0,
+            )
+            save = st.form_submit_button(
+                "Save guideline",
+                disabled=st.session_state.get("guideline_idx") is None,
+            )
+            if save:
+                # Form check
+                if len(guideline_title) == 0 or len(guideline_details) == 0:
+                    st.error(
+                        "Both the title & details sections need to be filled", icon="🚨"
+                    )
 
-        # Push the edit to the API
-        response = requests.put(
-            f"{API_ENDPOINT}/guidelines/{st.session_state['guidelines'][st.session_state['guideline_idx']]['id']}",
-            json={"title": guideline_title, "details": guideline_details},
-            headers={"Authorization": f"Bearer {st.session_state['token']}"},
-            timeout=HTTP_TIMEOUT,
+                # Push the edit to the API
+                response = requests.put(
+                    f"{API_ENDPOINT}/guidelines/{st.session_state['guidelines'][st.session_state['guideline_idx']]['id']}",
+                    json={"title": guideline_title, "details": guideline_details},
+                    headers={"Authorization": f"Bearer {st.session_state['token']}"},
+                    timeout=HTTP_TIMEOUT,
+                )
+                if response.status_code == 200:
+                    st.session_state["guidelines"][
+                        st.session_state["guideline_idx"]
+                    ] = response.json()
+                    st.toast("Guideline saved", icon="✅")
+                else:
+                    st.error("Unable to save guideline", icon="🚨")
+
+    with order_panel:
+        df = pd.DataFrame(st.session_state["guidelines"])
+        original_order = df.set_index("id").order.to_dict() if df.shape[0] > 0 else {}
+        updated_guidelines = st.data_editor(
+            df.set_index("id") if df.shape[0] > 0 else df,
+            column_config={
+                "order": st.column_config.SelectboxColumn(
+                    "Order", options=list(range(df.shape[0])), required=True
+                ),
+                "title": st.column_config.TextColumn("Title", max_chars=100),
+                "details": st.column_config.TextColumn("Details"),
+                "updated_at": st.column_config.DatetimeColumn("Last updated"),
+            },
+            column_order=("order", "title", "details", "updated_at"),
+            hide_index=True,
+            disabled=["title", "details", "updated_at"],
         )
-        if response.status_code == 200:
-            st.session_state["guidelines"][
-                st.session_state["guideline_idx"]
-            ] = response.json()
-            st.balloons()
-            st.sidebar.success(f"Guideline {guideline_title} saved", icon="✅")
+        if st.button("Save guideline order"):
+            # Check that order is unique
+            if updated_guidelines.order.nunique() != df.shape[0]:
+                st.error("At least two entries have the same order index", icon="🚨")
+            else:
+                # Update only the modified entries
+                updated_order = {
+                    int(guideline_id): guideline_order
+                    for guideline_id, guideline_order in updated_guidelines.order.to_dict().items()
+                    if guideline_order != original_order[guideline_id]
+                }
+                # Call the API
+                any_error = False
+                guideline_id_to_idx = {
+                    guideline["id"]: idx
+                    for idx, guideline in enumerate(st.session_state["guidelines"])
+                }
+                for guideline_id, order_idx in updated_order.items():
+                    response = requests.put(
+                        f"{API_ENDPOINT}/guidelines/{guideline_id}/order/{order_idx}",
+                        headers={
+                            "Authorization": f"Bearer {st.session_state['token']}"
+                        },
+                        timeout=HTTP_TIMEOUT,
+                    )
+                    if response.status_code == 200:
+                        st.session_state["guidelines"][
+                            guideline_id_to_idx[int(guideline_id)]
+                        ]["order"] = order_idx
+                    else:
+                        any_error = True
+
+                if any_error:
+                    st.error("Unable to update order", icon="🚨")
+                else:
+                    st.session_state["guidelines"] = sorted(
+                        st.session_state["guidelines"], key=itemgetter("order")
+                    )
+                    st.toast("Guideline order updated", icon="✅")
 
 
 if __name__ == "__main__":
