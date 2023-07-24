@@ -44,24 +44,21 @@ def main():
                     timeout=HTTP_TIMEOUT,
                 ).json()["access_token"],
             )
-
-    if st.session_state.get("gh_token") is not None:
-        if st.session_state.get("available_repos") is None:
-            with st.spinner("Fetching repos..."):
-                st.session_state["available_repos"] = requests.get(
-                    f"{GHAPI_ENDPOINT}/user/repos",
-                    params={
-                        "affiliation": "owner",
-                        "visibility": "public",
-                        "per_page": 100,
-                    },
-                    headers={"Authorization": f"Bearer {st.session_state['gh_token']}"},
-                    timeout=HTTP_TIMEOUT,
-                ).json()
+        with st.spinner("Fetching repos..."):
+            st.session_state["available_repos"] = requests.get(
+                f"{GHAPI_ENDPOINT}/user/repos",
+                params={
+                    "affiliation": "owner",
+                    "visibility": "public",
+                    "per_page": 100,
+                },
+                headers={"Authorization": f"Bearer {st.session_state['gh_token']}"},
+                timeout=HTTP_TIMEOUT,
+            ).json()
 
     st.sidebar.title("Selection")
     repo_idx = st.sidebar.selectbox(
-        "Available repos",
+        "Repositories",
         range(len(st.session_state.get("available_repos", []))),
         format_func=lambda idx: st.session_state.get("available_repos", [])[idx][
             "full_name"
@@ -131,18 +128,11 @@ def main():
                 headers={"Authorization": f"Bearer {st.session_state['token']}"},
                 timeout=HTTP_TIMEOUT,
             ).json()
-    guideline_idx = st.sidebar.selectbox(
-        "Repo guidelines",
-        range(len(st.session_state["guidelines"])),
-        format_func=lambda idx: f"{idx} - {st.session_state['guidelines'][idx]['title']}",
-    )
-    # Guideline selection
-    if isinstance(guideline_idx, int):
-        st.session_state["guideline_idx"] = guideline_idx
+    guideline_placeholder = st.sidebar.empty()
 
     # Guideline registration
     if st.sidebar.button(
-        "Add new guideline", disabled=len(st.session_state["guidelines"]) == 0
+        "Create guideline", disabled=len(st.session_state["guidelines"]) == 0
     ):
         gh_repo = st.session_state["available_repos"][repo_idx]
         # Create an entry
@@ -165,7 +155,9 @@ def main():
             st.error("Unable to create guideline", icon="🚨")
 
     if st.sidebar.button(
-        "Delete guideline", disabled=st.session_state.get("guideline_idx") is None
+        "Delete guideline",
+        disabled=len(st.session_state["guidelines"]) == 0
+        or st.session_state.get("guideline_idx") is None,
     ):
         # Push the edit to the API
         response = requests.delete(
@@ -183,11 +175,22 @@ def main():
                 0 if len(st.session_state["guidelines"]) > 0 else None
             )
 
+    guideline_idx = guideline_placeholder.selectbox(
+        "Repo guidelines",
+        range(len(st.session_state["guidelines"])),
+        format_func=lambda idx: f"{idx} - {st.session_state['guidelines'][idx]['title']}",
+        index=st.session_state.get("guideline_idx", 0),
+    )
+    # Guideline selection
+    if isinstance(guideline_idx, int):
+        st.session_state["guideline_idx"] = guideline_idx
+
     guideline_title = st.text_input(
         "Title",
         max_chars=100,
         value=st.session_state["guidelines"][st.session_state["guideline_idx"]]["title"]
-        if isinstance(st.session_state.get("guideline_idx"), int)
+        if len(st.session_state["guidelines"]) > 0
+        and isinstance(st.session_state.get("guideline_idx"), int)
         else "",
         disabled=len(st.session_state["guidelines"]) == 0,
     )
@@ -201,7 +204,8 @@ def main():
         disabled=len(st.session_state["guidelines"]) == 0,
     )
     if st.button(
-        "Save guideline", disabled=st.session_state.get("guideline_idx") is None
+        "Save guideline",
+        disabled=st.session_state.get("guideline_idx") is None,
     ):
         # Form check
         if len(guideline_title) == 0 or len(guideline_details) == 0:
