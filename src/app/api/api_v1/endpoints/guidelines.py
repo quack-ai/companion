@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
 from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_crud
 from app.crud import GuidelineCRUD, RepositoryCRUD
-from app.models import Guideline, UserScope
+from app.models import Guideline, Repository, UserScope
 from app.schemas.guidelines import ContentUpdate, GuidelineCreate, GuidelineEdit, OrderUpdate
 
 router = APIRouter()
@@ -49,7 +49,7 @@ async def fetch_guidelines_from_repo(
     repos: RepositoryCRUD = Depends(get_repo_crud),
     user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> List[Guideline]:
-    if user.scope == UserScope.USER and user.id != (await repos.get(repo_id, strict=True)).owner_id:
+    if user.scope == UserScope.USER and user.id != cast(Repository, await repos.get(repo_id, strict=True)).owner_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Your user scope is not compatible with this operation.",
