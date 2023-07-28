@@ -35,3 +35,12 @@ add-revision:
 
 apply-revision:
 	docker compose exec backend alembic upgrade head
+
+
+# Run tests for the library
+e2e:
+	poetry export -f requirements.txt --without-hashes --output requirements.txt
+	docker compose -f docker-compose.test.yml up -d --build
+	sleep 5
+	python scripts/test_e2e.py
+	docker compose -f docker-compose.test.yml down
