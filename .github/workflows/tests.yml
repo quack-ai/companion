@@ -1,0 +1,26 @@
+name: tests
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  headers:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+      - name: Check the headers
+        uses: frgfm/validate-python-headers@main
+        with:
+          license-notice: '.github/license-notice.txt'
+          owner: 'Quack AI'
+          starting-year: 2023
+          ignore-files: 'version.py,__init__.py'
+          ignore-folders: 'src/tests'
