@@ -63,7 +63,7 @@ async def login_token(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid GitHub token.")
     gh_user = response.json()
     # Verify credentials
-    user = await users.get_by_login(gh_user["login"], strict=False)
+    user = await users.get(gh_user["id"], strict=False)
     # Register if non existing
     if user is None:
         user = await users.create(
