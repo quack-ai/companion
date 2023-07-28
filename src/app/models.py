@@ -17,14 +17,14 @@ class UserScope(str, Enum):
     ADMIN: str = "admin"
 
 
-class User(SQLModel, table=True):  # type: ignore[misc]
+class User(SQLModel, table=True):
     id: int = Field(..., primary_key=True)
     login: str = Field(index=True, min_length=2, max_length=50)
     hashed_password: str = Field(..., min_length=5, max_length=70, nullable=False)
     scope: UserScope = Field(UserScope.USER, nullable=False)
 
 
-class Repository(SQLModel, table=True):  # type: ignore[misc]
+class Repository(SQLModel, table=True):
     id: int = Field(..., primary_key=True)
     owner_id: int = Field(..., nullable=False, foreign_key="user.id")
     full_name: str = Field(..., nullable=False)
@@ -33,7 +33,7 @@ class Repository(SQLModel, table=True):  # type: ignore[misc]
     installed_by: int = Field(..., foreign_key="user.id")
 
 
-class Guideline(SQLModel, table=True):  # type: ignore[misc]
+class Guideline(SQLModel, table=True):
     id: int = Field(None, primary_key=True)
     repo_id: int = Field(..., foreign_key="repository.id", nullable=False)
     title: str = Field(..., min_length=6, max_length=100, nullable=False)
@@ -42,6 +42,3 @@ class Guideline(SQLModel, table=True):  # type: ignore[misc]
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     # origin: str
-
-
-# class Event(SQLModel, table=true)
