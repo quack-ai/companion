@@ -114,5 +114,5 @@ You can find a short guide in [`CONTRIBUTING`](CONTRIBUTING.md) to help grow thi
 
 Copyright (C) 2023, Quack AI.
 
-This program is licensed under the GNU Affero General Public License v3.0 or later.
-See LICENSE or go to <https://www.gnu.org/licenses/agpl-3.0.txt> for full license details.
+All rights reserved.
+Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
