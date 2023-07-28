@@ -3,7 +3,7 @@
 # This program is licensed under the Attribution-NonCommercial-ShareAlike 4.0 International.
 # See LICENSE or go to <https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.txt> for full license details.
 
-from typing import cast
+import secrets
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -11,10 +11,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from app.api.dependencies import get_user_crud
 from app.core.config import settings
-from app.core.security import create_access_token, verify_password
+from app.core.security import create_access_token, hash_password, verify_password
 from app.crud import UserCRUD
-from app.models import User
+from app.models import UserScope
 from app.schemas.login import GitHubToken, Token
+from app.schemas.users import UserCreation
 
 router = APIRouter()
 
@@ -56,14 +57,25 @@ async def login_token(
     response = requests.get(
         "https://api.github.com/user",
         headers={"Content-Type": "application/json", "Authorization": f"Bearer {payload.github_token}"},
+        timeout=5,
     )
     if response.status_code != 200:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid GitHub token.")
     gh_user = response.json()
     # Verify credentials
-    entry = cast(User, await users.get_by_login(gh_user["login"], strict=True))
+    user = await users.get_by_login(gh_user["login"], strict=False)
+    # Register if non existing
+    if user is None:
+        user = await users.create(
+            UserCreation(
+                id=gh_user["id"],
+                login=gh_user["login"],
+                hashed_password=await hash_password(secrets.token_urlsafe(32)),
+                scope=UserScope.USER,
+            )
+        )
     # create access token using user user_id/user_scopes
-    token_data = {"sub": str(entry.id), "scopes": entry.scope.split()}
+    token_data = {"sub": str(user.id), "scopes": user.scope.split()}
     token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
 
     return Token(access_token=token, token_type="bearer")  # nosec B106
