@@ -34,11 +34,6 @@ jobs:
         python: [3.9]
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/checkout@v3
-        with:
-          repository: quack-ai/engine
-          ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
-          path: engine
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
