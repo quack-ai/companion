@@ -38,6 +38,7 @@ class Guideline(SQLModel, table=True):  # type: ignore[misc]
     repo_id: int = Field(..., foreign_key="repository.id", nullable=False)
     title: str = Field(..., min_length=6, max_length=100, nullable=False)
     details: str
+    order: int = Field(..., ge=0, nullable=False)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     # origin: str

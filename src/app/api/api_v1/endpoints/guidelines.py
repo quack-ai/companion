@@ -6,12 +6,12 @@
 from datetime import datetime
 from typing import List, cast
 
-from fastapi import APIRouter, Depends, Path, Security, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
-from app.api.dependencies import get_current_user, get_guideline_crud
-from app.crud import GuidelineCRUD
+from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_crud
+from app.crud import GuidelineCRUD, RepositoryCRUD
 from app.models import Guideline, UserScope
-from app.schemas.guidelines import GuidelineCreate, GuidelineEdit, GuidelineUpdate
+from app.schemas.guidelines import ContentUpdate, GuidelineCreate, GuidelineEdit, OrderUpdate
 
 router = APIRouter()
 
@@ -46,19 +46,35 @@ async def fetch_guidelines(
 async def fetch_guidelines_from_repo(
     repo_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    _=Security(get_current_user, scopes=[UserScope.ADMIN]),
+    repos: RepositoryCRUD = Depends(get_repo_crud),
+    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> List[Guideline]:
+    if user.scope == UserScope.USER and user.id != (await repos.get(repo_id, strict=True)).owner_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your user scope is not compatible with this operation.",
+        )
     return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
 
 
 @router.put("/{guideline_id}", status_code=status.HTTP_200_OK)
-async def update_guideline(
+async def update_guideline_content(
     payload: GuidelineEdit,
     guideline_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
     _=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
-    return await guidelines.update(guideline_id, GuidelineUpdate(**payload.dict(), updated_at=datetime.utcnow()))
+    return await guidelines.update(guideline_id, ContentUpdate(**payload.dict(), updated_at=datetime.utcnow()))
+
+
+@router.put("/{guideline_id}/order/{order_idx}", status_code=status.HTTP_200_OK)
+async def update_guideline_order(
+    guideline_id: int = Path(..., gt=0),
+    order_idx: int = Path(..., gte=0),
+    guidelines: GuidelineCRUD = Depends(get_guideline_crud),
+    _=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+) -> Guideline:
+    return await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.utcnow()))
 
 
 @router.delete("/{guideline_id}", status_code=status.HTTP_200_OK)

@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 from app.schemas.base import _CreatedAt
 
-__all__ = ["GuidelineCreate", "GuidelineEdit", "GuidelineUpdate"]
+__all__ = ["GuidelineCreate", "GuidelineEdit", "ContentUpdate", "OrderUpdate"]
 
 
 class GuidelineEdit(BaseModel):
@@ -20,7 +20,13 @@ class GuidelineEdit(BaseModel):
 class GuidelineCreate(_CreatedAt, GuidelineEdit):
     repo_id: int = Field(..., gt=0)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    order: int = Field(..., ge=0, nullable=False)
 
 
-class GuidelineUpdate(GuidelineEdit):
+class ContentUpdate(GuidelineEdit):
+    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+
+
+class OrderUpdate(BaseModel):
+    order: int = Field(..., ge=0, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
