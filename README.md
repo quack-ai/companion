@@ -77,6 +77,7 @@ This file will have to hold the following information:
 - `POSTGRES_USER`: the login to the PostgreSQL database
 - `POSTGRES_PASSWORD`: the password to the PostgreSQL database
 - `SUPERUSER_LOGIN`: the login of the initial admin access
+- `SUPERUSER_ID`: the GitHub ID of the initial admin access
 - `SUPERUSER_PWD`: the password of the initial admin access
 
 Optionally, the following information can be added:
@@ -90,6 +91,7 @@ POSTGRES_USER=admin
 POSTGRES_PASSWORD=my_password
 SUPERUSER_LOGIN=superadmin
 SUPERUSER_PWD=super_password
+SUPERUSER_ID=1
 SENTRY_DSN='https://replace.with.you.sentry.dsn/'
 SENTRY_SERVER_NAME=my_storage_bucket_name
 ```
