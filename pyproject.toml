@@ -1,0 +1,117 @@
+[build-system]
+requires = ["poetry>=1.0"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "contribution-api"
+version = "0.1.0.dev0"
+description = "Backend for contribution guideline curation"
+license = "Proprietary"
+authors = ["François-Guillaume Fernandez <support@quack-ai.com>"]
+maintainers = ["François-Guillaume Fernandez <support@quack-ai.com>"]
+readme = "README.md"
+repository = "https://github.com/quack-ai/contribution-api"
+keywords = ["backend", "api", "code contribution", "guidelines"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+uvicorn = ">=0.11.1,<1.0.0"
+fastapi = ">=0.100.0,<1.0.0"
+sqlmodel = "^0.0.8"
+asyncpg = ">=0.25.0,<1.0.0"
+bcrypt = "^3.2.0"
+passlib = { version = "^1.7.4", extras = ["bcrypt"] }
+python-jose = "^3.2.0"
+requests = "^2.20.0"
+python-multipart = "==0.0.5"
+SQLAlchemy-Utils = "^0.38.3"
+sentry-sdk = { version = "^1.14.0", extras = ["fastapi"] }
+alembic = "^1.8.1"
+
+[tool.poetry.group.quality.dependencies]
+ruff = { version = "==0.0.278", optional = true }
+mypy = { version = "==1.4.1", optional = true }
+types-requests = { version = ">=2.0.0", optional = true }
+types-python-jose = { version = ">=3.3.0", optional = true }
+types-passlib = { version = ">=1.7.0", optional = true }
+black = { version = "==23.3.0", optional = true }
+bandit = { version = "^1.7.0", extras = ["toml"], optional = true }
+pre-commit = { version = "^2.17.0", optional = true }
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=5.3.2,<8.0.0"
+pytest-asyncio = ">=0.17.0,<1.0.0"
+coverage = ">=4.5.4,<7.0.0"
+
+[tool.coverage.run]
+source = ["src/app"]
+
+[tool.ruff]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    # "D101", "D103",  # pydocstyle missing docstring in public function/class
+    "D201","D202","D207","D208","D214","D215","D300","D301","D417", "D419",  # pydocstyle
+    "F",  # pyflakes
+    "I",  # isort
+    "C",  # flake8-comprehensions
+    "B",  # flake8-bugbear
+    "CPY001",  # flake8-copyright
+    "ISC",  # flake8-implicit-str-concat
+    "PYI",  # flake8-pyi
+    "NPY",  # numpy
+    "PERF",  # perflint
+    "RUF",  # ruff specific
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "B904",  # raise from
+    "C901",  # too complex
+    "F403",  # star imports
+    "E731",  # lambda assignment
+    "C416",  # list comprehension to list()
+]
+exclude = [".git"]
+line-length = 120
+target-version = "py39"
+
+[tool.ruff.per-file-ignores]
+"**/__init__.py" = ["I001", "F401", "CPY001"]
+"scripts/**.py" = ["D"]
+".github/**.py" = ["D"]
+"client/docs/**.py" = ["E402"]
+"src/tests/**.py" = ["D103", "CPY001"]
+"client/tests/**.py" = ["D103", "CPY001"]
+
+[tool.ruff.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.ruff.isort]
+known-first-party = ["app", "tests"]
+known-third-party = ["fastapi"]
+
+[tool.mypy]
+python_version = "3.9"
+mypy_path = "src/"
+files = "src/app"
+show_error_codes = true
+pretty = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+check_untyped_defs = true
+implicit_reexport = false
+explicit_package_bases = true
+
+[[tool.mypy.overrides]]
+module = []
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 120
+target-version = ['py39']
+
+[tool.bandit]
+exclude_dirs = []
+skips = ["B101"]
