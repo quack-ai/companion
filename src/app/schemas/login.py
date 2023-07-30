@@ -5,14 +5,14 @@
 
 from typing import List
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 from app.models import UserScope
 
-__all__ = ["Token", "GitHubToken"]
+__all__ = ["Token", "GHAccessToken"]
 
 
-class GitHubToken(BaseModel):
+class GHAccessToken(BaseModel):
     github_token: str = Field(..., example="ghp_eyJhbGciOiJIUzI1NiIsInR5cCI")
 
 
@@ -24,3 +24,21 @@ class Token(BaseModel):
 class TokenPayload(BaseModel):
     user_id: int = Field(..., gt=0)
     scopes: List[UserScope] = []
+
+
+class GHTokenRequest(BaseModel):
+    code: str
+    redirect_uri: HttpUrl
+
+
+class TokenRequest(BaseModel):
+    client_id: str
+    client_secret: str
+    code: str
+    redirect_uri: HttpUrl
+
+
+class GHToken(BaseModel):
+    access_token: str
+    token_type: str
+    scope: str
