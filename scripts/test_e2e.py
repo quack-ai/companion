@@ -84,6 +84,13 @@ def main(args):
         "order": 0,
     }
     guideline_id = api_request("post", f"{args.endpoint}/guidelines/", superuser_auth, payload)["id"]
+    payload = {
+        "title": "My second guideline",
+        "details": "Always document public interface",
+        "repo_id": repo_id,
+        "order": 1,
+    }
+    guideline_2 = api_request("post", f"{args.endpoint}/guidelines/", superuser_auth, payload)["id"]
     guideline = api_request("get", f"{args.endpoint}/guidelines/{guideline_id}/", superuser_auth)
     api_request("get", f"{args.endpoint}/guidelines/", superuser_auth)
     api_request("get", f"{args.endpoint}/guidelines/from/{repo_id}", superuser_auth)
@@ -98,6 +105,12 @@ def main(args):
         f"{args.endpoint}/guidelines/{guideline_id}/order/1",
         superuser_auth,
         {},
+    )
+    api_request(
+        "put",
+        f"{args.endpoint}/repos/{repo_id}/guidelines/order",
+        superuser_auth,
+        {"guideline_ids": [guideline_2, guideline_id]},
     )
 
     # Delete
