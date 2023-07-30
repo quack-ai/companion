@@ -4,13 +4,13 @@
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
 from datetime import datetime
-from typing import Union
+from typing import List, Union
 
 from pydantic import BaseModel, Field
 
 from .base import _Id
 
-__all__ = ["RepoCreate", "RepoCreation", "RepoUpdate"]
+__all__ = ["RepoCreate", "RepoCreation", "RepoUpdate", "GuidelineOrder"]
 
 
 class RepoCreate(_Id):
@@ -25,3 +25,7 @@ class RepoCreation(RepoCreate):
 
 class RepoUpdate(BaseModel):
     removed_at: Union[datetime, None]
+
+
+class GuidelineOrder(BaseModel):
+    guideline_ids: List[int]
