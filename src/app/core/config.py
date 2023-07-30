@@ -18,6 +18,11 @@ class Settings(BaseSettings):
     PROJECT_DESCRIPTION: str = "API for contribution guideline curation"
     VERSION: str = "0.1.0.dev0"
     API_V1_STR: str = "/api/v1"
+    # Ext API endpoints
+    GH_AUTHORIZE_ENDPOINT: str = "https://github.com/login/oauth/authorize"
+    GH_TOKEN_ENDPOINT: str = "https://github.com/login/oauth/access_token"
+    GH_OAUTH_ID: str = os.environ["GH_OAUTH_ID"]
+    GH_OAUTH_SECRET: str = os.environ["GH_OAUTH_SECRET"]
     # Security
     SECRET_KEY: str = os.environ.get("SECRET_KEY", secrets.token_urlsafe(32))
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60

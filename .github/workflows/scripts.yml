@@ -30,6 +30,8 @@ jobs:
           SUPERUSER_LOGIN: ${{ secrets.SUPERUSER_LOGIN }}
           SUPERUSER_ID: ${{ secrets.SUPERUSER_ID }}
           SUPERUSER_PWD: ${{ secrets.SUPERUSER_PWD }}
+          GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
+          GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
         run: docker compose -f docker-compose.test.yml up -d --build
       - name: Docker sanity check
         run: sleep 20 && nc -vz localhost 8050

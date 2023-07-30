@@ -79,6 +79,8 @@ This file will have to hold the following information:
 - `SUPERUSER_LOGIN`: the login of the initial admin access
 - `SUPERUSER_ID`: the GitHub ID of the initial admin access
 - `SUPERUSER_PWD`: the password of the initial admin access
+- `GH_OAUTH_ID`: the ID of the GitHub Oauth app
+- `GH_OAUTH_SECRET`: the secret of the GitHub Oauth app
 
 Optionally, the following information can be added:
 - `SENTRY_DSN`: the URL of the [Sentry](https://sentry.io/) project, which monitors back-end errors and report them back.
@@ -94,6 +96,8 @@ SUPERUSER_PWD=super_password
 SUPERUSER_ID=1
 SENTRY_DSN='https://replace.with.you.sentry.dsn/'
 SENTRY_SERVER_NAME=my_storage_bucket_name
+GH_OAUTH_ID=your_github_oauth_app_id
+GH_OAUTH_SECRET=your_github_oauth_app_secret
 ```
 
 The file should be placed at the root folder of your local copy of the project.

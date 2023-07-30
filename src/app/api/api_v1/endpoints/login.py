@@ -7,21 +7,54 @@ import secrets
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import HttpUrl
 
 from app.api.dependencies import get_user_crud
 from app.core.config import settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.crud import UserCRUD
 from app.models import UserScope
-from app.schemas.login import GitHubToken, Token
+from app.schemas.login import GHAccessToken, GHToken, GHTokenRequest, Token, TokenRequest
 from app.schemas.users import UserCreation
 
 router = APIRouter()
 
 
+@router.get("/authorize", summary="Request authorization code through GitHub OAuth app")
+async def authorize_github(
+    scope: str,
+    redirect_uri: HttpUrl,
+) -> RedirectResponse:
+    return RedirectResponse(
+        f"{settings.GH_AUTHORIZE_ENDPOINT}?scope={scope}&client_id={settings.GH_OAUTH_ID}&redirect_uri={redirect_uri}"
+    )
+
+
+@router.post("/github", status_code=status.HTTP_200_OK, summary="Request a GitHub token from authorization code")
+async def request_github_token_from_code(
+    payload: GHTokenRequest,
+) -> GHToken:
+    gh_payload = TokenRequest(
+        client_id=settings.GH_OAUTH_ID,
+        client_secret=settings.GH_OAUTH_SECRET,
+        redirect_uri=payload.redirect_uri,
+        code=payload.code,
+    )
+    response = requests.post(
+        settings.GH_TOKEN_ENDPOINT,
+        json=gh_payload.dict(),
+        headers={"Accept": "application/json"},
+        timeout=5,
+    )
+    if response.status_code != status.HTTP_200_OK:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authorization code.")
+    return GHToken(**response.json())
+
+
 @router.post("/creds", status_code=status.HTTP_200_OK, summary="Request an access token using credentials")
-async def login_creds(
+async def login_with_creds(
     form_data: OAuth2PasswordRequestForm = Depends(),
     users: UserCRUD = Depends(get_user_crud),
 ) -> Token:
@@ -43,8 +76,8 @@ async def login_creds(
 
 
 @router.post("/token", status_code=status.HTTP_200_OK, summary="Request an access token using GitHub token")
-async def login_token(
-    payload: GitHubToken,
+async def login_with_github_token(
+    payload: GHAccessToken,
     users: UserCRUD = Depends(get_user_crud),
 ) -> Token:
     """This API follows the OAuth 2.0 specification.
