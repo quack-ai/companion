@@ -9,6 +9,7 @@ from typing import List, cast
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
 from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_crud
+from app.core.analytics import analytics_client
 from app.crud import GuidelineCRUD, RepositoryCRUD
 from app.models import Guideline, Repository, User, UserScope
 from app.schemas.guidelines import OrderUpdate
@@ -28,9 +29,16 @@ async def create_repo(
     if entry is not None:
         await repos.update(payload.id, RepoUpdate(removed_at=None))
         entry.removed_at = None
+        analytics_client.capture(
+            user.id, event="repo-enable", properties={"repo_id": payload.id, "full_name": payload.full_name}
+        )
         return entry
 
-    return await repos.create(RepoCreation(**payload.dict(), installed_by=user.id))
+    repo = await repos.create(RepoCreation(**payload.dict(), installed_by=user.id))
+    analytics_client.capture(
+        user.id, event="repo-creation", properties={"repo_id": payload.id, "full_name": payload.full_name}
+    )
+    return repo
 
 
 @router.get("/{repo_id}", status_code=status.HTTP_200_OK)
@@ -56,7 +64,7 @@ async def reorder_guidelines(
     payload: GuidelineOrder,
     repo_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    _=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> List[Guideline]:
     # Ensure all IDs are unique
     if len(payload.guideline_ids) != len(set(payload.guideline_ids)):
@@ -68,34 +76,41 @@ async def reorder_guidelines(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Guideline IDs for that repo don't match."
         )
     # Update all order
-    return [
+    guideline_list = [
         await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.utcnow()))
         for order_idx, guideline_id in enumerate(payload.guideline_ids)
     ]
+    analytics_client.capture(user.id, event="guideline-order", properties={"repo_id": repo_id})
+    return guideline_list
 
 
 @router.put("/{repo_id}/disable", status_code=status.HTTP_200_OK)
 async def disable_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    _=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
-    return await repos.update(repo_id, RepoUpdate(removed_at=datetime.utcnow()))
+    repo = await repos.update(repo_id, RepoUpdate(removed_at=datetime.utcnow()))
+    analytics_client.capture(user.id, event="repo-disable", properties={"repo_id": repo_id})
+    return repo
 
 
 @router.put("/{repo_id}/enable", status_code=status.HTTP_200_OK)
 async def enable_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    _=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
-    return await repos.update(repo_id, RepoUpdate(removed_at=None))
+    repo = await repos.update(repo_id, RepoUpdate(removed_at=None))
+    analytics_client.capture(user.id, event="repo-enable", properties={"repo_id": repo_id})
+    return repo
 
 
 @router.delete("/{repo_id}", status_code=status.HTTP_200_OK)
 async def delete_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    _=Security(get_current_user, scopes=[UserScope.ADMIN]),
+    user=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> None:
     await repos.delete(repo_id)
+    analytics_client.capture(user.id, event="repo-delete", properties={"repo_id": repo_id})

@@ -12,6 +12,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import HttpUrl
 
 from app.api.dependencies import get_user_crud
+from app.core.analytics import analytics_client
 from app.core.config import settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.crud import UserCRUD
@@ -99,6 +100,15 @@ async def login_with_github_token(
     user = await users.get(gh_user["id"], strict=False)
     # Register if non existing
     if user is None:
+        analytics_client.identify(
+            gh_user["id"],
+            properties={
+                "login": gh_user["login"],
+                "name": gh_user["name"],
+                "email": gh_user["email"],
+                "twitter_username": gh_user["twitter_username"],
+            },
+        )
         user = await users.create(
             UserCreation(
                 id=gh_user["id"],
@@ -107,6 +117,8 @@ async def login_with_github_token(
                 scope=UserScope.USER,
             )
         )
+        analytics_client.capture(user.id, event="user-creation", properties={"login": gh_user["login"]})
+
     # create access token using user user_id/user_scopes
     token_data = {"sub": str(user.id), "scopes": user.scope.split()}
     token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)

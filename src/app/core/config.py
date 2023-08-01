@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     PROJECT_DESCRIPTION: str = "API for contribution guideline curation"
     VERSION: str = "0.1.0.dev0"
     API_V1_STR: str = "/api/v1"
+    CORS_ORIGIN: str = "*"
     # Ext API endpoints
     GH_AUTHORIZE_ENDPOINT: str = "https://github.com/login/oauth/authorize"
     GH_TOKEN_ENDPOINT: str = "https://github.com/login/oauth/access_token"
@@ -46,6 +47,14 @@ class Settings(BaseSettings):
 
     @validator("SENTRY_DSN", pre=True)
     def sentry_dsn_can_be_blank(cls, v: str) -> Optional[str]:
+        if not isinstance(v, str) or len(v) == 0:
+            return None
+        return v
+
+    POSTHOG_KEY: Optional[str] = os.environ.get("POSTHOG_KEY")
+
+    @validator("POSTHOG_KEY", pre=True)
+    def posthog_key_can_be_blank(cls, v: str) -> Optional[str]:
         if not isinstance(v, str) or len(v) == 0:
             return None
         return v
