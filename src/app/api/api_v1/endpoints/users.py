@@ -8,6 +8,7 @@ from typing import List, cast
 from fastapi import APIRouter, Depends, Path, Security, status
 
 from app.api.dependencies import get_current_user, get_user_crud
+from app.core.analytics import analytics_client
 from app.core.security import hash_password
 from app.crud import UserCRUD
 from app.models import User, UserScope
@@ -25,9 +26,11 @@ async def create_user(
     # Hash the password
     pwd = await hash_password(payload.password)
 
-    return await users.create(
+    user = await users.create(
         UserCreation(id=payload.id, login=payload.login, hashed_password=pwd, scope=payload.scope)
     )
+    analytics_client.capture(payload.id, event="user-creation", properties={"login": payload.login})
+    return user
 
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
@@ -62,6 +65,7 @@ async def update_user_password(
 async def delete_user(
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
-    _=Security(get_current_user, scopes=[UserScope.ADMIN]),
+    user=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> None:
     await users.delete(user_id)
+    analytics_client.capture(user_id, event="user-deletion", properties={"login": user.login})

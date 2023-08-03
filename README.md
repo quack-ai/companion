@@ -1,4 +1,9 @@
-# API for contribution assistance
+<p align="center">
+  <a href="https://quack-ai.com"><img src="https://uploads-ssl.webflow.com/64a6527708bc7f2ce5fd6b2a/64a654825ed3d444b47c4935_quack-logo%20(copy).png" width="75" height="75"></a>
+</p>
+<h1 align="center">
+ API for contribution assistance
+</h1>
 
 <p align="center">
   <a href="https://github.com/quack-ai/contribution-api/actions?query=workflow%3Abuilds">
