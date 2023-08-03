@@ -6,12 +6,12 @@
 from datetime import datetime
 from typing import List, cast
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
+from fastapi import APIRouter, Depends, Path, Security, status
 
-from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_crud
+from app.api.dependencies import get_current_user, get_guideline_crud
 from app.core.analytics import analytics_client
-from app.crud import GuidelineCRUD, RepositoryCRUD
-from app.models import Guideline, Repository, UserScope
+from app.crud import GuidelineCRUD
+from app.models import Guideline, UserScope
 from app.schemas.guidelines import ContentUpdate, GuidelineCreate, GuidelineEdit, OrderUpdate
 
 router = APIRouter()
@@ -43,21 +43,6 @@ async def fetch_guidelines(
     _=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> List[Guideline]:
     return [elt for elt in await guidelines.fetch_all()]
-
-
-@router.get("/from/{repo_id}", status_code=status.HTTP_200_OK)
-async def fetch_guidelines_from_repo(
-    repo_id: int = Path(..., gt=0),
-    guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    repos: RepositoryCRUD = Depends(get_repo_crud),
-    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
-) -> List[Guideline]:
-    if user.scope == UserScope.USER and user.id != cast(Repository, await repos.get(repo_id, strict=True)).owner_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Your user scope is not compatible with this operation.",
-        )
-    return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
 
 
 @router.put("/{guideline_id}", status_code=status.HTTP_200_OK)
