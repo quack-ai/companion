@@ -114,3 +114,12 @@ async def delete_repo(
 ) -> None:
     await repos.delete(repo_id)
     analytics_client.capture(user.id, event="repo-delete", properties={"repo_id": repo_id})
+
+
+@router.get("/{repo_id}/guidelines", status_code=status.HTTP_200_OK)
+async def fetch_guidelines_from_repo(
+    repo_id: int = Path(..., gt=0),
+    guidelines: GuidelineCRUD = Depends(get_guideline_crud),
+    repos: RepositoryCRUD = Depends(get_repo_crud),
+) -> List[Guideline]:
+    return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
