@@ -93,7 +93,7 @@ def main(args):
     guideline_2 = api_request("post", f"{args.endpoint}/guidelines/", superuser_auth, payload)["id"]
     guideline = api_request("get", f"{args.endpoint}/guidelines/{guideline_id}/", superuser_auth)
     api_request("get", f"{args.endpoint}/guidelines/", superuser_auth)
-    api_request("get", f"{args.endpoint}/guidelines/from/{repo_id}", superuser_auth)
+    api_request("get", f"{args.endpoint}/repos/{repo_id}/guidelines", superuser_auth)
     api_request(
         "put",
         f"{args.endpoint}/guidelines/{guideline_id}",
