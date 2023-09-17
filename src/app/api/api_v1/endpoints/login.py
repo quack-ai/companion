@@ -73,7 +73,7 @@ async def login_with_creds(
     token_data = {"sub": str(entry.id), "scopes": entry.scope.split()}
     token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
 
-    return Token(access_token=token, token_type="bearer")  # nosec B106
+    return Token(access_token=token, token_type="bearer")  # nosec B106  # noqa S106
 
 
 @router.post("/token", status_code=status.HTTP_200_OK, summary="Request an access token using GitHub token")
@@ -123,4 +123,4 @@ async def login_with_github_token(
     token_data = {"sub": str(user.id), "scopes": user.scope.split()}
     token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
 
-    return Token(access_token=token, token_type="bearer")  # nosec B106
+    return Token(access_token=token, token_type="bearer")  # nosec B106  # noqa S106

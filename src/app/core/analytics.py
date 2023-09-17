@@ -19,7 +19,7 @@ class AnalyticsClient:
     def __init__(self, ph_api_key: Union[str, None] = None) -> None:
         self.is_enabled = isinstance(ph_api_key, str)
         if isinstance(ph_api_key, str):
-            self.ph_client = Posthog(project_api_key=ph_api_key, host="https://app.posthog.com")
+            self.ph_client = Posthog(project_api_key=ph_api_key, host="https://eu.posthog.com")
             logger.info("PostHog enabled")
 
     def capture(self, *args, **kwargs) -> None:

@@ -23,8 +23,8 @@ __all__ = ["get_user_crud", "get_repo_crud", "get_guideline_crud", "get_current_
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/creds",
     scopes={
-        UserScope.USER: "Read information about the current user.",
         UserScope.ADMIN: "Admin rights on all routes.",
+        UserScope.USER: "Read access on available information and write access on owned resources.",
     },
 )
 
