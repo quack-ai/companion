@@ -9,12 +9,20 @@ from typing import Union
 
 from sqlmodel import Field, SQLModel
 
-__all__ = ["UserScope", "User", "Repository", "Guideline"]
+__all__ = ["GHRole", "UserScope", "User", "Repository", "Guideline"]
+
+
+class GHRole(str, Enum):
+    ADMIN: str = "admin"
+    MAINTAIN: str = "maintain"
+    WRITE: str = "write"
+    TRIAGE: str = "triage"
+    READ: str = "read"
 
 
 class UserScope(str, Enum):
-    USER: str = "user"
     ADMIN: str = "admin"
+    USER: str = "user"
 
 
 class User(SQLModel, table=True):
@@ -37,7 +45,7 @@ class Guideline(SQLModel, table=True):
     id: int = Field(None, primary_key=True)
     repo_id: int = Field(..., foreign_key="repository.id", nullable=False)
     title: str = Field(..., min_length=6, max_length=100, nullable=False)
-    details: str
+    details: str = Field(..., min_length=6, max_length=1000, nullable=False)
     order: int = Field(..., ge=0, nullable=False)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)

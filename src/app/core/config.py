@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     SUPERUSER_PWD: str = os.environ["SUPERUSER_PWD"]
 
     @validator("POSTGRES_URL", pre=True)
+    @classmethod
     def sqlachmey_uri(cls, v: str) -> str:
         # Fix for SqlAlchemy 1.4+
         if v.startswith("postgres://"):
@@ -46,6 +47,7 @@ class Settings(BaseSettings):
     SERVER_NAME: str = os.environ["SERVER_NAME"]
 
     @validator("SENTRY_DSN", pre=True)
+    @classmethod
     def sentry_dsn_can_be_blank(cls, v: str) -> Optional[str]:
         if not isinstance(v, str) or len(v) == 0:
             return None
@@ -54,6 +56,7 @@ class Settings(BaseSettings):
     POSTHOG_KEY: Optional[str] = os.environ.get("POSTHOG_KEY")
 
     @validator("POSTHOG_KEY", pre=True)
+    @classmethod
     def posthog_key_can_be_blank(cls, v: str) -> Optional[str]:
         if not isinstance(v, str) or len(v) == 0:
             return None

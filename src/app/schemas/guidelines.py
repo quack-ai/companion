@@ -14,7 +14,7 @@ __all__ = ["GuidelineCreate", "GuidelineEdit", "ContentUpdate", "OrderUpdate"]
 
 class GuidelineEdit(BaseModel):
     title: str = Field(..., min_length=6, max_length=100)
-    details: str
+    details: str = Field(..., min_length=6, max_length=1000)
 
 
 class GuidelineCreate(_CreatedAt, GuidelineEdit):

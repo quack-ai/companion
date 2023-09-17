@@ -52,7 +52,7 @@ def main(args):
     }
 
     user_login = "my_user"
-    user_pwd = "my_pwd"  # nosec B105
+    user_pwd = "my_pwd"  # nosec B105  # noqa S105
 
     # create an access
     payload = {"id": 1, "login": user_login, "password": user_pwd, "scope": "user"}
@@ -65,7 +65,7 @@ def main(args):
     api_request("get", f"{args.endpoint}/users/{user_id}/", superuser_auth)
     api_request("get", f"{args.endpoint}/users/", superuser_auth)
     # Modify access
-    new_pwd = "my_new_pwd"  # nosec B105
+    new_pwd = "my_new_pwd"  # nosec B105  # noqa S105
     api_request("put", f"{args.endpoint}/users/{user_id}/", superuser_auth, {"password": new_pwd})
 
     # Repos
