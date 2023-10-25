@@ -29,6 +29,20 @@ run:
 stop:
 	docker compose down
 
+run-dev:
+	poetry export -f requirements.txt --without-hashes --with dev --output requirements.txt
+	docker compose -f docker-compose.test.yml up -d --build
+
+stop-dev:
+	docker compose -f docker-compose.test.yml down
+
+# Run tests for the library
+test:
+	poetry export -f requirements.txt --without-hashes --with dev --output requirements.txt
+	docker compose -f docker-compose.test.yml up -d --build
+	docker compose exec -T backend pytest --cov=app
+	docker compose -f docker-compose.test.yml down
+
 add-revision:
 	docker compose exec backend alembic revision --autogenerate
 
