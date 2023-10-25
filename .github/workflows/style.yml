@@ -22,7 +22,7 @@ jobs:
           architecture: x64
       - name: Run ruff
         run: |
-          pip install "ruff==0.0.290"
+          pip install "ruff==0.1.2"
           ruff --version
           ruff check --diff .
 
@@ -58,7 +58,7 @@ jobs:
           mypy --version
           mypy
 
-  black:
+  ruff-format:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -71,27 +71,8 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           architecture: x64
-      - name: Run black
+      - name: Run ruff
         run: |
-          pip install "black==23.3.0"
-          black --version
-          black --check --diff .
-
-  bandit:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        python: [3.9]
-    steps:
-      - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python }}
-          architecture: x64
-      - name: Run bandit
-        run: |
-          pip install bandit[toml]
-          bandit --version
-          bandit -r . -c pyproject.toml
+          pip install "ruff==0.1.2"
+          ruff --version
+          ruff format --check --diff .
