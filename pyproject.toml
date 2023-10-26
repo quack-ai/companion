@@ -30,7 +30,7 @@ alembic = "^1.8.1"
 posthog = "^3.0.0"
 
 [tool.poetry.group.quality.dependencies]
-ruff = { version = "==0.1.2", optional = true }
+ruff = { version = "==0.1.3", optional = true }
 mypy = { version = "==1.6.1", optional = true }
 types-requests = { version = ">=2.0.0", optional = true }
 types-python-jose = { version = ">=3.3.0", optional = true }
