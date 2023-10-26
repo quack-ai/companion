@@ -26,3 +26,17 @@ jobs:
           password: ${{ secrets.DOCKERHUB_PW }}
       - name: Push to hub
         run: docker push quackai/contribution-api:latest
+
+  deploy-dev:
+    needs: dockerhub
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SSH_DEV_HOST }}
+          username: ${{ secrets.SSH_DEV_USERNAME }}
+          key: ${{ secrets.SSH_DEPLOY_DEV }}
+          script: |
+            docker pull quackai/contribution-api:latest
+            cd devops && docker compose stop backend && docker compose up -d
+            docker inspect -f '{{ .Created }}' $(docker compose images -q backend)
