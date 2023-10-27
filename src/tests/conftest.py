@@ -40,3 +40,12 @@ async def async_session() -> AsyncSession:
         await conn.run_sync(SQLModel.metadata.drop_all)
 
     await engine.dispose()
+
+
+async def mock_verify_password(plain_password, hashed_password):
+    return hashed_password == f"hashed_{plain_password}"
+
+
+def pytest_configure():
+    # api.security patching
+    pytest.mock_verify_password = mock_verify_password
