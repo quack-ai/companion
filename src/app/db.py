@@ -3,9 +3,9 @@
 # All rights reserved.
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import sessionmaker
-from sqlmodel import SQLModel, select
+from sqlmodel import SQLModel, create_engine, select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import settings
@@ -15,7 +15,7 @@ from app.models import User, UserScope
 __all__ = ["get_session", "init_db"]
 
 
-engine = create_async_engine(settings.POSTGRES_URL, echo=settings.DEBUG)
+engine = AsyncEngine(create_engine(settings.POSTGRES_URL, echo=settings.DEBUG))
 
 
 async def get_session() -> AsyncSession:  # type: ignore[misc]
