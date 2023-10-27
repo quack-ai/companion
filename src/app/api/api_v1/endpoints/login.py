@@ -49,7 +49,7 @@ async def request_github_token_from_code(
         headers={"Accept": "application/json"},
         timeout=5,
     )
-    if response.status_code != status.HTTP_200_OK:
+    if response.status_code != status.HTTP_200_OK or isinstance(response.json().get("error"), str):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authorization code.")
     return GHToken(**response.json())
 
@@ -66,12 +66,13 @@ async def login_with_creds(
     By default, the token expires after 1 hour.
     """
     # Verify credentials
-    entry = await users.get_by_login(form_data.username)
-    if entry is None or not await verify_password(form_data.password, entry.hashed_password):
+    user = await users.get_by_login(form_data.username)
+    if user is None or not await verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials.")
     # create access token using user user_id/user_scopes
-    token_data = {"sub": str(entry.id), "scopes": entry.scope.split()}
+    token_data = {"sub": str(user.id), "scopes": user.scope.split()}
     token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
+    analytics_client.capture(user.id, event="user-login", properties={"login": user.login})
 
     return Token(access_token=token, token_type="bearer")  # nosec B106  # noqa S106
 
@@ -122,5 +123,6 @@ async def login_with_github_token(
     # create access token using user user_id/user_scopes
     token_data = {"sub": str(user.id), "scopes": user.scope.split()}
     token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
+    analytics_client.capture(user.id, event="user-login", properties={"login": user.login})
 
     return Token(access_token=token, token_type="bearer")  # nosec B106  # noqa S106
