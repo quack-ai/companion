@@ -56,6 +56,7 @@ async def fetch_repos(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> List[Repository]:
     entries = await repos.fetch_all() if user.scope == UserScope.ADMIN else await repos.fetch_all(("owner_id", user.id))
+    analytics_client.capture(user.id, event="repo-fetch")
     return [elt for elt in entries]
 
 
