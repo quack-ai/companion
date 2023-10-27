@@ -3,9 +3,10 @@
 # All rights reserved.
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
+from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel, create_engine, select
-from sqlmodel.ext.asyncio.session import AsyncEngine, AsyncSession
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import settings
 from app.core.security import hash_password
