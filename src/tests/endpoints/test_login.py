@@ -2,6 +2,7 @@ from typing import Any, Dict, Union
 from urllib.parse import parse_qs, urlparse
 
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -11,6 +12,14 @@ USER_TABLE = [
     {"id": 1, "login": "first_login", "hashed_password": "hashed_first_pwd", "scope": "user"},
     {"id": 2, "login": "second_login", "hashed_password": "hashed_second_pwd", "scope": "user"},
 ]
+
+
+@pytest_asyncio.fixture
+async def session(async_session: AsyncSession):
+    for entry in USER_TABLE:
+        async_session.add(User(**entry))
+    await async_session.commit()
+    yield async_session
 
 
 @pytest.mark.parametrize(
@@ -23,15 +32,11 @@ USER_TABLE = [
 @pytest.mark.asyncio()
 async def test_login_with_github_token(
     async_client: AsyncClient,
-    async_session: AsyncSession,
+    session: AsyncSession,
     payload: Dict[str, Any],
     status_code: int,
     status_detail: Union[str, None],
 ):
-    for entry in USER_TABLE:
-        async_session.add(User(**entry))
-    await async_session.commit()
-
     response = await async_client.post("/login/token", json=payload)
     assert response.status_code == status_code
     if isinstance(status_detail, str):
@@ -47,15 +52,11 @@ async def test_login_with_github_token(
 @pytest.mark.asyncio()
 async def test_authorize_github(
     async_client: AsyncClient,
-    async_session: AsyncSession,
+    session: AsyncSession,
     scope: Any,
     redirect_uri: Any,
     status_code: int,
 ):
-    for entry in USER_TABLE:
-        async_session.add(User(**entry))
-    await async_session.commit()
-
     response = await async_client.get("/login/authorize", params={"scope": scope, "redirect_uri": redirect_uri})
     assert response.status_code == status_code
     for key, _, val in response.headers._list:
