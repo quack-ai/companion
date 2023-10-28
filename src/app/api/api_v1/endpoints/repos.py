@@ -9,11 +9,11 @@ from typing import List, cast
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
 from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_crud
-from app.core.analytics import analytics_client
 from app.crud import GuidelineCRUD, RepositoryCRUD
 from app.models import Guideline, Repository, User, UserScope
 from app.schemas.guidelines import OrderUpdate
 from app.schemas.repos import GuidelineOrder, RepoCreate, RepoCreation, RepoUpdate
+from app.services.telemetry import telemetry_client
 
 router = APIRouter()
 
@@ -29,13 +29,13 @@ async def create_repo(
     if entry is not None:
         await repos.update(payload.id, RepoUpdate(removed_at=None))
         entry.removed_at = None
-        analytics_client.capture(
+        telemetry_client.capture(
             user.id, event="repo-enable", properties={"repo_id": payload.id, "full_name": payload.full_name}
         )
         return entry
 
     repo = await repos.create(RepoCreation(**payload.dict(), installed_by=user.id))
-    analytics_client.capture(
+    telemetry_client.capture(
         user.id, event="repo-creation", properties={"repo_id": payload.id, "full_name": payload.full_name}
     )
     return repo
@@ -56,7 +56,7 @@ async def fetch_repos(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> List[Repository]:
     entries = await repos.fetch_all() if user.scope == UserScope.ADMIN else await repos.fetch_all(("owner_id", user.id))
-    analytics_client.capture(user.id, event="repo-fetch")
+    telemetry_client.capture(user.id, event="repo-fetch")
     return [elt for elt in entries]
 
 
@@ -81,7 +81,7 @@ async def reorder_guidelines(
         await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.utcnow()))
         for order_idx, guideline_id in enumerate(payload.guideline_ids)
     ]
-    analytics_client.capture(user.id, event="guideline-order", properties={"repo_id": repo_id})
+    telemetry_client.capture(user.id, event="guideline-order", properties={"repo_id": repo_id})
     return guideline_list
 
 
@@ -92,7 +92,7 @@ async def disable_repo(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
     repo = await repos.update(repo_id, RepoUpdate(removed_at=datetime.utcnow()))
-    analytics_client.capture(user.id, event="repo-disable", properties={"repo_id": repo_id})
+    telemetry_client.capture(user.id, event="repo-disable", properties={"repo_id": repo_id})
     return repo
 
 
@@ -103,7 +103,7 @@ async def enable_repo(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
     repo = await repos.update(repo_id, RepoUpdate(removed_at=None))
-    analytics_client.capture(user.id, event="repo-enable", properties={"repo_id": repo_id})
+    telemetry_client.capture(user.id, event="repo-enable", properties={"repo_id": repo_id})
     return repo
 
 
@@ -114,7 +114,7 @@ async def delete_repo(
     user=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> None:
     await repos.delete(repo_id)
-    analytics_client.capture(user.id, event="repo-delete", properties={"repo_id": repo_id})
+    telemetry_client.capture(user.id, event="repo-delete", properties={"repo_id": repo_id})
 
 
 @router.get("/{repo_id}/guidelines", status_code=status.HTTP_200_OK)

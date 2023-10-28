@@ -12,10 +12,10 @@ from app.core.config import settings
 
 logger = logging.getLogger("uvicorn.error")
 
-__all__ = ["analytics_client"]
+__all__ = ["telemetry_client"]
 
 
-class AnalyticsClient:
+class TelemetryClient:
     def __init__(self, ph_api_key: Union[str, None] = None) -> None:
         self.is_enabled = isinstance(ph_api_key, str)
         if isinstance(ph_api_key, str):
@@ -31,4 +31,4 @@ class AnalyticsClient:
             self.ph_client.identify(*args, **kwargs)
 
 
-analytics_client = AnalyticsClient(ph_api_key=settings.POSTHOG_KEY)
+telemetry_client = TelemetryClient(ph_api_key=settings.POSTHOG_KEY)

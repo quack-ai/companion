@@ -8,11 +8,11 @@ from typing import List, cast
 from fastapi import APIRouter, Depends, Path, Security, status
 
 from app.api.dependencies import get_current_user, get_user_crud
-from app.core.analytics import analytics_client
 from app.core.security import hash_password
 from app.crud import UserCRUD
 from app.models import User, UserScope
 from app.schemas.users import Cred, CredHash, UserCreate, UserCreation
+from app.services.telemetry import telemetry_client
 
 router = APIRouter()
 
@@ -29,7 +29,7 @@ async def create_user(
     user = await users.create(
         UserCreation(id=payload.id, login=payload.login, hashed_password=pwd, scope=payload.scope)
     )
-    analytics_client.capture(payload.id, event="user-creation", properties={"login": payload.login})
+    telemetry_client.capture(payload.id, event="user-creation", properties={"login": payload.login})
     return user
 
 
@@ -68,4 +68,4 @@ async def delete_user(
     user=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> None:
     await users.delete(user_id)
-    analytics_client.capture(user_id, event="user-deletion", properties={"login": user.login})
+    telemetry_client.capture(user_id, event="user-deletion", properties={"login": user.login})

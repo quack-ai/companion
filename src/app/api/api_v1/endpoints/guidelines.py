@@ -9,10 +9,10 @@ from typing import List, cast
 from fastapi import APIRouter, Depends, Path, Security, status
 
 from app.api.dependencies import get_current_user, get_guideline_crud
-from app.core.analytics import analytics_client
 from app.crud import GuidelineCRUD
 from app.models import Guideline, UserScope
 from app.schemas.guidelines import ContentUpdate, GuidelineCreate, GuidelineEdit, OrderUpdate
+from app.services.telemetry import telemetry_client
 
 router = APIRouter()
 
@@ -24,7 +24,7 @@ async def create_guideline(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
     guideline = await guidelines.create(payload)
-    analytics_client.capture(user.id, event="guideline-creation", properties={"repo_id": payload.repo_id})
+    telemetry_client.capture(user.id, event="guideline-creation", properties={"repo_id": payload.repo_id})
     return guideline
 
 
@@ -53,7 +53,7 @@ async def update_guideline_content(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
     guideline = await guidelines.update(guideline_id, ContentUpdate(**payload.dict(), updated_at=datetime.utcnow()))
-    analytics_client.capture(user.id, event="guideline-content", properties={"repo_id": guideline.repo_id})
+    telemetry_client.capture(user.id, event="guideline-content", properties={"repo_id": guideline.repo_id})
     return guideline
 
 
@@ -65,7 +65,7 @@ async def update_guideline_order(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
     guideline = await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.utcnow()))
-    analytics_client.capture(user.id, event="guideline-order", properties={"repo_id": guideline.repo_id})
+    telemetry_client.capture(user.id, event="guideline-order", properties={"repo_id": guideline.repo_id})
     return guideline
 
 
@@ -77,4 +77,4 @@ async def delete_guideline(
 ) -> None:
     guideline = cast(Guideline, await guidelines.get(guideline_id, strict=True))
     await guidelines.delete(guideline_id)
-    analytics_client.capture(user.id, event="guideline-deletion", properties={"repo_id": guideline.repo_id})
+    telemetry_client.capture(user.id, event="guideline-deletion", properties={"repo_id": guideline.repo_id})

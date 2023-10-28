@@ -12,13 +12,13 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import HttpUrl
 
 from app.api.dependencies import get_user_crud
-from app.core.analytics import analytics_client
 from app.core.config import settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.crud import UserCRUD
 from app.models import UserScope
 from app.schemas.login import GHAccessToken, GHToken, GHTokenRequest, Token, TokenRequest
 from app.schemas.users import UserCreation
+from app.services.telemetry import telemetry_client
 
 router = APIRouter()
 
@@ -72,7 +72,7 @@ async def login_with_creds(
     # create access token using user user_id/user_scopes
     token_data = {"sub": str(user.id), "scopes": user.scope.split()}
     token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
-    analytics_client.capture(user.id, event="user-login", properties={"login": user.login})
+    telemetry_client.capture(user.id, event="user-login", properties={"login": user.login})
 
     return Token(access_token=token, token_type="bearer")  # nosec B106  # noqa S106
 
@@ -101,7 +101,7 @@ async def login_with_github_token(
     user = await users.get(gh_user["id"], strict=False)
     # Register if non existing
     if user is None:
-        analytics_client.identify(
+        telemetry_client.identify(
             gh_user["id"],
             properties={
                 "login": gh_user["login"],
@@ -118,11 +118,11 @@ async def login_with_github_token(
                 scope=UserScope.USER,
             )
         )
-        analytics_client.capture(user.id, event="user-creation", properties={"login": gh_user["login"]})
+        telemetry_client.capture(user.id, event="user-creation", properties={"login": gh_user["login"]})
 
     # create access token using user user_id/user_scopes
     token_data = {"sub": str(user.id), "scopes": user.scope.split()}
     token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
-    analytics_client.capture(user.id, event="user-login", properties={"login": user.login})
+    telemetry_client.capture(user.id, event="user-login", properties={"login": user.login})
 
     return Token(access_token=token, token_type="bearer")  # nosec B106  # noqa S106
