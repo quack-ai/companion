@@ -44,7 +44,7 @@ RESPONSE_SCHEMA = {
                     ),
                     # "suggestion": SchemaField(type="string", description="the modified code snippet that meets the guideline, with minimal modifications. Should be empty if the snippet is compliant"),
                 },
-                requires=["is_compliant", "comment"],
+                required=["is_compliant", "comment"],
             ),
         },
     },
