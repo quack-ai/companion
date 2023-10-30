@@ -14,7 +14,7 @@
   </a>
   <a href="https://www.codacy.com/gh/quack-ai/contribution-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quack-ai/contribution-api&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/f8b24d4f9f674ef487b0889b2aa90e9c"/></a>
   <a href="https://codecov.io/gh/quack-ai/contribution-api">
-    <img src="https://img.shields.io/codecov/c/github/quack-ai/contribution-api.svg?logo=codecov&style=flat-square" alt="Test coverage percentage">
+    <img src="https://img.shields.io/codecov/c/github/quack-ai/contribution-api.svg?logo=codecov&style=flat-square&token=fkT0jQefhO" alt="Test coverage percentage">
   </a>
 </p>
 <p align="center">
