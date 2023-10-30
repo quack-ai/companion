@@ -28,6 +28,6 @@ async def analyze_snippet(
     # Check repo
     await repos.get(payload.repo_id, strict=True)
     # Fetch guidelines
-    guideline_list = [elt.details for elt in await guidelines.fetch_all(("repo_id", payload.repo_id))]
+    guideline_list = [elt for elt in await guidelines.fetch_all(("repo_id", payload.repo_id))]
     # Run analysis
     return openai_client.analyze_snippet(payload.code, guideline_list)

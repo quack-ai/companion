@@ -12,6 +12,7 @@ import requests
 from fastapi import HTTPException, status
 
 from app.core.config import settings
+from app.models import Guideline
 from app.schemas.compute import ComplianceResult
 from app.schemas.services import (
     ArraySchema,
@@ -72,9 +73,9 @@ class OpenAIClient:
             f"Using OpenAI model: {self.model} (created at {datetime.fromtimestamp(model_card.json()['created']).isoformat()})"
         )
 
-    def analyze_snippet(self, code: str, guidelines: List[str], timeout: int = 10) -> List[ComplianceResult]:
+    def analyze_snippet(self, code: str, guidelines: List[Guideline], timeout: int = 10) -> List[ComplianceResult]:
         # Check args before sending a request
-        if len(code) == 0 or len(guidelines) == 0 or any(len(guideline) == 0 for guideline in guidelines):
+        if len(code) == 0 or len(guidelines) == 0 or any(len(guideline.details) == 0 for guideline in guidelines):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No code or guideline provided for analysis."
             )
@@ -87,12 +88,13 @@ class OpenAIClient:
                     role=OpenAIChatRole.SYSTEM,
                     content=(
                         "As a code compliance agent, you are going to receive requests from user with two elements: a code snippet, and a list of guidelines. "
-                        "You should answer with a list of compliance results, one for each guideline (in the same order)."
+                        "You should answer with a list of compliance results, one for each guideline (in the same order). "
+                        "For a given compliance results, the comment should be an empty string if the code is compliant with the corresponding guideline."
                     ),
                 ),
                 OpenAIMessage(
                     role=OpenAIChatRole.USER,
-                    content=json.dumps({"code": code, "guidelines": guidelines}),
+                    content=json.dumps({"code": code, "guidelines": [guideline.details for guideline in guidelines]}),
                 ),
             ],
             functions=[
@@ -107,7 +109,7 @@ class OpenAIClient:
             frequency_penalty=self.frequency_penalty,
         )
         # Send the request
-        response = requests.post(self.ENDPOINT, json=payload, headers=self.headers, timeout=10)
+        response = requests.post(self.ENDPOINT, json=payload.dict(), headers=self.headers, timeout=10)
 
         # Check status
         if response.status_code != 200:
@@ -115,8 +117,11 @@ class OpenAIClient:
         # Ideas: check the returned code can run
         # Return with pydantic validation
         return [
-            ComplianceResult(**res)
-            for res in json.loads(response.json()["choices"][0]["message"]["function_call"]["arguments"])["result"]
+            # ComplianceResult(is_compliant=res["is_compliant"], comment="" if res["is_compliant"] else res["comment"])
+            ComplianceResult(guideline_id=guideline.id, **res)
+            for guideline, res in zip(
+                guidelines, json.loads(response.json()["choices"][0]["message"]["function_call"]["arguments"])["result"]
+            )
         ]
 
 

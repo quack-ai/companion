@@ -15,5 +15,6 @@ class Snippet(BaseModel):
 
 
 class ComplianceResult(BaseModel):
+    guideline_id: int = Field(..., gt=0)
     is_compliant: bool
     comment: str
