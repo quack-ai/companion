@@ -69,10 +69,10 @@ async def login_with_creds(
     user = await users.get_by_login(form_data.username)
     if user is None or not await verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials.")
+    telemetry_client.capture(user.id, event="user-login", properties={"login": user.login})
     # create access token using user user_id/user_scopes
     token_data = {"sub": str(user.id), "scopes": user.scope.split()}
     token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
-    telemetry_client.capture(user.id, event="user-login", properties={"login": user.login})
 
     return Token(access_token=token, token_type="bearer")  # nosec B106  # noqa S106
 
