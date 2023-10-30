@@ -23,13 +23,13 @@ async def create_user(
     users: UserCRUD = Depends(get_user_crud),
     _=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> User:
+    telemetry_client.capture(payload.id, event="user-creation", properties={"login": payload.login})
     # Hash the password
     pwd = await hash_password(payload.password)
 
     user = await users.create(
         UserCreation(id=payload.id, login=payload.login, hashed_password=pwd, scope=payload.scope)
     )
-    telemetry_client.capture(payload.id, event="user-creation", properties={"login": payload.login})
     return user
 
 
@@ -37,16 +37,18 @@ async def create_user(
 async def get_user(
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
-    _=Security(get_current_user, scopes=[UserScope.ADMIN]),
+    user=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> User:
+    telemetry_client.capture(user.id, event="user-get", properties={"user_id": user_id})
     return cast(User, await users.get(user_id, strict=True))
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
 async def fetch_users(
     users: UserCRUD = Depends(get_user_crud),
-    _=Security(get_current_user, scopes=[UserScope.ADMIN]),
+    user=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> List[User]:
+    telemetry_client.capture(user.id, event="user-fetch")
     return [elt for elt in await users.fetch_all()]
 
 
@@ -55,8 +57,9 @@ async def update_user_password(
     payload: Cred,
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
-    _=Security(get_current_user, scopes=[UserScope.ADMIN]),
+    user=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> User:
+    telemetry_client.capture(user.id, event="user-pwd", properties={"user_id": user_id})
     pwd = await hash_password(payload.password)
     return await users.update(user_id, CredHash(hashed_password=pwd))
 
@@ -67,5 +70,5 @@ async def delete_user(
     users: UserCRUD = Depends(get_user_crud),
     user=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> None:
+    telemetry_client.capture(user_id, event="user-deletion", properties={"user_id": user_id})
     await users.delete(user_id)
-    telemetry_client.capture(user_id, event="user-deletion", properties={"login": user.login})

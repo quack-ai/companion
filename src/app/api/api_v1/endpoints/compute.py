@@ -24,7 +24,7 @@ async def analyze_snippet(
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
     user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> List[ComplianceResult]:
-    telemetry_client.capture(user.id, event="snippet-analysis", properties={"repo_id": payload.repo_id})
+    telemetry_client.capture(user.id, event="compute-analysis", properties={"repo_id": payload.repo_id})
     # Check repo
     await repos.get(payload.repo_id, strict=True)
     # Fetch guidelines

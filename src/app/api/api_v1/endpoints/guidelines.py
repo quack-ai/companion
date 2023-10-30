@@ -23,8 +23,8 @@ async def create_guideline(
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
-    guideline = await guidelines.create(payload)
     telemetry_client.capture(user.id, event="guideline-creation", properties={"repo_id": payload.repo_id})
+    guideline = await guidelines.create(payload)
     return guideline
 
 
@@ -32,16 +32,19 @@ async def create_guideline(
 async def get_guideline(
     guideline_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    _=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
-    return cast(Guideline, await guidelines.get(guideline_id, strict=True))
+    guideline = cast(Guideline, await guidelines.get(guideline_id, strict=True))
+    telemetry_client.capture(user.id, event="guideline-get", properties={"repo_id": guideline.repo_id})
+    return guideline
 
 
 @router.get("/", status_code=status.HTTP_200_OK)
 async def fetch_guidelines(
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    _=Security(get_current_user, scopes=[UserScope.ADMIN]),
+    user=Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> List[Guideline]:
+    telemetry_client.capture(user.id, event="guideline-fetch")
     return [elt for elt in await guidelines.fetch_all()]
 
 
@@ -76,5 +79,5 @@ async def delete_guideline(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> None:
     guideline = cast(Guideline, await guidelines.get(guideline_id, strict=True))
-    await guidelines.delete(guideline_id)
     telemetry_client.capture(user.id, event="guideline-deletion", properties={"repo_id": guideline.repo_id})
+    await guidelines.delete(guideline_id)
