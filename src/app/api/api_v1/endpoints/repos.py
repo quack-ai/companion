@@ -24,6 +24,10 @@ async def create_repo(
     repos: RepositoryCRUD = Depends(get_repo_crud),
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
+    telemetry_client.capture(
+        user.id, event="repo-creation", properties={"repo_id": payload.id, "full_name": payload.full_name}
+    )
+    # Check that user is allowed to do so
     entry = await repos.get(payload.id, strict=False)
     # If repo exists, set it back to active
     if entry is not None:
@@ -35,9 +39,6 @@ async def create_repo(
         return entry
 
     repo = await repos.create(RepoCreation(**payload.dict(), installed_by=user.id))
-    telemetry_client.capture(
-        user.id, event="repo-creation", properties={"repo_id": payload.id, "full_name": payload.full_name}
-    )
     return repo
 
 
@@ -122,5 +123,6 @@ async def fetch_guidelines_from_repo(
     repo_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
     repos: RepositoryCRUD = Depends(get_repo_crud),
+    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> List[Guideline]:
     return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
