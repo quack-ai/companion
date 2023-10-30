@@ -55,7 +55,7 @@ RESPONSE_SCHEMA = {
 class OpenAIClient:
     ENDPOINT: str = "https://api.openai.com/v1/chat/completions"
 
-    def __init__(self, api_key: str, model: str, temperature: float = 0.0, frequence_penalty: float = 1.0) -> None:
+    def __init__(self, api_key: str, model: str, temperature: float = 0.0, frequency_penalty: float = 1.0) -> None:
         self.headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         # Validate model
         model_card = requests.get(f"https://api.openai.com/v1/models/{model}", headers=self.headers, timeout=2)
@@ -63,7 +63,7 @@ class OpenAIClient:
             raise HTTPException(status_code=model_card.status_code, detail=model_card.json()["error"]["message"])
         self.model = model
         self.temperature = temperature
-        self.frequence_penalty = frequence_penalty
+        self.frequency_penalty = frequency_penalty
         logger.info(
             f"Using OpenAI model: {self.model} (created at {datetime.fromtimestamp(model_card.json()['created']).isoformat()})"
         )
