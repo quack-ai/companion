@@ -4,7 +4,7 @@
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
 from enum import Enum
-from typing import Dict, List
+from typing import Any, Dict, List
 
 from pydantic import BaseModel
 
@@ -25,21 +25,26 @@ class OpenAIChatRole(str, Enum):
     ASSISTANT: str = "assistant"
 
 
-class SchemaField(BaseModel):
+class FieldSchema(BaseModel):
     type: str
     description: str
 
 
-class ResponseSchema(BaseModel):
-    type: str
-    properties: Dict[str, SchemaField]
+class ObjectSchema(BaseModel):
+    type: str = "object"
+    properties: Dict[str, Any]
     required: List[str]
+
+
+class ArraySchema(BaseModel):
+    type: str = "array"
+    items: ObjectSchema
 
 
 class OpenAIFunction(BaseModel):
     name: str
     description: str
-    parameters: ResponseSchema
+    parameters: ObjectSchema
 
 
 class OpenAIMessage(BaseModel):

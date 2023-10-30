@@ -14,12 +14,14 @@ from fastapi import HTTPException, status
 from app.core.config import settings
 from app.schemas.compute import ComplianceResult
 from app.schemas.services import (
+    ArraySchema,
     ChatCompletion,
+    FieldSchema,
+    ObjectSchema,
     OpenAIChatRole,
     OpenAIFunction,
     OpenAIMessage,
-    ResponseSchema,
-    SchemaField,
+    OpenAIModel,
 )
 
 logger = logging.getLogger("uvicorn.error")
@@ -27,35 +29,37 @@ logger = logging.getLogger("uvicorn.error")
 __all__ = ["openai_client"]
 
 
-RESPONSE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "result": {
-            "type": "array",
-            "items": ResponseSchema(
+RESPONSE_SCHEMA = ObjectSchema(
+    type="object",
+    properties={
+        "result": ArraySchema(
+            type="array",
+            items=ObjectSchema(
                 type="object",
                 properties={
-                    "is_compliant": SchemaField(
+                    "is_compliant": FieldSchema(
                         type="boolean", description="whether the guideline has been followed in the code snippet"
                     ),
-                    "comment": SchemaField(
+                    "comment": FieldSchema(
                         type="string",
                         description="instruction to make the snippet compliant, addressed to the developer who wrote the code. Should be empty if the snippet is compliant",
                     ),
-                    # "suggestion": SchemaField(type="string", description="the modified code snippet that meets the guideline, with minimal modifications. Should be empty if the snippet is compliant"),
+                    # "suggestion": FieldSchema(type="string", description="the modified code snippet that meets the guideline, with minimal modifications. Should be empty if the snippet is compliant"),
                 },
                 required=["is_compliant", "comment"],
             ),
-        },
+        ),
     },
-    "required": ["result"],
-}
+    required=["result"],
+)
 
 
 class OpenAIClient:
     ENDPOINT: str = "https://api.openai.com/v1/chat/completions"
 
-    def __init__(self, api_key: str, model: str, temperature: float = 0.0, frequency_penalty: float = 1.0) -> None:
+    def __init__(
+        self, api_key: str, model: OpenAIModel, temperature: float = 0.0, frequency_penalty: float = 1.0
+    ) -> None:
         self.headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         # Validate model
         model_card = requests.get(f"https://api.openai.com/v1/models/{model}", headers=self.headers, timeout=2)
