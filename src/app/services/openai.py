@@ -115,13 +115,14 @@ class OpenAIClient:
         if response.status_code != 200:
             raise HTTPException(status_code=response.status_code, detail=response.json()["error"]["message"])
         # Ideas: check the returned code can run
+        parsed_response = json.loads(response.json()["choices"][0]["message"]["function_call"]["arguments"])["result"]
+        if len(parsed_response) != len(guidelines):
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Invalid model response")
         # Return with pydantic validation
         return [
             # ComplianceResult(is_compliant=res["is_compliant"], comment="" if res["is_compliant"] else res["comment"])
             ComplianceResult(guideline_id=guideline.id, **res)
-            for guideline, res in zip(
-                guidelines, json.loads(response.json()["choices"][0]["message"]["function_call"]["arguments"])["result"]
-            )
+            for guideline, res in zip(guidelines, parsed_response)
         ]
 
 
