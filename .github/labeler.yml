@@ -38,6 +38,9 @@
 'endpoint: guidelines':
 - src/app/api/*/endpoints/guidelines.py
 
+'endpoint: compute':
+- src/app/api/*/endpoints/compute.py
+
 'topic: build':
 - pyproject.toml
 - poetry.lock
