@@ -32,6 +32,7 @@ jobs:
           SUPERUSER_PWD: ${{ secrets.SUPERUSER_PWD }}
           GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: docker-compose up -d --build
       - name: Docker sanity check
         run: sleep 20 && nc -vz api.localhost 8050

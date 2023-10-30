@@ -9,6 +9,8 @@ from typing import Optional
 
 from pydantic import BaseSettings, validator
 
+from app.schemas.services import OpenAIModel
+
 __all__ = ["settings"]
 
 
@@ -34,6 +36,9 @@ class Settings(BaseSettings):
     SUPERUSER_LOGIN: str = os.environ["SUPERUSER_LOGIN"]
     SUPERUSER_ID: int = int(os.environ["SUPERUSER_ID"])
     SUPERUSER_PWD: str = os.environ["SUPERUSER_PWD"]
+    # Compute
+    OPENAI_API_KEY: str = os.environ["OPENAI_API_KEY"]
+    OPENAI_MODEL: OpenAIModel = OpenAIModel.GPT3_5
 
     @validator("POSTGRES_URL", pre=True)
     @classmethod

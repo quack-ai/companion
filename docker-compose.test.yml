@@ -15,6 +15,7 @@ services:
       - SUPERUSER_PWD=${SUPERUSER_PWD}
       - GH_OAUTH_ID=${GH_OAUTH_ID}
       - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - SERVER_NAME=dummy_server
       - DEBUG=true
     depends_on:

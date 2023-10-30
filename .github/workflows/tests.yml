@@ -26,6 +26,7 @@ jobs:
           SUPERUSER_PWD: ${{ secrets.SUPERUSER_PWD }}
           GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: docker compose -f docker-compose.test.yml up -d --build
       - name: Run docker test
         run: |
