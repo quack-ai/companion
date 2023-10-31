@@ -155,9 +155,7 @@ class OpenAIClient:
         # Return with pydantic validation
         return ComplianceResult(guideline_id=guideline.id, **res)
 
-    def _analyze(
-        self, prompt: str, payload: Dict[str, Any], schema: ObjectSchema, timeout: int = 10
-    ) -> ComplianceResult:
+    def _analyze(self, prompt: str, payload: Dict[str, Any], schema: ObjectSchema, timeout: int = 10) -> Dict[str, Any]:
         # Prepare the request
         _payload = ChatCompletion(
             model=self.model,

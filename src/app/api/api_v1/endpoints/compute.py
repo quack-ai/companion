@@ -3,13 +3,13 @@
 # All rights reserved.
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
-from typing import List
+from typing import List, cast
 
 from fastapi import APIRouter, Depends, Path, Security, status
 
 from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_crud
 from app.crud import GuidelineCRUD, RepositoryCRUD
-from app.models import UserScope
+from app.models import Guideline, UserScope
 from app.schemas.compute import ComplianceResult, Snippet
 from app.services.openai import ExecutionMode, openai_client
 from app.services.telemetry import telemetry_client
@@ -42,7 +42,7 @@ async def check_code_against_guideline(
     user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> ComplianceResult:
     # Check repo
-    guideline = await guidelines.get(guideline_id, strict=True)
+    guideline = cast(Guideline, await guidelines.get(guideline_id, strict=True))
     telemetry_client.capture(
         user.id, event="compute-check", properties={"repo_id": guideline.repo_id, "guideline_id": guideline_id}
     )
