@@ -11,7 +11,6 @@ __all__ = ["Snippet", "ComplianceResult"]
 
 class Snippet(BaseModel):
     code: str = Field(..., min_length=1)
-    repo_id: int = Field(..., gt=0)
 
 
 class ComplianceResult(BaseModel):

@@ -15,7 +15,7 @@ from app.models import User, UserScope
 __all__ = ["get_session", "init_db"]
 
 
-engine = AsyncEngine(create_engine(settings.POSTGRES_URL, echo=settings.DEBUG))
+engine = AsyncEngine(create_engine(settings.POSTGRES_URL, echo=False))
 
 
 async def get_session() -> AsyncSession:  # type: ignore[misc]
