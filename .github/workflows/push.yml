@@ -38,5 +38,6 @@ jobs:
           key: ${{ secrets.SSH_DEPLOY_DEV }}
           script: |
             docker pull quackai/contribution-api:latest
+            docker rmi -f $(docker images -f "dangling=true" -q)
             cd devops && docker compose stop backend && docker compose up -d
             docker inspect -f '{{ .Created }}' $(docker compose images -q backend)
