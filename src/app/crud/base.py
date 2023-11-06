@@ -47,7 +47,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         if strict and entry is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Table {self.model.__class__.__name__} has no corresponding entry",
+                detail=f"Table {self.model.__name__} has no corresponding entry.",
             )
         return entry
 
