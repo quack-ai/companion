@@ -16,7 +16,7 @@ USER_TABLE = [
 
 
 @pytest_asyncio.fixture(scope="function")
-async def session(async_session: AsyncSession, monkeypatch):
+async def login_session(async_session: AsyncSession, monkeypatch):
     for entry in USER_TABLE:
         async_session.add(User(**entry))
     await async_session.commit()
@@ -34,7 +34,7 @@ async def session(async_session: AsyncSession, monkeypatch):
 @pytest.mark.asyncio()
 async def test_login_with_github_token(
     async_client: AsyncClient,
-    session: AsyncSession,
+    login_session: AsyncSession,
     payload: Dict[str, Any],
     status_code: int,
     status_detail: Union[str, None],
@@ -56,7 +56,7 @@ async def test_login_with_github_token(
 @pytest.mark.asyncio()
 async def test_login_with_creds(
     async_client: AsyncClient,
-    session: AsyncSession,
+    login_session: AsyncSession,
     payload: Dict[str, Any],
     status_code: int,
     status_detail: Union[str, None],
@@ -84,7 +84,7 @@ async def test_login_with_creds(
 @pytest.mark.asyncio()
 async def test_request_github_token_from_code(
     async_client: AsyncClient,
-    session: AsyncSession,
+    login_session: AsyncSession,
     payload: Dict[str, Any],
     status_code: int,
     status_detail: Union[str, None],
@@ -107,12 +107,14 @@ async def test_request_github_token_from_code(
 @pytest.mark.asyncio()
 async def test_authorize_github(
     async_client: AsyncClient,
-    session: AsyncSession,
+    login_session: AsyncSession,
     scope: Any,
     redirect_uri: Any,
     status_code: int,
 ):
-    response = await async_client.get("/login/authorize", params={"scope": scope, "redirect_uri": redirect_uri})
+    response = await async_client.get(
+        "/login/authorize", params={"scope": scope, "redirect_uri": redirect_uri}, follow_redirects=False
+    )
     assert response.status_code == status_code
     for key, _, val in response.headers._list:
         if key == "location":
