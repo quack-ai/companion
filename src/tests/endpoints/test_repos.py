@@ -256,13 +256,13 @@ async def test_fetch_guidelines_from_repo(
 @pytest.mark.parametrize(
     ("user_idx", "repo_id", "payload", "status_code", "status_detail"),
     [
-        (None, 12345, {"guideline_ids": [2]}, 401, "Not authenticated"),
-        (0, 1, {"guideline_ids": [2]}, 404, ""),
+        (None, 12345, {"guideline_ids": [1]}, 401, "Not authenticated"),
+        (0, 100, {"guideline_ids": [1]}, 404, "Table Repository has no corresponding entry."),
         (0, 12345, {"guideline_ids": [1, 2]}, 422, None),
-        (0, 12345, {"guideline_ids": [2, 2]}, 422, None),
-        (0, 12345, {"guideline_ids": [2]}, 200, None),
-        (0, 123456, {"guideline_ids": [2]}, 422, None),
-        (1, 12345, {"guideline_ids": [2]}, 200, None),
+        (0, 12345, {"guideline_ids": [1, 1]}, 422, None),
+        (0, 12345, {"guideline_ids": [1]}, 200, None),
+        (0, 123456, {"guideline_ids": [1]}, 422, None),
+        (1, 12345, {"guideline_ids": [1]}, 200, None),
     ],
 )
 @pytest.mark.asyncio()
@@ -279,11 +279,14 @@ async def test_reorder_repo_guidelines(
     if isinstance(user_idx, int):
         auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
 
-    response = await async_client.put(f"/repos/{repo_id}/guidelines/order", headers=auth)
-    assert response.status_code == status_code, print(response.__dict__)
+    response = await async_client.put(f"/repos/{repo_id}/guidelines/order", json=payload, headers=auth)
+    assert response.status_code == status_code, print(response.json())
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
-        assert response.json() == [
-            {**entry, "order": order} for entry, order in zip(GUIDELINE_TABLE, payload["guideline_ids"])
+        assert [{k: v for k, v in entry.items() if k not in {"updated_at", "order"}} for entry in response.json()] == [
+            {k: v for k, v in entry.items() if k not in {"updated_at", "order"}} for entry in GUIDELINE_TABLE
+        ]
+        assert [entry["order"] for entry in response.json()] == [
+            payload["guideline_ids"].index(entry["id"]) for entry in GUIDELINE_TABLE
         ]
