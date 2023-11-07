@@ -26,19 +26,6 @@ class TokenPayload(BaseModel):
     scopes: List[UserScope] = []
 
 
-class GHTokenRequest(BaseModel):
-    code: str
-    redirect_uri: HttpUrl
-
-
 class TokenRequest(BaseModel):
-    client_id: str
-    client_secret: str
     code: str
     redirect_uri: HttpUrl
-
-
-class GHToken(BaseModel):
-    access_token: str
-    token_type: str
-    scope: str

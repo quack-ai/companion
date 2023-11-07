@@ -6,50 +6,73 @@
 from typing import Any, Dict, Union
 
 import requests
-from fastapi import HTTPException
+from fastapi import HTTPException, status
+from pydantic import HttpUrl
 
 from app.core.config import settings
+from app.schemas.services import GHToken, GHTokenRequest
 
 __all__ = ["gh_client"]
 
 
 class GitHubClient:
     ENDPOINT: str = "https://api.github.com"
+    OAUTH_ENDPOINT: str = "https://github.com/login/oauth/access_token"
 
     def __init__(self, token: Union[str, None] = None) -> None:
-        self.headers = (
-            {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-            if token
-            else {"Content-Type": "application/json"}
+        self.headers = self._get_headers(token)
+
+    def _get_headers(self, token: Union[str, None] = None) -> Dict[str, str]:
+        if isinstance(token, str):
+            return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+        return {"Content-Type": "application/json"}
+
+    def _get(self, route: str, token: Union[str, None] = None, timeout: int = 5) -> Dict[str, Any]:
+        response = requests.get(
+            f"{self.ENDPOINT}/{route}",
+            headers=self._get_headers(token) if isinstance(token, str) else self.headers,
+            timeout=timeout,
         )
+        json_response = response.json()
+        if response.status_code != status.HTTP_200_OK:
+            raise HTTPException(
+                status_code=response.status_code, detail=json_response.get("error", json_response["message"])
+            )
+        return json_response
 
-    def _get(self, endpoint: str, entry_id: int) -> Dict[str, Any]:
-        response = requests.get(f"{self.ENDPOINT}/{endpoint}{entry_id}", headers=self.headers, timeout=2)
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail=response.json()["error"]["message"])
-        return response.json()
+    def get_repo(self, repo_id: int, **kwargs: Any) -> Dict[str, Any]:
+        return self._get(f"repositories/{repo_id}", **kwargs)
 
-    def get_repo(self, repo_id: int) -> Dict[str, Any]:
-        return self._get("repositories/", repo_id)
+    def get_user(self, user_id: int, **kwargs: Any) -> Dict[str, Any]:
+        return self._get(f"user/{user_id}", **kwargs)
 
-    def get_user(self, user_id: int) -> Dict[str, Any]:
-        return self._get("user/", user_id)
+    def get_my_user(self, token: str) -> Dict[str, Any]:
+        return self._get("user", token)
 
     def get_permission(self, repo_name: str, user_name: str, github_token: str) -> str:
-        response = requests.get(
-            f"{self.ENDPOINT}/repos/{repo_name}/collaborators/{user_name}/permission",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {github_token}",
-            },
-            timeout=5,
-        )
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail=response.json()["error"]["message"])
-        return response.json()["role_name"]
+        return self._get(f"repos/{repo_name}/collaborators/{user_name}/permission", github_token)["role_name"]
 
     def has_valid_permission(self, repo_name: str, user_name: str, github_token: str) -> bool:
         return self.get_permission(repo_name, user_name, github_token) in ("maintain", "admin")
+
+    def get_token_from_code(self, code: str, redirect_uri: HttpUrl, timeout: int = 5) -> GHToken:
+        gh_payload = GHTokenRequest(
+            client_id=settings.GH_OAUTH_ID,
+            client_secret=settings.GH_OAUTH_SECRET,
+            redirect_uri=redirect_uri,
+            code=code,
+        )
+        response = requests.post(
+            self.OAUTH_ENDPOINT,
+            json=gh_payload.dict(),
+            headers={"Accept": "application/json"},
+            timeout=timeout,
+        )
+        if response.status_code != status.HTTP_200_OK:
+            raise HTTPException(status_code=response.status_code, detail=response.json()["error"])
+        if response.status_code == status.HTTP_200_OK and isinstance(response.json().get("error_description"), str):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=response.json()["error_description"])
+        return GHToken(**response.json())
 
 
 gh_client = GitHubClient(settings.GH_TOKEN)
