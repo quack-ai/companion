@@ -41,3 +41,7 @@ jobs:
             docker rmi -f $(docker images -f "dangling=true" -q)
             cd devops && docker compose stop backend && docker compose up -d && docker compose exec backend alembic upgrade head
             docker inspect -f '{{ .Created }}' $(docker compose images -q backend)
+      - name: Ping server
+        env:
+          DEV_ENDPOINT: ${{ secrets.DEV_ENDPOINT }}
+        run: sleep 10 && curl $DEV_ENDPOINT
