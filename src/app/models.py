@@ -36,7 +36,7 @@ class Repository(SQLModel, table=True):
     owner_id: int = Field(..., nullable=False)
     full_name: str = Field(..., nullable=False)
     installed_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-    is_active: bool
+    is_active: bool = Field(True, nullable=False)
     installed_by: int = Field(..., foreign_key="user.id")
 
 
