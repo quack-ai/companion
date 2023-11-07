@@ -13,6 +13,7 @@ from app.crud import GuidelineCRUD, RepositoryCRUD
 from app.models import Guideline, Repository, User, UserScope
 from app.schemas.guidelines import OrderUpdate
 from app.schemas.repos import GuidelineOrder, RepoCreate, RepoCreation, RepoUpdate
+from app.services.github import gh_client
 from app.services.telemetry import telemetry_client
 
 router = APIRouter()
@@ -24,22 +25,18 @@ async def create_repo(
     repos: RepositoryCRUD = Depends(get_repo_crud),
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
+    # Check repo exists
+    gh_repo = gh_client.get_repo(payload.id)
     telemetry_client.capture(
-        user.id, event="repo-creation", properties={"repo_id": payload.id, "full_name": payload.full_name}
+        user.id, event="repo-creation", properties={"repo_id": payload.id, "full_name": gh_repo["full_name"]}
     )
-    # Check that user is allowed to do so
-    entry = await repos.get(payload.id, strict=False)
-    # If repo exists, set it back to active
-    if entry is not None:
-        await repos.update(payload.id, RepoUpdate(removed_at=None))
-        entry.removed_at = None
-        telemetry_client.capture(
-            user.id, event="repo-enable", properties={"repo_id": payload.id, "full_name": payload.full_name}
+    # Check if user is allowed
+    # gh_client.has_valid_permission(gh_repo["full_name"], user.login, payload.gh_token)
+    return await repos.create(
+        RepoCreation(
+            id=payload.id, full_name=gh_repo["full_name"], owner_id=gh_repo["owner"]["id"], installed_by=user.id
         )
-        return entry
-
-    repo = await repos.create(RepoCreation(**payload.dict(), installed_by=user.id))
-    return repo
+    )
 
 
 @router.get("/{repo_id}", status_code=status.HTTP_200_OK)
@@ -124,4 +121,5 @@ async def fetch_guidelines_from_repo(
     user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> List[Guideline]:
     telemetry_client.capture(user.id, event="repo-fetch-guidelines", properties={"repo_id": repo_id})
+    await repos.get(repo_id, strict=True)
     return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]

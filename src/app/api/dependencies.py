@@ -76,7 +76,7 @@ async def get_current_user(
 
     if set(token_data.scopes).isdisjoint(security_scopes.scopes):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Your user scope is not compatible with this operation.",
             headers={"WWW-Authenticate": authenticate_value},
         )

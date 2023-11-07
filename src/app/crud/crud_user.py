@@ -20,6 +20,3 @@ class UserCRUD(BaseCRUD[User, UserCreation, CredHash]):
 
     async def get_by_login(self, login: str, **kwargs: Any) -> Union[User, None]:
         return await self.get_by("login", login, **kwargs)
-
-    async def get(self, entry_id: int, **kwargs: Any) -> Union[User, None]:
-        return await self.get_by("id", entry_id, **kwargs)

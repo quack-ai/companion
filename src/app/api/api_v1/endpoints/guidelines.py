@@ -24,8 +24,7 @@ async def create_guideline(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
     telemetry_client.capture(user.id, event="guideline-creation", properties={"repo_id": payload.repo_id})
-    guideline = await guidelines.create(payload)
-    return guideline
+    return await guidelines.create(payload)
 
 
 @router.get("/{guideline_id}", status_code=status.HTTP_200_OK)

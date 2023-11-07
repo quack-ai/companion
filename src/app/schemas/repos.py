@@ -14,12 +14,13 @@ __all__ = ["RepoCreate", "RepoCreation", "RepoUpdate", "GuidelineOrder"]
 
 
 class RepoCreate(_Id):
+    pass
+
+
+class RepoCreation(_Id):
+    installed_by: int = Field(..., gt=0)
     owner_id: int = Field(..., gt=0)
     full_name: str = Field(..., example="frgfm/torch-cam")
-
-
-class RepoCreation(RepoCreate):
-    installed_by: int = Field(..., gt=0)
 
 
 class RepoUpdate(BaseModel):

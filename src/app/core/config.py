@@ -5,7 +5,7 @@
 
 import os
 import secrets
-from typing import Optional
+from typing import Union
 
 from pydantic import BaseSettings, validator
 
@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     GH_TOKEN_ENDPOINT: str = "https://github.com/login/oauth/access_token"
     GH_OAUTH_ID: str = os.environ["GH_OAUTH_ID"]
     GH_OAUTH_SECRET: str = os.environ["GH_OAUTH_SECRET"]
+    GH_TOKEN: Union[str, None] = os.environ.get("GH_TOKEN")
     # Security
     SECRET_KEY: str = os.environ.get("SECRET_KEY", secrets.token_urlsafe(32))
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
@@ -48,21 +49,21 @@ class Settings(BaseSettings):
             return v.replace("postgres://", "postgresql+asyncpg://", 1)
         return v
 
-    SENTRY_DSN: Optional[str] = os.environ.get("SENTRY_DSN")
+    SENTRY_DSN: Union[str, None] = os.environ.get("SENTRY_DSN")
     SERVER_NAME: str = os.environ["SERVER_NAME"]
 
     @validator("SENTRY_DSN", pre=True)
     @classmethod
-    def sentry_dsn_can_be_blank(cls, v: str) -> Optional[str]:
+    def sentry_dsn_can_be_blank(cls, v: str) -> Union[str, None]:
         if not isinstance(v, str) or len(v) == 0:
             return None
         return v
 
-    POSTHOG_KEY: Optional[str] = os.environ.get("POSTHOG_KEY")
+    POSTHOG_KEY: Union[str, None] = os.environ.get("POSTHOG_KEY")
 
     @validator("POSTHOG_KEY", pre=True)
     @classmethod
-    def posthog_key_can_be_blank(cls, v: str) -> Optional[str]:
+    def posthog_key_can_be_blank(cls, v: str) -> Union[str, None]:
         if not isinstance(v, str) or len(v) == 0:
             return None
         return v

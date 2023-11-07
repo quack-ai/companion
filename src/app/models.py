@@ -34,7 +34,7 @@ class User(SQLModel, table=True):
 
 class Repository(SQLModel, table=True):
     id: int = Field(..., primary_key=True)
-    owner_id: int = Field(..., nullable=False, foreign_key="user.id")
+    owner_id: int = Field(..., nullable=False)
     full_name: str = Field(..., nullable=False)
     installed_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     removed_at: Union[datetime, None] = None
