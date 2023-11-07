@@ -15,7 +15,7 @@ from alembic import context
 from sqlmodel import SQLModel, create_engine
 from sqlmodel.ext.asyncio.session import AsyncEngine
 
-from app import config as cfg
+from app.core.config import settings
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
 
@@ -47,7 +47,7 @@ def run_migrations_offline():
     Calls to context.execute() here emit the given string to the
     script output.
     """
-    url = cfg.DATABASE_URL
+    url = settings.POSTGRES_URL
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -72,7 +72,7 @@ async def run_migrations_online():
     In this scenario we need to create an Engine
     and associate a connection with the context.
     """
-    connectable = AsyncEngine(create_engine(cfg.DATABASE_URL, echo=True, future=True))
+    connectable = AsyncEngine(create_engine(settings.POSTGRES_URL, echo=True, future=True))
 
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

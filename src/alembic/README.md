@@ -3,7 +3,7 @@
 All commands should be run after spinning the containers using
 
 ```shell
-make urn
+make run
 ```
 
 ## Create a revision

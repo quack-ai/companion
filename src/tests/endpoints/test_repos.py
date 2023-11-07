@@ -20,7 +20,7 @@ REPO_TABLE = [
         "installed_by": 1,
         "owner_id": 1,
         "installed_at": "2023-11-07T15:07:19.226673",
-        "removed_at": None,
+        "is_active": True,
     },
     {
         "id": 123456,
@@ -28,7 +28,7 @@ REPO_TABLE = [
         "installed_by": 2,
         "owner_id": 2,
         "installed_at": "2023-11-07T15:07:19.226673",
-        "removed_at": None,
+        "is_active": True,
     },
 ]
 
@@ -87,7 +87,7 @@ async def guideline_session(repo_session: AsyncSession):
                 "full_name": "frgfm/torch-cam",
                 "owner_id": 26927750,
                 "installed_by": 1,
-                "removed_at": None,
+                "is_active": True,
             },
         ),
         (
@@ -100,7 +100,7 @@ async def guideline_session(repo_session: AsyncSession):
                 "full_name": "frgfm/torch-cam",
                 "owner_id": 26927750,
                 "installed_by": 2,
-                "removed_at": None,
+                "is_active": True,
             },
         ),
     ],

@@ -93,7 +93,7 @@ async def disable_repo(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
     telemetry_client.capture(user.id, event="repo-disable", properties={"repo_id": repo_id})
-    return await repos.update(repo_id, RepoUpdate(removed_at=datetime.utcnow()))
+    return await repos.update(repo_id, RepoUpdate(is_active=False))
 
 
 @router.put("/{repo_id}/enable", status_code=status.HTTP_200_OK)
@@ -103,7 +103,7 @@ async def enable_repo(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
     telemetry_client.capture(user.id, event="repo-enable", properties={"repo_id": repo_id})
-    return await repos.update(repo_id, RepoUpdate(removed_at=None))
+    return await repos.update(repo_id, RepoUpdate(is_active=True))
 
 
 @router.delete("/{repo_id}", status_code=status.HTTP_200_OK)

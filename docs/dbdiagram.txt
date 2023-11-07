@@ -1,0 +1,40 @@
+
+Enum "accesstype" {
+  "user"
+  "admin"
+}
+
+Table "User" as U {
+  "id" int [not null]
+  "login" str [not null]
+  "hashed_password" str [not null]
+  "scope" accesstype [not null]
+  Indexes {
+    (id, login) [pk]
+  }
+}
+
+Table "Repository" as R {
+  "id" int [not null]
+  "owner_id" int [not null]
+  "full_name" str [not null]
+  "installed_at" timestamp [not null]
+  "is_active" boolean [not null]
+  "installed_by" int [ref: > U.id, not null]
+  Indexes {
+    (id) [pk]
+  }
+}
+
+Table "Guideline" as G {
+  "id" int [not null]
+  "repo_id" int [ref: > R.id, not null]
+  "title" str [not null]
+  "details" str [not null]
+  "order" int [not null]
+  "created_at" timestamp [not null]
+  "updated_at" timestamp [not null]
+  Indexes {
+    (id) [pk]
+  }
+}
