@@ -60,13 +60,16 @@ async def fetch_repos(
 
 
 @router.put("/{repo_id}/guidelines/order", status_code=status.HTTP_200_OK)
-async def reorder_guidelines(
+async def reorder_repo_guidelines(
     payload: GuidelineOrder,
     repo_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
+    repos: RepositoryCRUD = Depends(get_repo_crud),
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> List[Guideline]:
     telemetry_client.capture(user.id, event="guideline-order", properties={"repo_id": repo_id})
+    # Check the repo
+    await repos.get(repo_id, strict=True)
     # Ensure all IDs are unique
     if len(payload.guideline_ids) != len(set(payload.guideline_ids)):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Duplicate IDs were passed.")
