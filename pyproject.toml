@@ -95,6 +95,7 @@ indent-style = "space"
 ".github/**.py" = ["D", "T201"]
 "client/docs/**.py" = ["E402"]
 "src/tests/**.py" = ["D103", "CPY001", "S101", "T201"]
+"src/alembic/versions/**.py" = ["CPY001"]
 "client/tests/**.py" = ["D103", "CPY001", "S101"]
 
 [tool.ruff.flake8-quotes]
