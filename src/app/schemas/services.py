@@ -4,7 +4,7 @@
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 from pydantic import BaseModel, HttpUrl
 
@@ -13,10 +13,10 @@ __all__ = ["ChatCompletion"]
 
 class OpenAIModel(str, Enum):
     # https://platform.openai.com/docs/models/overview
-    GPT3_5: str = "gpt-3.5-turbo-0613"
-    GPT3_5_LONG: str = "gpt-3.5-turbo-16k-0613"
-    GPT4: str = "gpt-4-0613"
-    GPT4_LONG: str = "gpt-4-32k-0613"
+    GPT3_5: str = "gpt-3.5-turbo-1106"
+    GPT3_5_LEGACY: str = "gpt-3.5-turbo-0613"
+    GPT4: str = "gpt-4-1106-preview"
+    GPT4_LEGACY: str = "gpt-4-0613"
 
 
 class OpenAIChatRole(str, Enum):
@@ -47,9 +47,27 @@ class OpenAIFunction(BaseModel):
     parameters: ObjectSchema
 
 
+class OpenAITool(BaseModel):
+    type: str = "function"
+    function: OpenAIFunction
+
+
+class _FunctionName(BaseModel):
+    name: str
+
+
+class _OpenAIToolChoice(BaseModel):
+    type: str = "function"
+    function: _FunctionName
+
+
 class OpenAIMessage(BaseModel):
     role: OpenAIChatRole
     content: str
+
+
+class _ResponseFormat(BaseModel):
+    type: str = "json_object"
 
 
 class ChatCompletion(BaseModel):
@@ -57,8 +75,11 @@ class ChatCompletion(BaseModel):
     messages: List[OpenAIMessage]
     functions: List[OpenAIFunction]
     function_call: Dict[str, str]
-    temperature: float
-    frequency_penalty: float
+    temperature: float = 0.0
+    frequency_penalty: float = 1.0
+    response_format: _ResponseFormat = _ResponseFormat(type="json_object")
+    user: Union[str, None] = None
+    # seed: int = 42
 
 
 class GHTokenRequest(BaseModel):

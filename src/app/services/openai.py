@@ -8,7 +8,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
 import requests
 from fastapi import HTTPException, status
@@ -45,7 +45,7 @@ MONO_SCHEMA = ObjectSchema(
         ),
         "comment": FieldSchema(
             type="string",
-            description="instruction to make the snippet compliant, addressed to the developer who wrote the code. Should be empty if the snippet is compliant",
+            description="short instruction to make the snippet compliant, addressed to the developer who wrote the code. Should be empty if the snippet is compliant",
         ),
         # "suggestion": FieldSchema(type="string", description="the modified code snippet that meets the guideline, with minimal modifications. Should be empty if the snippet is compliant"),
     },
@@ -54,7 +54,7 @@ MONO_SCHEMA = ObjectSchema(
 
 MONO_PROMPT = (
     "As a code compliance agent, you are going to receive requests from user with two elements: a code snippet, and a guideline. "
-    "You should answer with an analysis result. The comment should be an empty string if the code is compliant with the guideline."
+    "You should answer in JSON format with an analysis result. The comment should be an empty string if the code is compliant with the guideline."
 )
 
 
@@ -71,7 +71,7 @@ MULTI_SCHEMA = ObjectSchema(
                     ),
                     "comment": FieldSchema(
                         type="string",
-                        description="instruction to make the snippet compliant, addressed to the developer who wrote the code. Should be empty if the snippet is compliant",
+                        description="short instruction to make the snippet compliant, addressed to the developer who wrote the code. Should be empty if the snippet is compliant",
                     ),
                     # "suggestion": FieldSchema(type="string", description="the modified code snippet that meets the guideline, with minimal modifications. Should be empty if the snippet is compliant"),
                 },
@@ -84,7 +84,7 @@ MULTI_SCHEMA = ObjectSchema(
 
 MULTI_PROMPT = (
     "As a code compliance agent, you are going to receive requests from user with two elements: a code snippet, and a list of guidelines. "
-    "You should answer with a list of compliance results, one for each guideline, no more, no less (in the same order). "
+    "You should answer in JSON format with a list of compliance results, one for each guideline, no more, no less (in the same order). "
     "For a given compliance results, the comment should be an empty string if the code is compliant with the corresponding guideline."
 )
 
@@ -95,7 +95,7 @@ class OpenAIClient:
     def __init__(
         self, api_key: str, model: OpenAIModel, temperature: float = 0.0, frequency_penalty: float = 1.0
     ) -> None:
-        self.headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        self.headers = self._get_headers(api_key)
         # Validate model
         model_card = requests.get(f"https://api.openai.com/v1/models/{model}", headers=self.headers, timeout=2)
         if model_card.status_code != 200:
@@ -106,6 +106,10 @@ class OpenAIClient:
         logger.info(
             f"Using OpenAI model: {self.model} (created at {datetime.fromtimestamp(model_card.json()['created']).isoformat()})"
         )
+
+    @staticmethod
+    def _get_headers(api_key: str) -> Dict[str, str]:
+        return {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
     def analyze_multi(
         self,
@@ -163,7 +167,14 @@ class OpenAIClient:
         # Return with pydantic validation
         return ComplianceResult(guideline_id=guideline.id, **res)
 
-    def _analyze(self, prompt: str, payload: Dict[str, Any], schema: ObjectSchema, timeout: int = 20) -> Dict[str, Any]:
+    def _analyze(
+        self,
+        prompt: str,
+        payload: Dict[str, Any],
+        schema: ObjectSchema,
+        timeout: int = 20,
+        user_id: Union[str, None] = None,
+    ) -> Dict[str, Any]:
         # Prepare the request
         _payload = ChatCompletion(
             model=self.model,
@@ -187,6 +198,7 @@ class OpenAIClient:
             function_call={"name": "analyze_code"},
             temperature=self.temperature,
             frequency_penalty=self.frequency_penalty,
+            user=user_id,
         )
         # Send the request
         response = requests.post(self.ENDPOINT, json=_payload.dict(), headers=self.headers, timeout=timeout)
