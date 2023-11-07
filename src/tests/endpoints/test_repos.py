@@ -251,3 +251,39 @@ async def test_fetch_guidelines_from_repo(
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
         assert response.json() == expected_response
+
+
+@pytest.mark.parametrize(
+    ("user_idx", "repo_id", "payload", "status_code", "status_detail"),
+    [
+        (None, 12345, {"guideline_ids": [2]}, 401, "Not authenticated"),
+        (0, 1, {"guideline_ids": [2]}, 404, ""),
+        (0, 12345, {"guideline_ids": [1, 2]}, 422, None),
+        (0, 12345, {"guideline_ids": [2, 2]}, 422, None),
+        (0, 12345, {"guideline_ids": [2]}, 200, None),
+        (0, 123456, {"guideline_ids": [2]}, 422, None),
+        (1, 12345, {"guideline_ids": [2]}, 200, None),
+    ],
+)
+@pytest.mark.asyncio()
+async def test_reorder_repo_guidelines(
+    async_client: AsyncClient,
+    guideline_session: AsyncSession,
+    user_idx: Union[int, None],
+    repo_id: int,
+    payload: Dict[str, Any],
+    status_code: int,
+    status_detail: Union[str, None],
+):
+    auth = None
+    if isinstance(user_idx, int):
+        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+
+    response = await async_client.put(f"/repos/{repo_id}/guidelines/order", headers=auth)
+    assert response.status_code == status_code, print(response.__dict__)
+    if isinstance(status_detail, str):
+        assert response.json()["detail"] == status_detail
+    if response.status_code // 100 == 2:
+        assert response.json() == [
+            {**entry, "order": order} for entry, order in zip(GUIDELINE_TABLE, payload["guideline_ids"])
+        ]
