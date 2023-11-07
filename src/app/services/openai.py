@@ -95,7 +95,7 @@ class OpenAIClient:
     def __init__(
         self, api_key: str, model: OpenAIModel, temperature: float = 0.0, frequency_penalty: float = 1.0
     ) -> None:
-        self.headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        self.headers = self._get_headers(api_key)
         # Validate model
         model_card = requests.get(f"https://api.openai.com/v1/models/{model}", headers=self.headers, timeout=2)
         if model_card.status_code != 200:
@@ -106,6 +106,10 @@ class OpenAIClient:
         logger.info(
             f"Using OpenAI model: {self.model} (created at {datetime.fromtimestamp(model_card.json()['created']).isoformat()})"
         )
+
+    @staticmethod
+    def _get_headers(api_key: str) -> Dict[str, str]:
+        return {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
     def analyze_multi(
         self,
