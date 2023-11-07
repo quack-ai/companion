@@ -24,9 +24,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.model = model
 
     async def create(self, payload: CreateSchemaType) -> ModelType:
-        values = payload.dict()
-
-        entry = self.model(**values)
+        entry = self.model(**payload.dict())
         try:
             self.session.add(entry)
             await self.session.commit()
