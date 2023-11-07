@@ -23,7 +23,6 @@ class Settings(BaseSettings):
     CORS_ORIGIN: str = "*"
     # Ext API endpoints
     GH_AUTHORIZE_ENDPOINT: str = "https://github.com/login/oauth/authorize"
-    GH_TOKEN_ENDPOINT: str = "https://github.com/login/oauth/access_token"
     GH_OAUTH_ID: str = os.environ["GH_OAUTH_ID"]
     GH_OAUTH_SECRET: str = os.environ["GH_OAUTH_SECRET"]
     GH_TOKEN: Union[str, None] = os.environ.get("GH_TOKEN")

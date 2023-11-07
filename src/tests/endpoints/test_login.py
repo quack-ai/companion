@@ -6,7 +6,7 @@ import pytest_asyncio
 from httpx import AsyncClient
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.core import security
+from app.api.api_v1.endpoints import login
 from app.models import User
 
 USER_TABLE = [
@@ -20,7 +20,8 @@ async def login_session(async_session: AsyncSession, monkeypatch):
     for entry in USER_TABLE:
         async_session.add(User(**entry))
     await async_session.commit()
-    monkeypatch.setattr(security, "verify_password", pytest.mock_verify_password)
+    monkeypatch.setattr(login, "verify_password", pytest.mock_verify_password)
+    monkeypatch.setattr(login, "hash_password", pytest.mock_hash_password)
     yield async_session
 
 
@@ -28,7 +29,7 @@ async def login_session(async_session: AsyncSession, monkeypatch):
     ("payload", "status_code", "status_detail"),
     [
         ({"username": "foo"}, 422, None),
-        ({"github_token": "foo"}, 401, None),
+        ({"github_token": "foo"}, 401, "Bad credentials"),
     ],
 )
 @pytest.mark.asyncio()
@@ -50,7 +51,8 @@ async def test_login_with_github_token(
     [
         ({"username": "foo"}, 422, None),
         ({"username": "foo", "password": "bar"}, 401, None),
-        # ({"username": "first_login", "password": "first_pwd"}, 200, None),
+        ({"username": "first_login", "password": "pwd"}, 401, None),
+        ({"username": "first_login", "password": "first_pwd"}, 200, None),
     ],
 )
 @pytest.mark.asyncio()
@@ -67,9 +69,9 @@ async def test_login_with_creds(
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
         response_json = response.json()
-        assert response_json["token_type"] == "Bearer"  # noqa: S105
+        assert response_json["token_type"] == "bearer"  # noqa: S105
         assert isinstance(response_json["access_token"], str)
-        assert len(response_json["access_token"]) == 10
+        assert len(response_json["access_token"]) == 143
 
 
 @pytest.mark.parametrize(
@@ -78,7 +80,7 @@ async def test_login_with_creds(
         ({"code": "foo", "redirect_uri": 0}, 422, None, None),
         # Github 422
         ({"code": "foo", "redirect_uri": ""}, 422, None, None),
-        ({"code": "foo", "redirect_uri": "https://quackai.com"}, 401, None, None),
+        ({"code": "foo", "redirect_uri": "https://quackai.com"}, 400, None, None),
     ],
 )
 @pytest.mark.asyncio()
@@ -91,7 +93,7 @@ async def test_request_github_token_from_code(
     expected_response: Union[Dict[str, Any], None],
 ):
     response = await async_client.post("/login/github", json=payload)
-    assert response.status_code == status_code
+    assert response.status_code == status_code, print(response.json(), isinstance(response.json()["detail"], str))
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if isinstance(expected_response, dict):

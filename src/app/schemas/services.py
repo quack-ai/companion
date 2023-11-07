@@ -6,7 +6,7 @@
 from enum import Enum
 from typing import Any, Dict, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 
 __all__ = ["ChatCompletion"]
 
@@ -59,3 +59,16 @@ class ChatCompletion(BaseModel):
     function_call: Dict[str, str]
     temperature: float
     frequency_penalty: float
+
+
+class GHTokenRequest(BaseModel):
+    client_id: str
+    client_secret: str
+    code: str
+    redirect_uri: HttpUrl
+
+
+class GHToken(BaseModel):
+    access_token: str
+    token_type: str
+    scope: str
