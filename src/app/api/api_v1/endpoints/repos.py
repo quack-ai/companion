@@ -68,11 +68,11 @@ async def reorder_repo_guidelines(
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> List[Guideline]:
     telemetry_client.capture(user.id, event="guideline-order", properties={"repo_id": repo_id})
-    # Check the repo
-    await repos.get(repo_id, strict=True)
     # Ensure all IDs are unique
     if len(payload.guideline_ids) != len(set(payload.guideline_ids)):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Duplicate IDs were passed.")
+    # Check the repo
+    await repos.get(repo_id, strict=True)
     # Ensure all IDs are valid
     guideline_ids = [elt.id for elt in await guidelines.fetch_all(("repo_id", repo_id))]
     if set(payload.guideline_ids) != set(guideline_ids):
