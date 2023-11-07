@@ -3,8 +3,7 @@
 # All rights reserved.
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
-from datetime import datetime
-from typing import List, Union
+from typing import List
 
 from pydantic import BaseModel, Field
 
@@ -24,7 +23,7 @@ class RepoCreation(_Id):
 
 
 class RepoUpdate(BaseModel):
-    removed_at: Union[datetime, None]
+    is_active: bool
 
 
 class GuidelineOrder(BaseModel):
