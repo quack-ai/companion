@@ -40,6 +40,15 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
         return entry
 
+    async def get(self, entry_id: int, strict: bool = False) -> Union[ModelType, None]:
+        entry = await self.session.get(self.model, entry_id)
+        if strict and entry is None:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Table {self.model.__name__} has no corresponding entry.",
+            )
+        return entry
+
     async def get_by(self, field_name: str, val: Any, strict: bool = False) -> Union[ModelType, None]:
         statement = select(self.model).where(getattr(self.model, field_name) == val)
         results = await self.session.execute(statement=statement)
@@ -59,7 +68,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return results.scalars()  # type: ignore[return-value]
 
     async def update(self, entry_id: int, payload: UpdateSchemaType) -> ModelType:
-        access = cast(ModelType, await self.get_by("id", entry_id, strict=True))
+        access = cast(ModelType, await self.get(entry_id, strict=True))
         values = payload.dict(exclude_unset=True)
 
         for k, v in values.items():
@@ -72,6 +81,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return access
 
     async def delete(self, entry_id: int) -> None:
+        await self.get(entry_id, strict=True)
         statement = delete(self.model).where(self.model.id == entry_id)  # type: ignore[attr-defined]
 
         await self.session.execute(statement=statement)
