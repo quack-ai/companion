@@ -39,5 +39,5 @@ jobs:
           script: |
             docker pull quackai/contribution-api:latest
             docker rmi -f $(docker images -f "dangling=true" -q)
-            cd devops && docker compose stop backend && docker compose up -d
+            cd devops && docker compose stop backend && docker compose up -d && docker compose exec backend alembic upgrade head
             docker inspect -f '{{ .Created }}' $(docker compose images -q backend)
