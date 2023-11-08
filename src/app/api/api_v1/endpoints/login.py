@@ -10,14 +10,15 @@ from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import HttpUrl
 
+from app.api.api_v1.endpoints.users import _create_user
 from app.api.dependencies import get_user_crud
 from app.core.config import settings
-from app.core.security import create_access_token, hash_password, verify_password
+from app.core.security import create_access_token, verify_password
 from app.crud import UserCRUD
 from app.models import UserScope
 from app.schemas.login import GHAccessToken, Token, TokenRequest
 from app.schemas.services import GHToken
-from app.schemas.users import UserCreation
+from app.schemas.users import UserCreate
 from app.services.github import gh_client
 from app.services.telemetry import telemetry_client
 
@@ -78,15 +79,6 @@ async def login_with_github_token(
     # Fetch GitHub
     gh_user = gh_client.get_my_user(payload.github_token)
     telemetry_client.capture(gh_user["id"], event="user-login", properties={"login": gh_user["login"]})
-    telemetry_client.identify(
-        gh_user["id"],
-        properties={
-            "login": gh_user["login"],
-            "name": gh_user["name"],
-            "email": gh_user["email"],
-            "twitter_username": gh_user["twitter_username"],
-        },
-    )
     # Check that GH account is a user
     if gh_user["type"] != "User":
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user")
@@ -94,14 +86,8 @@ async def login_with_github_token(
     user = await users.get(gh_user["id"], strict=False)
     # Register if non existing
     if user is None:
-        telemetry_client.capture(gh_user["id"], event="user-creation", properties={"login": gh_user["login"]})
-        user = await users.create(
-            UserCreation(
-                id=gh_user["id"],
-                login=gh_user["login"],
-                hashed_password=await hash_password(secrets.token_urlsafe(32)),
-                scope=UserScope.USER,
-            )
+        user = await _create_user(
+            UserCreate(id=gh_user["id"], password=secrets.token_urlsafe(32), scope=UserScope.USER), users
         )
 
     # create access token using user user_id/user_scopes

@@ -6,7 +6,7 @@ import pytest_asyncio
 from httpx import AsyncClient
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.api.api_v1.endpoints import login
+from app.api.api_v1.endpoints import login, users
 from app.models import User
 
 USER_TABLE = [
@@ -21,7 +21,7 @@ async def login_session(async_session: AsyncSession, monkeypatch):
         async_session.add(User(**entry))
     await async_session.commit()
     monkeypatch.setattr(login, "verify_password", pytest.mock_verify_password)
-    monkeypatch.setattr(login, "hash_password", pytest.mock_hash_password)
+    monkeypatch.setattr(users, "hash_password", pytest.mock_hash_password)
     yield async_session
 
 
