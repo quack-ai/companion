@@ -9,7 +9,7 @@ from app.api.api_v1.endpoints import users
 from app.models import User
 
 USER_TABLE = [
-    {"id": 1, "login": "first_login", "hashed_password": "hashed_first_pwd", "scope": "admin"},
+    {"id": 26927750, "login": "first_login", "hashed_password": "hashed_first_pwd", "scope": "admin"},
     {"id": 2, "login": "second_login", "hashed_password": "hashed_second_pwd", "scope": "user"},
 ]
 
@@ -26,18 +26,18 @@ async def user_session(async_session: AsyncSession, monkeypatch):
 @pytest.mark.parametrize(
     ("user_idx", "payload", "status_code", "status_detail"),
     [
-        (None, {"id": 3, "login": "foo", "password": "bar", "scope": "user"}, 401, "Not authenticated"),
+        (None, {"id": 241138, "password": "bar", "scope": "user"}, 401, "Not authenticated"),
         (
             0,
-            {"id": 1, "login": "foo", "password": "bar", "scope": "user"},
+            {"id": 26927750, "password": "bar", "scope": "user"},
             409,
             "An entry with the same index already exists.",
         ),
-        (0, {"id": 3, "login": "foo", "password": "bar", "scope": "user"}, 201, None),
-        (0, {"id": 3, "login": "foo", "scope": "user"}, 422, None),
+        (0, {"id": 241138, "password": "bar", "scope": "user"}, 201, None),
+        (0, {"id": 241138, "scope": "user"}, 422, None),
         (
             1,
-            {"id": 3, "login": "foo", "password": "bar", "scope": "user"},
+            {"id": 241138, "password": "bar", "scope": "user"},
             401,
             "Your user scope is not compatible with this operation.",
         ),
@@ -63,7 +63,7 @@ async def test_create_user(
     if response.status_code // 100 == 2:
         assert response.json() == {
             "id": payload["id"],
-            "login": payload["login"],
+            "login": "karpathy",
             "hashed_password": f"hashed_{payload['password']}",
             "scope": payload["scope"],
         }
@@ -72,11 +72,11 @@ async def test_create_user(
 @pytest.mark.parametrize(
     ("user_idx", "user_id", "status_code", "status_detail", "expected_idx"),
     [
-        (None, 1, 401, "Not authenticated", None),
+        (None, 26927750, 401, "Not authenticated", None),
         (0, 0, 422, None, None),
-        (0, len(USER_TABLE) + 1, 404, "Table User has no corresponding entry.", None),
-        (1, 1, 401, "Your user scope is not compatible with this operation.", None),
-        (0, 1, 200, None, 0),
+        (0, 400, 404, "Table User has no corresponding entry.", None),
+        (1, 26927750, 401, "Your user scope is not compatible with this operation.", None),
+        (0, 26927750, 200, None, 0),
         (0, 2, 200, None, 1),
     ],
 )
@@ -133,10 +133,10 @@ async def test_fetch_users(
 @pytest.mark.parametrize(
     ("user_idx", "user_id", "status_code", "status_detail"),
     [
-        (None, 1, 401, "Not authenticated"),
-        (0, 1, 200, None),
+        (None, 26927750, 401, "Not authenticated"),
+        (0, 26927750, 200, None),
         (0, 2, 200, None),
-        (1, 1, 401, "Your user scope is not compatible with this operation."),
+        (1, 26927750, 401, "Your user scope is not compatible with this operation."),
         (1, 2, 401, "Your user scope is not compatible with this operation."),
     ],
 )
@@ -164,11 +164,11 @@ async def test_delete_user(
 @pytest.mark.parametrize(
     ("user_idx", "user_id", "payload", "status_code", "status_detail", "expected_idx"),
     [
-        (None, 1, {"password": "HeyQuack!"}, 401, "Not authenticated", None),
-        (0, 1, {"login": "HeyQuack!"}, 422, None, None),
-        (0, 1, {"password": "HeyQuack!"}, 200, None, 0),
+        (None, 26927750, {"password": "HeyQuack!"}, 401, "Not authenticated", None),
+        (0, 26927750, {"login": "HeyQuack!"}, 422, None, None),
+        (0, 26927750, {"password": "HeyQuack!"}, 200, None, 0),
         (0, 2, {"password": "HeyQuack!"}, 200, None, 1),
-        (1, 1, {"password": "HeyQuack!"}, 401, "Your user scope is not compatible with this operation.", None),
+        (1, 26927750, {"password": "HeyQuack!"}, 401, "Your user scope is not compatible with this operation.", None),
         (1, 2, {"password": "HeyQuack!"}, 401, "Your user scope is not compatible with this operation.", None),
     ],
 )

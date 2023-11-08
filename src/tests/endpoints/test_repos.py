@@ -5,7 +5,7 @@ import pytest_asyncio
 from httpx import AsyncClient
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.api.api_v1.endpoints import repos, users
+from app.api.api_v1.endpoints import users
 from app.models import Guideline, Repository, User
 
 USER_TABLE = [
@@ -45,12 +45,6 @@ GUIDELINE_TABLE = [
 ]
 
 
-class MockClient:
-    @staticmethod
-    def get_repo(repo_id: int) -> Dict[str, Any]:
-        return {"full_name": "frgfm/torch-cam", "owner": {"id": 26927750}} if repo_id == 249513553 else {}
-
-
 @pytest_asyncio.fixture(scope="function")
 async def repo_session(async_session: AsyncSession, monkeypatch):
     for entry in USER_TABLE:
@@ -60,7 +54,6 @@ async def repo_session(async_session: AsyncSession, monkeypatch):
         async_session.add(Repository(**entry))
     await async_session.commit()
     monkeypatch.setattr(users, "hash_password", pytest.mock_hash_password)
-    monkeypatch.setattr(repos, "gh_client", MockClient)
     yield async_session
 
 
@@ -93,7 +86,7 @@ async def guideline_session(repo_session: AsyncSession):
         (
             1,
             {"id": 249513553},
-            201,
+            422,
             None,
             {
                 "id": 249513553,
@@ -262,7 +255,7 @@ async def test_fetch_guidelines_from_repo(
         (0, 12345, {"guideline_ids": [1, 1]}, 422, None),
         (0, 12345, {"guideline_ids": [1]}, 200, None),
         (0, 123456, {"guideline_ids": [1]}, 422, None),
-        (1, 12345, {"guideline_ids": [1]}, 200, None),
+        (1, 12345, {"guideline_ids": [1]}, 422, None),
     ],
 )
 @pytest.mark.asyncio()

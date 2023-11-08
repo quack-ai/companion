@@ -36,6 +36,9 @@ async def async_session() -> AsyncSession:
     async with session() as s:
         async with engine.begin() as conn:
             await conn.run_sync(SQLModel.metadata.create_all)
+            for table in reversed(SQLModel.metadata.sorted_tables):
+                conn.execute(table.delete())
+                conn.execute(f"ALTER SEQUENCE {table}_id_seq RESTART WITH 1")
 
         yield s
 
