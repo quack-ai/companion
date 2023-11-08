@@ -81,7 +81,7 @@ async def reorder_repo_guidelines(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Guideline IDs for that repo don't match."
         )
     # Check if user is allowed
-    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token)
+    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
     # Update all order
     return [
         await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.utcnow()))
@@ -99,7 +99,7 @@ async def disable_repo(
     telemetry_client.capture(user.id, event="repo-disable", properties={"repo_id": repo_id})
     # Check if user is allowed
     repo = cast(Repository, await repos.get(repo_id, strict=True))
-    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token)
+    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
     return await repos.update(repo_id, RepoUpdate(is_active=False))
 
 
@@ -113,7 +113,7 @@ async def enable_repo(
     telemetry_client.capture(user.id, event="repo-enable", properties={"repo_id": repo_id})
     # Check if user is allowed
     repo = cast(Repository, await repos.get(repo_id, strict=True))
-    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token)
+    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
     return await repos.update(repo_id, RepoUpdate(is_active=True))
 
 
