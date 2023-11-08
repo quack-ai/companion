@@ -29,7 +29,7 @@ async def create_guideline(
     telemetry_client.capture(user.id, event="guideline-creation", properties={"repo_id": payload.repo_id})
     # Check if user is allowed
     repo = cast(Repository, await repos.get(payload.repo_id, strict=True))
-    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token)
+    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
     return await guidelines.create(GuidelineCreation(**payload.dict()))
 
 
@@ -65,7 +65,7 @@ async def update_guideline_content(
     telemetry_client.capture(user.id, event="guideline-content", properties={"repo_id": guideline.repo_id})
     # Check if user is allowed
     repo = cast(Repository, await repos.get(guideline.repo_id, strict=True))
-    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token)
+    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
     return guideline
 
 
@@ -82,7 +82,7 @@ async def update_guideline_order(
     telemetry_client.capture(user.id, event="guideline-order", properties={"repo_id": guideline.repo_id})
     # Check if user is allowed
     repo = cast(Repository, await repos.get(guideline.repo_id, strict=True))
-    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token)
+    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
     return guideline
 
 
@@ -98,5 +98,5 @@ async def delete_guideline(
     telemetry_client.capture(user.id, event="guideline-deletion", properties={"repo_id": guideline.repo_id})
     # Check if user is allowed
     repo = cast(Repository, await repos.get(guideline.repo_id, strict=True))
-    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token)
+    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
     await guidelines.delete(guideline_id)
