@@ -4,6 +4,7 @@
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
 from datetime import datetime
+from typing import Union
 
 from pydantic import BaseModel, Field
 
@@ -15,3 +16,7 @@ class _CreatedAt(BaseModel):
 
 class _Id(BaseModel):
     id: int = Field(..., gt=0)
+
+
+class OptionalGHToken(BaseModel):
+    github_token: Union[str, None] = None

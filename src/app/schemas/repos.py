@@ -7,12 +7,12 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-from .base import _Id
+from .base import OptionalGHToken, _Id
 
 __all__ = ["RepoCreate", "RepoCreation", "RepoUpdate", "GuidelineOrder"]
 
 
-class RepoCreate(_Id):
+class RepoCreate(_Id, OptionalGHToken):
     pass
 
 
@@ -26,5 +26,5 @@ class RepoUpdate(BaseModel):
     is_active: bool
 
 
-class GuidelineOrder(BaseModel):
+class GuidelineOrder(OptionalGHToken):
     guideline_ids: List[int]
