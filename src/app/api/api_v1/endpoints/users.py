@@ -3,7 +3,7 @@
 # All rights reserved.
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
-from typing import List, cast
+from typing import List, Union, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
@@ -18,22 +18,45 @@ from app.services.telemetry import telemetry_client
 router = APIRouter()
 
 
+async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[User, None] = None) -> User:
+    # Check that user exists on GitHub
+    gh_user = gh_client.get_user(payload.id)
+    if gh_user["type"] != "User":
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user")
+    telemetry_client.identify(
+        gh_user["id"],
+        properties={
+            "login": gh_user["login"],
+            "name": gh_user["name"],
+            "email": gh_user["email"],
+            "twitter_username": gh_user["twitter_username"],
+        },
+    )
+    # Create the entry
+    user = await users.create(
+        UserCreation(
+            id=payload.id,
+            login=gh_user["login"],
+            hashed_password=await hash_password(payload.password),
+            scope=payload.scope,
+        )
+    )
+    # Assume the requester is the new user if none was specified
+    telemetry_client.capture(
+        requester.id if isinstance(requester, User) else user.id,
+        event="user-creation",
+        properties={"login": gh_user["login"]},
+    )
+    return user
+
+
 @router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_user(
     payload: UserCreate,
     users: UserCRUD = Depends(get_user_crud),
     user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> User:
-    # Check that user exists on GitHub
-    gh_user = gh_client.get_user(payload.id)
-    if gh_user["type"] != "User":
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user")
-    telemetry_client.capture(user.id, event="user-creation", properties={"login": gh_user["login"]})
-    # Hash the password
-    pwd = await hash_password(payload.password)
-    return await users.create(
-        UserCreation(id=payload.id, login=gh_user["login"], hashed_password=pwd, scope=payload.scope)
-    )
+    return await _create_user(payload, users, user)
 
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
