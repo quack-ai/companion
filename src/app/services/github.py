@@ -54,9 +54,18 @@ class GitHubClient:
         return self._get(f"repos/{repo_name}/collaborators/{user_name}/permission", github_token)["role_name"]
 
     def check_user_permission(
-        self, user: User, repo_full_name: str, repo_owner_id: int, github_token: Union[str, None]
+        self,
+        user: User,
+        repo_full_name: str,
+        repo_owner_id: int,
+        github_token: Union[str, None],
+        repo_installer_id: Union[int, None],
     ) -> None:
-        if user.scope != UserScope.ADMIN and repo_owner_id != user.id:
+        if (
+            user.scope != UserScope.ADMIN
+            and repo_owner_id != user.id
+            and (not isinstance(repo_installer_id, int) or repo_installer_id != user.id)
+        ):
             if not isinstance(github_token, str):
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Expected `github_token` to check access."
