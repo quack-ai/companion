@@ -59,7 +59,7 @@ class GitHubClient:
         repo_full_name: str,
         repo_owner_id: int,
         github_token: Union[str, None],
-        repo_installer_id: Union[int, None],
+        repo_installer_id: Union[int, None] = None,
     ) -> None:
         if (
             user.scope != UserScope.ADMIN
