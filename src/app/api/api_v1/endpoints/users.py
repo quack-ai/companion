@@ -5,13 +5,14 @@
 
 from typing import List, cast
 
-from fastapi import APIRouter, Depends, Path, Security, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
 from app.api.dependencies import get_current_user, get_user_crud
 from app.core.security import hash_password
 from app.crud import UserCRUD
 from app.models import User, UserScope
 from app.schemas.users import Cred, CredHash, UserCreate, UserCreation
+from app.services.github import gh_client
 from app.services.telemetry import telemetry_client
 
 router = APIRouter()
@@ -21,16 +22,18 @@ router = APIRouter()
 async def create_user(
     payload: UserCreate,
     users: UserCRUD = Depends(get_user_crud),
-    _=Security(get_current_user, scopes=[UserScope.ADMIN]),
+    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> User:
-    telemetry_client.capture(payload.id, event="user-creation", properties={"login": payload.login})
+    # Check that user exists on GitHub
+    gh_user = gh_client.get_user(payload.id)
+    if gh_user["type"] != "User":
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user")
+    telemetry_client.capture(user.id, event="user-creation", properties={"login": gh_user["login"]})
     # Hash the password
     pwd = await hash_password(payload.password)
-
-    user = await users.create(
-        UserCreation(id=payload.id, login=payload.login, hashed_password=pwd, scope=payload.scope)
+    return await users.create(
+        UserCreation(id=payload.id, login=gh_user["login"], hashed_password=pwd, scope=payload.scope)
     )
-    return user
 
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)
