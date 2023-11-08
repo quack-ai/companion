@@ -5,7 +5,7 @@ import pytest_asyncio
 from httpx import AsyncClient
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from app.api.api_v1.endpoints import repos, users
+from app.api.api_v1.endpoints import users
 from app.models import Guideline, Repository, User
 
 USER_TABLE = [
@@ -45,12 +45,6 @@ GUIDELINE_TABLE = [
 ]
 
 
-class MockClient:
-    @staticmethod
-    def get_repo(repo_id: int) -> Dict[str, Any]:
-        return {"full_name": "frgfm/torch-cam", "owner": {"id": 26927750}} if repo_id == 249513553 else {}
-
-
 @pytest_asyncio.fixture(scope="function")
 async def repo_session(async_session: AsyncSession, monkeypatch):
     for entry in USER_TABLE:
@@ -60,7 +54,6 @@ async def repo_session(async_session: AsyncSession, monkeypatch):
         async_session.add(Repository(**entry))
     await async_session.commit()
     monkeypatch.setattr(users, "hash_password", pytest.mock_hash_password)
-    monkeypatch.setattr(repos, "gh_client", MockClient)
     yield async_session
 
 
@@ -93,7 +86,7 @@ async def guideline_session(repo_session: AsyncSession):
         (
             1,
             {"id": 249513553},
-            201,
+            422,
             None,
             {
                 "id": 249513553,
@@ -222,6 +215,74 @@ async def test_delete_repo(
 
 
 @pytest.mark.parametrize(
+    ("user_idx", "repo_id", "status_code", "status_detail", "expected_idx"),
+    [
+        (None, 12345, 401, "Not authenticated", None),
+        (0, 0, 422, None, None),
+        (0, 100, 404, "Table Repository has no corresponding entry.", None),
+        (0, 12345, 200, None, 0),
+        (0, 123456, 200, None, 1),
+        (1, 12345, 422, "Expected `github_token` to check access.", None),
+        (1, 123456, 200, None, 1),
+    ],
+)
+@pytest.mark.asyncio()
+async def test_enable_repo(
+    async_client: AsyncClient,
+    repo_session: AsyncSession,
+    user_idx: Union[int, None],
+    repo_id: int,
+    status_code: int,
+    status_detail: Union[str, None],
+    expected_idx: Union[int, None],
+):
+    auth = None
+    if isinstance(user_idx, int):
+        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+
+    response = await async_client.put(f"/repos/{repo_id}/enable", json={}, headers=auth)
+    assert response.status_code == status_code, print(response.__dict__)
+    if isinstance(status_detail, str):
+        assert response.json()["detail"] == status_detail
+    if response.status_code // 100 == 2:
+        assert response.json() == {**REPO_TABLE[expected_idx], "is_active": True}
+
+
+@pytest.mark.parametrize(
+    ("user_idx", "repo_id", "status_code", "status_detail", "expected_idx"),
+    [
+        (None, 12345, 401, "Not authenticated", None),
+        (0, 0, 422, None, None),
+        (0, 100, 404, "Table Repository has no corresponding entry.", None),
+        (0, 12345, 200, None, 0),
+        (0, 123456, 200, None, 1),
+        (1, 12345, 422, "Expected `github_token` to check access.", None),
+        (1, 123456, 200, None, 1),
+    ],
+)
+@pytest.mark.asyncio()
+async def test_disable_repo(
+    async_client: AsyncClient,
+    repo_session: AsyncSession,
+    user_idx: Union[int, None],
+    repo_id: int,
+    status_code: int,
+    status_detail: Union[str, None],
+    expected_idx: Union[int, None],
+):
+    auth = None
+    if isinstance(user_idx, int):
+        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+
+    response = await async_client.put(f"/repos/{repo_id}/disable", json={}, headers=auth)
+    assert response.status_code == status_code, print(response.__dict__)
+    if isinstance(status_detail, str):
+        assert response.json()["detail"] == status_detail
+    if response.status_code // 100 == 2:
+        assert response.json() == {**REPO_TABLE[expected_idx], "is_active": False}
+
+
+@pytest.mark.parametrize(
     ("user_idx", "repo_id", "status_code", "status_detail", "expected_response"),
     [
         (None, 12345, 401, "Not authenticated", None),
@@ -262,7 +323,7 @@ async def test_fetch_guidelines_from_repo(
         (0, 12345, {"guideline_ids": [1, 1]}, 422, None),
         (0, 12345, {"guideline_ids": [1]}, 200, None),
         (0, 123456, {"guideline_ids": [1]}, 422, None),
-        (1, 12345, {"guideline_ids": [1]}, 200, None),
+        (1, 12345, {"guideline_ids": [1]}, 422, None),
     ],
 )
 @pytest.mark.asyncio()

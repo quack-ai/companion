@@ -11,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_crud
 from app.crud import GuidelineCRUD, RepositoryCRUD
 from app.models import Guideline, Repository, User, UserScope
+from app.schemas.base import OptionalGHToken
 from app.schemas.guidelines import OrderUpdate
 from app.schemas.repos import GuidelineOrder, RepoCreate, RepoCreation, RepoUpdate
 from app.services.github import gh_client
@@ -31,7 +32,7 @@ async def create_repo(
         user.id, event="repo-creation", properties={"repo_id": payload.id, "full_name": gh_repo["full_name"]}
     )
     # Check if user is allowed
-    # gh_client.has_valid_permission(gh_repo["full_name"], user.login, payload.gh_token)
+    gh_client.check_user_permission(user, gh_repo["full_name"], gh_repo["owner"]["id"], payload.github_token)
     return await repos.create(
         RepoCreation(
             id=payload.id, full_name=gh_repo["full_name"], owner_id=gh_repo["owner"]["id"], installed_by=user.id
@@ -72,13 +73,15 @@ async def reorder_repo_guidelines(
     if len(payload.guideline_ids) != len(set(payload.guideline_ids)):
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Duplicate IDs were passed.")
     # Check the repo
-    await repos.get(repo_id, strict=True)
+    repo = cast(Repository, await repos.get(repo_id, strict=True))
     # Ensure all IDs are valid
     guideline_ids = [elt.id for elt in await guidelines.fetch_all(("repo_id", repo_id))]
     if set(payload.guideline_ids) != set(guideline_ids):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Guideline IDs for that repo don't match."
         )
+    # Check if user is allowed
+    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token)
     # Update all order
     return [
         await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.utcnow()))
@@ -88,21 +91,29 @@ async def reorder_repo_guidelines(
 
 @router.put("/{repo_id}/disable", status_code=status.HTTP_200_OK)
 async def disable_repo(
+    payload: OptionalGHToken,
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
     telemetry_client.capture(user.id, event="repo-disable", properties={"repo_id": repo_id})
+    # Check if user is allowed
+    repo = cast(Repository, await repos.get(repo_id, strict=True))
+    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token)
     return await repos.update(repo_id, RepoUpdate(is_active=False))
 
 
 @router.put("/{repo_id}/enable", status_code=status.HTTP_200_OK)
 async def enable_repo(
+    payload: OptionalGHToken,
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
     user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
     telemetry_client.capture(user.id, event="repo-enable", properties={"repo_id": repo_id})
+    # Check if user is allowed
+    repo = cast(Repository, await repos.get(repo_id, strict=True))
+    gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token)
     return await repos.update(repo_id, RepoUpdate(is_active=True))
 
 

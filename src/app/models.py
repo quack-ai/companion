@@ -5,8 +5,9 @@
 
 from datetime import datetime
 from enum import Enum
+from typing import List
 
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 __all__ = ["GHRole", "UserScope", "User", "Repository", "Guideline"]
 
@@ -38,6 +39,8 @@ class Repository(SQLModel, table=True):
     installed_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     is_active: bool = Field(True, nullable=False)
     installed_by: int = Field(..., foreign_key="user.id")
+
+    guidelines: List["Guideline"] = Relationship(sa_relationship_kwargs={"cascade": "delete"})
 
 
 class Guideline(SQLModel, table=True):

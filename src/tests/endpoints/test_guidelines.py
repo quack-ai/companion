@@ -82,8 +82,9 @@ async def guideline_session(async_session: AsyncSession, monkeypatch):
             401,
             "Not authenticated",
         ),
-        (0, {"repo_id": 123456, "title": "Hello there!", "details": "Quacky quack"}, 422, None),
+        (0, {"repo_id": 123456, "title": "Hello there!"}, 422, None),
         (0, {"repo_id": 123456, "title": "Hello there!", "details": "Quacky quack", "order": 3}, 201, None),
+        (1, {"repo_id": 12345, "title": "Hello there!", "details": "Quacky quack", "order": 3}, 422, None),
         (1, {"repo_id": 123456, "title": "Hello there!", "details": "Quacky quack", "order": 3}, 201, None),
     ],
 )
@@ -179,8 +180,8 @@ async def test_fetch_guidelines(
         (0, 100, 404, "Table Guideline has no corresponding entry."),
         (0, 1, 200, None),
         (0, 2, 200, None),
-        (1, 1, 200, None),
-        (1, 2, 200, None),
+        (1, 1, 422, None),
+        (1, 2, 422, None),
     ],
 )
 @pytest.mark.asyncio()
@@ -196,7 +197,7 @@ async def test_delete_guideline(
     if isinstance(user_idx, int):
         auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
 
-    response = await async_client.delete(f"/guidelines/{guideline_id}", headers=auth)
+    response = await async_client.request("DELETE", f"/guidelines/{guideline_id}", json={}, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
@@ -213,8 +214,8 @@ async def test_delete_guideline(
         (0, 10, 1, 404, "Table Guideline has no corresponding entry.", None),
         (0, 1, 1, 200, None, 0),
         (0, 2, 1, 200, None, 1),
-        (1, 1, 1, 200, None, 0),
-        (1, 2, 1, 200, None, 1),
+        (1, 1, 1, 422, None, 0),
+        (1, 2, 1, 422, None, 1),
     ],
 )
 @pytest.mark.asyncio()
@@ -232,7 +233,7 @@ async def test_update_guideline_order(
     if isinstance(user_idx, int):
         auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
 
-    response = await async_client.put(f"/guidelines/{guideline_id}/order/{order}", headers=auth)
+    response = await async_client.put(f"/guidelines/{guideline_id}/order/{order}", json={}, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
@@ -251,8 +252,8 @@ async def test_update_guideline_order(
         (0, 1, {"title": "New guideline title"}, 422, None, None),
         (0, 1, {"title": "New guideline title", "details": "New guideline details"}, 200, None, 0),
         (0, 2, {"title": "New guideline title", "details": "New guideline details"}, 200, None, 1),
-        (1, 1, {"title": "New guideline title", "details": "New guideline details"}, 200, None, 0),
-        (1, 2, {"title": "New guideline title", "details": "New guideline details"}, 200, None, 1),
+        (1, 1, {"title": "New guideline title", "details": "New guideline details"}, 422, None, 0),
+        (1, 2, {"title": "New guideline title", "details": "New guideline details"}, 422, None, 1),
     ],
 )
 @pytest.mark.asyncio()

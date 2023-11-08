@@ -51,13 +51,18 @@ def main(args):
         "Content-Type": "application/json",
     }
 
-    user_login = "my_user"
-    user_pwd = "my_pwd"  # nosec B105  # noqa S105
+    # Hardcoded info
+    user_login = "karpathy"
+    user_id = 241138
+    user_pwd = "my_pwd"  # noqa S105
+    repo_id = 582822129
+    # repo_name = "karpathy/nanoGPT"
 
     # create an access
-    payload = {"id": 1, "login": user_login, "password": user_pwd, "scope": "user"}
-    user_id = api_request("post", f"{args.endpoint}/users/", superuser_auth, payload)["id"]
-    {
+    api_request(
+        "post", f"{args.endpoint}/users/", superuser_auth, {"id": user_id, "password": user_pwd, "scope": "user"}
+    )
+    user_auth = {
         "Authorization": f"Bearer {get_token(args.endpoint, user_login, user_pwd)}",
         "Content-Type": "application/json",
     }
@@ -69,12 +74,11 @@ def main(args):
     api_request("put", f"{args.endpoint}/users/{user_id}/", superuser_auth, {"password": new_pwd})
 
     # Repos
-    payload = {"id": 1, "owner_id": user_id, "full_name": "frgfm/torch-cam"}
-    repo_id = api_request("post", f"{args.endpoint}/repos/", superuser_auth, payload)["id"]
-    api_request("get", f"{args.endpoint}/repos/{repo_id}/", superuser_auth)
-    api_request("get", f"{args.endpoint}/repos/", superuser_auth)
-    api_request("put", f"{args.endpoint}/repos/{repo_id}/disable", superuser_auth)
-    api_request("put", f"{args.endpoint}/repos/{repo_id}/enable", superuser_auth)
+    api_request("post", f"{args.endpoint}/repos/", user_auth, {"id": repo_id})
+    api_request("get", f"{args.endpoint}/repos/{repo_id}/", user_auth)
+    api_request("get", f"{args.endpoint}/repos/", user_auth)
+    api_request("put", f"{args.endpoint}/repos/{repo_id}/disable", user_auth, {})
+    api_request("put", f"{args.endpoint}/repos/{repo_id}/enable", user_auth, {})
 
     # Guidelines
     payload = {
@@ -83,41 +87,41 @@ def main(args):
         "repo_id": repo_id,
         "order": 0,
     }
-    guideline_id = api_request("post", f"{args.endpoint}/guidelines/", superuser_auth, payload)["id"]
+    guideline_id = api_request("post", f"{args.endpoint}/guidelines/", user_auth, payload)["id"]
     payload = {
         "title": "My second guideline",
         "details": "Always document public interface",
         "repo_id": repo_id,
         "order": 1,
     }
-    guideline_2 = api_request("post", f"{args.endpoint}/guidelines/", superuser_auth, payload)["id"]
-    guideline = api_request("get", f"{args.endpoint}/guidelines/{guideline_id}/", superuser_auth)
+    guideline_2 = api_request("post", f"{args.endpoint}/guidelines/", user_auth, payload)["id"]
+    guideline = api_request("get", f"{args.endpoint}/guidelines/{guideline_id}/", user_auth)
     api_request("get", f"{args.endpoint}/guidelines/", superuser_auth)
-    api_request("get", f"{args.endpoint}/repos/{repo_id}/guidelines", superuser_auth)
+    api_request("get", f"{args.endpoint}/repos/{repo_id}/guidelines", user_auth)
     api_request(
         "put",
         f"{args.endpoint}/guidelines/{guideline_id}",
-        superuser_auth,
+        user_auth,
         {"title": "Updated title", "details": "Updated details"},
     )
     api_request(
         "put",
-        f"{args.endpoint}/guidelines/{guideline_id}/order/1",
-        superuser_auth,
+        f"{args.endpoint}/guidelines/{guideline_2}/order/2",
+        user_auth,
         {},
     )
     api_request(
         "put",
         f"{args.endpoint}/repos/{repo_id}/guidelines/order",
-        superuser_auth,
+        user_auth,
         {"guideline_ids": [guideline_2, guideline_id]},
     )
 
     # Delete
     for guideline in api_request("get", f"{args.endpoint}/guidelines/", superuser_auth):
-        api_request("delete", f"{args.endpoint}/guidelines/{guideline['id']}/", superuser_auth)
+        api_request("delete", f"{args.endpoint}/guidelines/{guideline['id']}/", user_auth, {})
     for repo in api_request("get", f"{args.endpoint}/repos/", superuser_auth):
-        api_request("delete", f"{args.endpoint}/repos/{repo['id']}/", superuser_auth)
+        api_request("delete", f"{args.endpoint}/repos/{repo['id']}/", superuser_auth, {})
     api_request("delete", f"{args.endpoint}/users/{user_id}/", superuser_auth)
 
     print(f"SUCCESS in {time.time() - start_ts:.3}s")

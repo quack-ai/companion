@@ -87,6 +87,9 @@ async def login_with_github_token(
             "twitter_username": gh_user["twitter_username"],
         },
     )
+    # Check that GH account is a user
+    if gh_user["type"] != "User":
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user")
     # Verify credentials
     user = await users.get(gh_user["id"], strict=False)
     # Register if non existing

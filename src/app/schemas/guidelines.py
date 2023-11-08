@@ -7,23 +7,37 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
+from .base import OptionalGHToken
+
 __all__ = ["GuidelineCreate", "GuidelineEdit", "ContentUpdate", "OrderUpdate"]
 
 
-class GuidelineEdit(BaseModel):
+class GuidelineContent(BaseModel):
     title: str = Field(..., min_length=6, max_length=100)
     details: str = Field(..., min_length=6, max_length=1000)
 
 
-class GuidelineCreate(GuidelineEdit):
+class GuidelineLocation(BaseModel):
     repo_id: int = Field(..., gt=0)
-    order: int = Field(..., ge=0, nullable=False)
+    order: int = Field(0, ge=0, nullable=False)
 
 
-class ContentUpdate(GuidelineEdit):
+class GuidelineEdit(GuidelineContent, OptionalGHToken):
+    pass
+
+
+class GuidelineCreate(GuidelineEdit, GuidelineLocation):
+    pass
+
+
+class GuidelineCreation(GuidelineContent, GuidelineLocation):
+    pass
+
+
+class ContentUpdate(GuidelineContent):
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
 
-class OrderUpdate(BaseModel):
+class OrderUpdate(OptionalGHToken):
     order: int = Field(..., ge=0, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)

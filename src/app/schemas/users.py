@@ -29,7 +29,7 @@ class Scope(BaseModel):
     scope: UserScope = Field(UserScope.USER, nullable=False)
 
 
-class UserCreate(_Id, Login, Cred, Scope):
+class UserCreate(_Id, Cred, Scope):
     pass
 
 

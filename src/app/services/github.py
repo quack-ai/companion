@@ -10,6 +10,7 @@ from fastapi import HTTPException, status
 from pydantic import HttpUrl
 
 from app.core.config import settings
+from app.models import User, UserScope
 from app.schemas.services import GHToken, GHTokenRequest
 
 __all__ = ["gh_client"]
@@ -52,8 +53,18 @@ class GitHubClient:
     def get_permission(self, repo_name: str, user_name: str, github_token: str) -> str:
         return self._get(f"repos/{repo_name}/collaborators/{user_name}/permission", github_token)["role_name"]
 
-    def has_valid_permission(self, repo_name: str, user_name: str, github_token: str) -> bool:
-        return self.get_permission(repo_name, user_name, github_token) in ("maintain", "admin")
+    def check_user_permission(
+        self, user: User, repo_full_name: str, repo_owner_id: int, github_token: Union[str, None]
+    ) -> None:
+        if user.scope != UserScope.ADMIN and repo_owner_id != user.id:
+            if not isinstance(github_token, str):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Expected `github_token` to check access."
+                )
+            if self.get_permission(repo_full_name, user.login, github_token) not in ("maintain", "admin"):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Insufficient access (requires maintain or admin)."
+                )
 
     def get_token_from_code(self, code: str, redirect_uri: HttpUrl, timeout: int = 5) -> GHToken:
         gh_payload = GHTokenRequest(
