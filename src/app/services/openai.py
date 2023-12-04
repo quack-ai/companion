@@ -111,7 +111,7 @@ class OpenAIClient:
     def _get_headers(api_key: str) -> Dict[str, str]:
         return {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
 
-    def analyze_multi(
+    def check_code_against_guidelines(
         self,
         code: str,
         guidelines: List[Guideline],
@@ -157,7 +157,7 @@ class OpenAIClient:
             for guideline, res in zip(guidelines, parsed_response)
         ]
 
-    def analyze_mono(self, code: str, guideline: Guideline, **kwargs: Any) -> ComplianceResult:
+    def check_code(self, code: str, guideline: Guideline, **kwargs: Any) -> ComplianceResult:
         # Check args before sending a request
         if len(code) == 0 or len(guideline.details) == 0:
             raise HTTPException(
@@ -167,11 +167,11 @@ class OpenAIClient:
         # Return with pydantic validation
         return ComplianceResult(guideline_id=guideline.id, **res)
 
-    def _analyze(
+    def _request(
         self,
-        prompt: str,
-        payload: Dict[str, Any],
-        schema: ObjectSchema,
+        system_prompt: str,
+        openai_fn: OpenAIFunction,
+        message: str,
         timeout: int = 20,
         user_id: Union[str, None] = None,
     ) -> Dict[str, Any]:
@@ -181,21 +181,15 @@ class OpenAIClient:
             messages=[
                 OpenAIMessage(
                     role=OpenAIChatRole.SYSTEM,
-                    content=prompt,
+                    content=system_prompt,
                 ),
                 OpenAIMessage(
                     role=OpenAIChatRole.USER,
-                    content=json.dumps(payload),
+                    content=message,
                 ),
             ],
-            functions=[
-                OpenAIFunction(
-                    name="analyze_code",
-                    description="Analyze code",
-                    parameters=schema,
-                )
-            ],
-            function_call={"name": "analyze_code"},
+            functions=[openai_fn],
+            function_call={"name": openai_fn.name},
             temperature=self.temperature,
             frequency_penalty=self.frequency_penalty,
             user=user_id,
@@ -208,6 +202,26 @@ class OpenAIClient:
             raise HTTPException(status_code=response.status_code, detail=response.json()["error"]["message"])
 
         return json.loads(response.json()["choices"][0]["message"]["function_call"]["arguments"])
+
+    def _analyze(
+        self,
+        prompt: str,
+        payload: Dict[str, Any],
+        schema: ObjectSchema,
+        timeout: int = 20,
+        user_id: Union[str, None] = None,
+    ) -> Dict[str, Any]:
+        return self._request(
+            prompt,
+            OpenAIFunction(
+                name="analyze_code",
+                description="Analyze code",
+                parameters=schema,
+            ),
+            json.dumps(payload),
+            timeout,
+            user_id,
+        )
 
 
 openai_client = OpenAIClient(settings.OPENAI_API_KEY, settings.OPENAI_MODEL)
