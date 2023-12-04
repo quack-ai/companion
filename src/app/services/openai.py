@@ -314,16 +314,18 @@ class OpenAIClient:
                 detail="The instruction and language need to be non-empty strings.",
             )
 
-        return self._request(
-            EXAMPLE_PROMPT,
-            OpenAIFunction(
-                name="generate_examples_from_instruction",
-                description="Generate code examples for a coding instruction",
-                parameters=EXAMPLE_SCHEMA,
-            ),
-            json.dumps({"instruction": instruction, "language": language}),
-            timeout,
-            user_id,
+        return GuidelineExample(
+            **self._request(
+                EXAMPLE_PROMPT,
+                OpenAIFunction(
+                    name="generate_examples_from_instruction",
+                    description="Generate code examples for a coding instruction",
+                    parameters=EXAMPLE_SCHEMA,
+                ),
+                json.dumps({"instruction": instruction, "language": language}),
+                timeout,
+                user_id,
+            )
         )
 
 
