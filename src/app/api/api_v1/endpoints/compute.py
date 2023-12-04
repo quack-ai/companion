@@ -31,7 +31,9 @@ async def check_code_against_repo_guidelines(
     # Fetch guidelines
     guideline_list = [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
     # Run analysis
-    return openai_client.analyze_multi(payload.code, guideline_list, mode=ExecutionMode.MULTI, user_id=str(user.id))
+    return openai_client.check_code_against_guidelines(
+        payload.code, guideline_list, mode=ExecutionMode.MULTI, user_id=str(user.id)
+    )
 
 
 @router.post("/check/{guideline_id}", status_code=status.HTTP_200_OK)
@@ -47,4 +49,4 @@ async def check_code_against_guideline(
         user.id, event="compute-check", properties={"repo_id": guideline.repo_id, "guideline_id": guideline_id}
     )
     # Run analysis
-    return openai_client.analyze_mono(payload.code, guideline, user_id=str(user.id))
+    return openai_client.check_code(payload.code, guideline, user_id=str(user.id))
