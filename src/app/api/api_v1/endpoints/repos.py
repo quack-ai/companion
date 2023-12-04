@@ -34,6 +34,17 @@ async def create_repo(
     )
     # Check if user is allowed
     gh_client.check_user_permission(user, gh_repo["full_name"], gh_repo["owner"]["id"], payload.github_token)
+    # Notify slack
+    slack_client.notify(
+        "*New GitHub repo* :up:",
+        [
+            (
+                "Name",
+                f"<{gh_repo['html_url']}|{gh_repo['full_name']}> ({gh_repo['stargazers_count']} :star:, {gh_repo['forks']} forks)",
+            ),
+            ("Language", gh_repo["language"]),
+        ],
+    )
     return await repos.create(
         RepoCreation(
             id=payload.id, full_name=gh_repo["full_name"], owner_id=gh_repo["owner"]["id"], installed_by=user.id
