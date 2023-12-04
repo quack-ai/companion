@@ -67,6 +67,16 @@ class Settings(BaseSettings):
             return None
         return v
 
+    SLACK_API_TOKEN: Union[str, None] = os.environ.get("SLACK_API_TOKEN")
+    SLACK_CHANNEL: str = os.environ.get("SLACK_CHANNEL", "#general")
+
+    @validator("SLACK_API_TOKEN", pre=True)
+    @classmethod
+    def slack_token_can_be_blank(cls, v: str) -> Union[str, None]:
+        if not isinstance(v, str) or len(v) == 0:
+            return None
+        return v
+
     DEBUG: bool = os.environ.get("DEBUG", "").lower() != "false"
     LOGO_URL: str = ""
 

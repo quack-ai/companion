@@ -15,6 +15,7 @@ from app.schemas.base import OptionalGHToken
 from app.schemas.guidelines import OrderUpdate
 from app.schemas.repos import GuidelineOrder, RepoCreate, RepoCreation, RepoUpdate
 from app.services.github import gh_client
+from app.services.slack import slack_client
 from app.services.telemetry import telemetry_client
 
 router = APIRouter()
@@ -33,6 +34,17 @@ async def create_repo(
     )
     # Check if user is allowed
     gh_client.check_user_permission(user, gh_repo["full_name"], gh_repo["owner"]["id"], payload.github_token)
+    # Notify slack
+    slack_client.notify(
+        "*New GitHub repo* :up:",
+        [
+            (
+                "Name",
+                f"<{gh_repo['html_url']}|{gh_repo['full_name']}> ({gh_repo['stargazers_count']} :star:, {gh_repo['forks']} forks)",
+            ),
+            ("Language", gh_repo["language"]),
+        ],
+    )
     return await repos.create(
         RepoCreation(
             id=payload.id, full_name=gh_repo["full_name"], owner_id=gh_repo["owner"]["id"], installed_by=user.id
@@ -137,3 +149,24 @@ async def fetch_guidelines_from_repo(
     telemetry_client.capture(user.id, event="repo-fetch-guidelines", properties={"repo_id": repo_id})
     await repos.get(repo_id, strict=True)
     return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
+
+
+@router.post("/{repo_id}/waitlist", status_code=status.HTTP_200_OK)
+async def add_repo_to_waitlist(
+    repo_id: int = Path(..., gt=0),
+    repos: RepositoryCRUD = Depends(get_repo_crud),
+    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+) -> None:
+    telemetry_client.capture(user.id, event="repo-waitlist", properties={"repo_id": repo_id})
+    gh_repo = gh_client.get_repo(repo_id)
+    # Notify slack
+    slack_client.notify(
+        f"Request from <https://github.com/{user.login}|{user.login}> :pray:",
+        [
+            (
+                "Repo",
+                f"<{gh_repo['html_url']}|{gh_repo['full_name']}> "
+                f"({gh_repo['stargazers_count']} :star:, {gh_repo['forks']} :fork_and_knife:)",
+            ),
+        ],
+    )

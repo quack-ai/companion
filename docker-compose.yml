@@ -18,6 +18,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - SERVER_NAME=${SERVER_NAME}
       - SECRET_KEY=${SECRET_KEY}
+      - SLACK_API_TOKEN=${SLACK_API_TOKEN}
+      - SLACK_CHANNEL=${SLACK_CHANNEL}
       - DEBUG=true
     depends_on:
       db:
