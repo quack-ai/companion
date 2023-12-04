@@ -113,28 +113,30 @@ class GitHubClient:
         response = self._get(f"repos/{repo_name}/readme", token, status_code_tolerance=status.HTTP_404_NOT_FOUND)
         return response.json() if response.status_code != status.HTTP_404_NOT_FOUND else None
 
-    def get_contributing(self, repo_name: str, token: Union[str, None] = None) -> Union[Dict[str, Any], None]:
+    def get_file(self, repo_name: str, file_path: str, token: Union[str, None] = None) -> Union[Dict[str, Any], None]:
         # https://docs.github.com/en/rest/repos/contents#get-repository-content
         response = self._get(
-            f"repos/{repo_name}/contents/CONTRIBUTING.md", token, status_code_tolerance=status.HTTP_404_NOT_FOUND
+            f"repos/{repo_name}/contents/{file_path}", token, status_code_tolerance=status.HTTP_404_NOT_FOUND
         )
         return response.json() if response.status_code != status.HTTP_404_NOT_FOUND else None
 
-    def list_pulls(self, token: str, per_page: int = 30) -> List[Dict[str, Any]]:
+    def list_pulls(self, repo_name: str, token: Union[str, None] = None, per_page: int = 30) -> List[Dict[str, Any]]:
         # https://docs.github.com/en/rest/pulls/pulls#list-pull-requests
         return self._get(
-            "pulls",
+            f"repos/{repo_name}/pulls",
             token,
             state="closed",
             sort="popularity",
             direction="desc",
-            base=self._get("").json()["default_branch"],
+            base=self._get(f"repos/{repo_name}", token).json()["default_branch"],
             per_page=per_page,
         ).json()
 
-    def list_review_comments(self, token: str):
+    def list_review_comments(self, repo_name: str, token: Union[str, None] = None):
         # https://docs.github.com/en/rest/pulls/comments#list-review-comments-in-a-repository
-        comments = self._get("pulls/comments", token, sort="created_at", direction="desc", per_page=100).json()
+        comments = self._get(
+            f"repos/{repo_name}/pulls/comments", token, sort="created_at", direction="desc", per_page=100
+        ).json()
         # Get comments (filter account type == user, & user != author) --> take diff_hunk, body, path
         return [comment for comment in comments if comment["user"]["type"] == "User"]
 

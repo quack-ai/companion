@@ -167,7 +167,7 @@ async def parse_guidelines_from_github(
     repo = cast(Repository, await repos.get(repo_id, strict=True))
     # STATIC CONTENT
     # Parse CONTRIBUTING (README if CONTRIBUTING doesn't exist)
-    contributing = gh_client.get_contributing(repo.full_name, payload.github_token)
+    contributing = gh_client.get_file(repo.full_name, "CONTRIBUTING.md", payload.github_token)
     # readme = gh_client.get_readme(payload.github_token)
     # diff_hunk, body, path
     # comments = gh_client.list_review_comments(payload.github_token)
