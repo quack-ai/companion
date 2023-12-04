@@ -13,6 +13,7 @@ from app.crud import UserCRUD
 from app.models import User, UserScope
 from app.schemas.users import Cred, CredHash, UserCreate, UserCreation
 from app.services.github import gh_client
+from app.services.slack import slack_client
 from app.services.telemetry import telemetry_client
 
 router = APIRouter()
@@ -46,6 +47,17 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
         requester.id if isinstance(requester, User) else user.id,
         event="user-creation",
         properties={"login": gh_user["login"]},
+    )
+    # Notify slack
+    slack_client.notify(
+        "*New user* :partying_face:",
+        [
+            ("Name", gh_user["name"]),
+            ("Email", gh_user["email"]),
+            ("Company", f"`{gh_user['company']}`"),
+            ("GitHub", f"<{gh_user['html_url']}|{gh_user['login']}> ({gh_user['followers']} followers)"),
+            ("Twitter", f"<https://twitter.com/{gh_user['twitter_username']}|{gh_user['twitter_username']}>"),
+        ],
     )
     return user
 
