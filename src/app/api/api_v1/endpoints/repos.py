@@ -151,7 +151,7 @@ async def fetch_guidelines_from_repo(
     return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
 
 
-@router.get("/{repo_id}/waitlist", status_code=status.HTTP_200_OK)
+@router.post("/{repo_id}/waitlist", status_code=status.HTTP_200_OK)
 async def add_repo_to_waitlist(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
