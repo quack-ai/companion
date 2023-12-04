@@ -3,6 +3,8 @@
 # All rights reserved.
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
+import logging
+from base64 import b64decode
 from datetime import datetime
 from typing import List, cast
 
@@ -12,12 +14,14 @@ from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_
 from app.crud import GuidelineCRUD, RepositoryCRUD
 from app.models import Guideline, Repository, User, UserScope
 from app.schemas.base import OptionalGHToken
-from app.schemas.guidelines import OrderUpdate
+from app.schemas.guidelines import OrderUpdate, ParsedGuideline
 from app.schemas.repos import GuidelineOrder, RepoCreate, RepoCreation, RepoUpdate
 from app.services.github import gh_client
+from app.services.openai import openai_client
 from app.services.slack import slack_client
 from app.services.telemetry import telemetry_client
 
+logger = logging.getLogger("uvicorn.error")
 router = APIRouter()
 
 
@@ -149,6 +153,36 @@ async def fetch_guidelines_from_repo(
     telemetry_client.capture(user.id, event="repo-fetch-guidelines", properties={"repo_id": repo_id})
     await repos.get(repo_id, strict=True)
     return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
+
+
+@router.post("/{repo_id}/parse", status_code=status.HTTP_200_OK)
+async def parse_guidelines_from_github(
+    payload: OptionalGHToken,
+    repo_id: int = Path(..., gt=0),
+    repos: RepositoryCRUD = Depends(get_repo_crud),
+    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+) -> List[ParsedGuideline]:
+    telemetry_client.capture(user.id, event="repo-parse-guidelines", properties={"repo_id": repo_id})
+    # Sanity check
+    repo = cast(Repository, await repos.get(repo_id, strict=True))
+    # STATIC CONTENT
+    # Parse CONTRIBUTING (README if CONTRIBUTING doesn't exist)
+    contributing = gh_client.get_contributing(repo.full_name, payload.github_token)
+    # readme = gh_client.get_readme(payload.github_token)
+    # diff_hunk, body, path
+    # comments = gh_client.list_review_comments(payload.github_token)
+    # Ideas: filter on pulls with highest amount of comments recently, add the review output rejection/etc
+    # If not enough information, raise error
+    if contributing is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="No useful information is accessible in the repository")
+    # Analyze with LLM
+    contributing_guidelines = openai_client.parse_guidelines_from_text(
+        b64decode(contributing["content"]).decode(), user_id=str(user.id)
+    )
+    return [
+        ParsedGuideline(**guideline.dict(), repo_id=repo_id, origin_path=contributing["path"])
+        for guideline in contributing_guidelines
+    ]
 
 
 @router.post("/{repo_id}/waitlist", status_code=status.HTTP_200_OK)

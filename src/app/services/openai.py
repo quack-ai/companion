@@ -16,6 +16,7 @@ from fastapi import HTTPException, status
 from app.core.config import settings
 from app.models import Guideline
 from app.schemas.compute import ComplianceResult
+from app.schemas.guidelines import GuidelineContent, GuidelineExample
 from app.schemas.services import (
     ArraySchema,
     ChatCompletion,
@@ -86,6 +87,58 @@ MULTI_PROMPT = (
     "As a code compliance agent, you are going to receive requests from user with two elements: a code snippet, and a list of guidelines. "
     "You should answer in JSON format with a list of compliance results, one for each guideline, no more, no less (in the same order). "
     "For a given compliance results, the comment should be an empty string if the code is compliant with the corresponding guideline."
+)
+
+PARSING_SCHEMA = ObjectSchema(
+    type="object",
+    properties={
+        "result": ArraySchema(
+            type="array",
+            items=ObjectSchema(
+                type="object",
+                properties={
+                    "title": FieldSchema(type="string", description="a short summary title of the guideline"),
+                    "details": FieldSchema(
+                        type="string",
+                        description="a descriptive, comprehensive and inambiguous explanation of the guideline.",
+                    ),
+                },
+                required=["title", "details"],
+            ),
+        ),
+    },
+    required=["result"],
+)
+
+PARSING_PROMPT = (
+    "You are responsible for summarizing the list of distinct coding guidelines for the company, by going through documentation. "
+    "This list will be used by developers to avoid hesitations in code reviews and to onboard new members. "
+    "Consider only guidelines that can be verified for a specific snippet of code (nothing about git, commits or community interactions) "
+    "by a human developer without running additional commands or tools, it should only relate to the code within each file. "
+    "Only include guidelines for which you could generate positive and negative code snippets, "
+    "don't invent anything that isn't present in the input text. "
+    "You should answer in JSON format with only the list of string guidelines."
+)
+
+EXAMPLE_SCHEMA = ObjectSchema(
+    type="object",
+    properties={
+        "positive": FieldSchema(
+            type="string", description="a short code snippet where the instruction was correctly followed."
+        ),
+        "negative": FieldSchema(
+            type="string", description="the same snippet with minimal modification that invalidate the instruction."
+        ),
+    },
+    required=["positive", "negative"],
+)
+
+EXAMPLE_PROMPT = (
+    "You are responsible for producing concise code snippets to illustrate the company coding guidelines. "
+    "This will be used to teach new developers our way of engineering software. "
+    "You should answer in JSON format with only two short code snippets in the specified programming language: one that follows the rule correctly, "
+    "and a similar version with minimal modifications that violates the rule. "
+    "Make sure your code is functional, don't extra comments or explanation."
 )
 
 
@@ -219,6 +272,56 @@ class OpenAIClient:
                 parameters=schema,
             ),
             json.dumps(payload),
+            timeout,
+            user_id,
+        )
+
+    def parse_guidelines_from_text(
+        self, corpus: str, timeout: int = 20, user_id: Union[str, None] = None
+    ) -> List[GuidelineContent]:
+        if not isinstance(corpus, str):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="The input corpus needs to be a string."
+            )
+        if len(corpus) == 0:
+            return []
+
+        response = self._request(
+            PARSING_PROMPT,
+            OpenAIFunction(
+                name="parse_guidelines_from_text",
+                description="Parse guidelines from corpus",
+                parameters=PARSING_SCHEMA,
+            ),
+            json.dumps(corpus),
+            timeout,
+            user_id,
+        )
+
+        return [GuidelineContent(**elt) for elt in response["result"]]
+
+    def generate_examples_for_instruction(
+        self, instruction: str, language: str, timeout: int = 20, user_id: Union[str, None] = None
+    ) -> GuidelineExample:
+        if (
+            not isinstance(instruction, str)
+            or len(instruction) == 0
+            or not isinstance(language, str)
+            or len(language) == 0
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="The instruction and language need to be non-empty strings.",
+            )
+
+        return self._request(
+            EXAMPLE_PROMPT,
+            OpenAIFunction(
+                name="generate_examples_from_instruction",
+                description="Generate code examples for a coding instruction",
+                parameters=EXAMPLE_SCHEMA,
+            ),
+            json.dumps({"instruction": instruction, "language": language}),
             timeout,
             user_id,
         )

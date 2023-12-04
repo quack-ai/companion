@@ -12,9 +12,27 @@ from .base import OptionalGHToken
 __all__ = ["GuidelineCreate", "GuidelineEdit", "ContentUpdate", "OrderUpdate"]
 
 
+class TextContent(BaseModel):
+    content: str = Field(..., min_length=10)
+
+
+class ExampleRequest(TextContent):
+    language: str = Field("python", min_length=1, max_length=20)
+
+
+class GuidelineExample(BaseModel):
+    positive: str = Field(..., min_length=3)
+    negative: str = Field(..., min_length=3)
+
+
 class GuidelineContent(BaseModel):
     title: str = Field(..., min_length=6, max_length=100)
     details: str = Field(..., min_length=6, max_length=1000)
+
+
+class ParsedGuideline(GuidelineContent):
+    repo_id: int = Field(..., gt=0)
+    origin_path: str
 
 
 class GuidelineLocation(BaseModel):
