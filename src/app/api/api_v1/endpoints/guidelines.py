@@ -12,8 +12,19 @@ from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_
 from app.crud import GuidelineCRUD, RepositoryCRUD
 from app.models import Guideline, Repository, UserScope
 from app.schemas.base import OptionalGHToken
-from app.schemas.guidelines import ContentUpdate, GuidelineCreate, GuidelineCreation, GuidelineEdit, OrderUpdate
+from app.schemas.guidelines import (
+    ContentUpdate,
+    ExampleRequest,
+    GuidelineContent,
+    GuidelineCreate,
+    GuidelineCreation,
+    GuidelineEdit,
+    GuidelineExample,
+    OrderUpdate,
+    TextContent,
+)
 from app.services.github import gh_client
+from app.services.openai import openai_client
 from app.services.telemetry import telemetry_client
 
 router = APIRouter()
@@ -100,3 +111,23 @@ async def delete_guideline(
     repo = cast(Repository, await repos.get(guideline.repo_id, strict=True))
     gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
     await guidelines.delete(guideline_id)
+
+
+@router.post("/parse", status_code=status.HTTP_200_OK)
+async def parse_guidelines_from_text(
+    payload: TextContent,
+    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+) -> List[GuidelineContent]:
+    telemetry_client.capture(user.id, event="guideline-parse")
+    # Analyze with LLM
+    return openai_client.parse_guidelines_from_text(payload.content, user_id=str(user.id))
+
+
+@router.post("/examples", status_code=status.HTTP_200_OK)
+async def generate_examples_for_text(
+    payload: ExampleRequest,
+    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+) -> GuidelineExample:
+    telemetry_client.capture(user.id, event="guideline-examples")
+    # Analyze with LLM
+    return openai_client.generate_examples_for_instruction(payload.content, payload.language, user_id=str(user.id))
