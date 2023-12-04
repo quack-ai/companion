@@ -158,13 +158,15 @@ async def add_repo_to_waitlist(
     user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> None:
     telemetry_client.capture(user.id, event="repo-waitlist", properties={"repo_id": repo_id})
-    # Check if repo exists
-    repo = await repos.get(repo_id, strict=False)
-    if repo is None:
-        gh_repo = gh_client.get_repo(repo_id)
-        # Notify slack
-        slack_client.notify(
-            f"New guideline request for <{gh_repo['html_url']}|{gh_repo['full_name']}> "
-            f"({gh_repo['stargazers_count']} :star:, {gh_repo['forks']} forks) :pray:",
-            [],
-        )
+    gh_repo = gh_client.get_repo(repo_id)
+    # Notify slack
+    slack_client.notify(
+        f"Request from <https://github.com/{user.login}|{user.login}> :pray:",
+        [
+            (
+                "Repo",
+                f"<{gh_repo['html_url']}|{gh_repo['full_name']}> "
+                f"({gh_repo['stargazers_count']} :star:, {gh_repo['forks']} :fork_and_knife:)",
+            ),
+        ],
+    )
