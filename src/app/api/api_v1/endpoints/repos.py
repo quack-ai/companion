@@ -1,7 +1,7 @@
 # Copyright (C) 2023, Quack AI.
 
-# All rights reserved.
-# Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
+# This program is licensed under the Apache License 2.0.
+# See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 import logging
 from base64 import b64decode
@@ -25,7 +25,7 @@ logger = logging.getLogger("uvicorn.error")
 router = APIRouter()
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED, summary="Register a GitHub repository")
 async def create_repo(
     payload: RepoCreate,
     repos: RepositoryCRUD = Depends(get_repo_crud),
@@ -61,7 +61,7 @@ async def create_repo(
     )
 
 
-@router.get("/{repo_id}", status_code=status.HTTP_200_OK)
+@router.get("/{repo_id}", status_code=status.HTTP_200_OK, summary="Fetch a specific repository")
 async def get_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
@@ -71,7 +71,7 @@ async def get_repo(
     return cast(Repository, await repos.get(repo_id, strict=True))
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK, summary="Fetch all repositories")
 async def fetch_repos(
     repos: RepositoryCRUD = Depends(get_repo_crud),
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
@@ -81,7 +81,11 @@ async def fetch_repos(
     return [elt for elt in entries]
 
 
-@router.put("/{repo_id}/guidelines/order", status_code=status.HTTP_200_OK)
+@router.put(
+    "/{repo_id}/guidelines/order",
+    status_code=status.HTTP_200_OK,
+    summary="Updates the order of the guidelines for a specific repository",
+)
 async def reorder_repo_guidelines(
     payload: GuidelineOrder,
     repo_id: int = Path(..., gt=0),
@@ -111,7 +115,7 @@ async def reorder_repo_guidelines(
     ]
 
 
-@router.put("/{repo_id}/disable", status_code=status.HTTP_200_OK)
+@router.put("/{repo_id}/disable", status_code=status.HTTP_200_OK, summary="Disable a specific repository")
 async def disable_repo(
     payload: OptionalGHToken,
     repo_id: int = Path(..., gt=0),
@@ -125,7 +129,7 @@ async def disable_repo(
     return await repos.update(repo_id, RepoUpdate(is_active=False))
 
 
-@router.put("/{repo_id}/enable", status_code=status.HTTP_200_OK)
+@router.put("/{repo_id}/enable", status_code=status.HTTP_200_OK, summary="Enable a specific repository")
 async def enable_repo(
     payload: OptionalGHToken,
     repo_id: int = Path(..., gt=0),
@@ -139,7 +143,7 @@ async def enable_repo(
     return await repos.update(repo_id, RepoUpdate(is_active=True))
 
 
-@router.delete("/{repo_id}", status_code=status.HTTP_200_OK)
+@router.delete("/{repo_id}", status_code=status.HTTP_200_OK, summary="Delete a specific repository")
 async def delete_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
@@ -149,7 +153,7 @@ async def delete_repo(
     await repos.delete(repo_id)
 
 
-@router.get("/{repo_id}/guidelines", status_code=status.HTTP_200_OK)
+@router.get("/{repo_id}/guidelines", status_code=status.HTTP_200_OK, summary="Fetch the guidelines of a repository")
 async def fetch_guidelines_from_repo(
     repo_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
@@ -161,7 +165,9 @@ async def fetch_guidelines_from_repo(
     return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
 
 
-@router.post("/{repo_id}/parse", status_code=status.HTTP_200_OK)
+@router.post(
+    "/{repo_id}/parse", status_code=status.HTTP_200_OK, summary="Extracts the guidelines from a GitHub repository"
+)
 async def parse_guidelines_from_github(
     payload: OptionalGHToken,
     repo_id: int = Path(..., gt=0),
@@ -193,7 +199,7 @@ async def parse_guidelines_from_github(
     ]
 
 
-@router.post("/{repo_id}/waitlist", status_code=status.HTTP_200_OK)
+@router.post("/{repo_id}/waitlist", status_code=status.HTTP_200_OK, summary="Add a GitHub repository to the waitlist")
 async def add_repo_to_waitlist(
     repo_id: int = Path(..., gt=0),
     user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),

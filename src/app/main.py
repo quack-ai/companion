@@ -1,7 +1,7 @@
 # Copyright (C) 2023, Quack AI.
 
-# All rights reserved.
-# Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
+# This program is licensed under the Apache License 2.0.
+# See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 import logging
 import time
@@ -9,6 +9,7 @@ import time
 import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 
@@ -35,6 +36,7 @@ app = FastAPI(
     debug=settings.DEBUG,
     version=settings.VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    docs_url=None,
 )
 
 
@@ -72,17 +74,36 @@ if isinstance(settings.SENTRY_DSN, str):
     app.add_middleware(SentryAsgiMiddleware)
 
 
-# Docs
+# Overrides swagger to include favicon
+@app.get("/docs", include_in_schema=False)
+async def swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url=f"{settings.API_V1_STR}/openapi.json",
+        title=settings.PROJECT_NAME,
+        swagger_favicon_url="https://www.quackai.com/favicon.ico",
+        # Remove schemas from swagger
+        swagger_ui_parameters={"defaultModelsExpandDepth": -1},
+    )
+
+
+# OpenAPI config
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
+    # https://fastapi.tiangolo.com/tutorial/metadata/
     openapi_schema = get_openapi(
         title=settings.PROJECT_NAME,
         version=settings.VERSION,
         description=settings.PROJECT_DESCRIPTION,
         routes=app.routes,
+        license_info={"name": "Apache 2.0", "url": "http://www.apache.org/licenses/LICENSE-2.0.html"},
+        contact={
+            "name": "API support",
+            "email": settings.SUPPORT_EMAIL,
+            "url": "https://github.com/quack-ai/contribution-api/issues",
+        },
     )
-    openapi_schema["info"]["x-logo"] = {"url": settings.LOGO_URL}
+    openapi_schema["info"]["x-logo"] = {"url": "https://www.quackai.com/quack.png"}
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 

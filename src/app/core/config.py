@@ -1,7 +1,7 @@
 # Copyright (C) 2023, Quack AI.
 
-# All rights reserved.
-# Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
+# This program is licensed under the Apache License 2.0.
+# See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 import os
 import secrets
@@ -17,11 +17,12 @@ __all__ = ["settings"]
 
 class Settings(BaseSettings):
     # State
-    PROJECT_NAME: str = "Contribution guideline API"
-    PROJECT_DESCRIPTION: str = "API for contribution guideline curation"
+    PROJECT_NAME: str = "Quack API - Guideline curation"
+    PROJECT_DESCRIPTION: str = "Your cohesive framework of seamless sharing and understanding of team expectations."
     VERSION: str = "0.1.0.dev0"
     API_V1_STR: str = "/api/v1"
     CORS_ORIGIN: str = "*"
+    SUPPORT_EMAIL: Union[str, None] = os.environ.get("SUPPORT_EMAIL")
     # Authentication
     SUPERADMIN_GH_PAT: str = os.environ["SUPERADMIN_GH_PAT"]
     SUPERADMIN_PWD: str = os.environ["SUPERADMIN_PWD"]

@@ -21,6 +21,7 @@ services:
       - POSTHOG_KEY=${POSTHOG_KEY}
       - SLACK_API_TOKEN=${SLACK_API_TOKEN}
       - SLACK_CHANNEL=${SLACK_CHANNEL}
+      - SUPPORT_EMAIL=${SUPPORT_EMAIL}
       - DEBUG=true
     depends_on:
       db:
