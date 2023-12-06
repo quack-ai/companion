@@ -6,7 +6,7 @@
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Union
 
@@ -165,7 +165,7 @@ class OpenAIClient:
         self.temperature = temperature
         self.frequency_penalty = frequency_penalty
         logger.info(
-            f"Using OpenAI model: {self.model} (created at {datetime.fromtimestamp(model_card.json()['created'], tz=timezone.utc).isoformat()})",
+            f"Using OpenAI model: {self.model} (created at {datetime.fromtimestamp(model_card.json()['created']).isoformat()})",
         )
 
     @staticmethod

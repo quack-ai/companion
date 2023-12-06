@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 import pytest
 from jose import jwt
@@ -37,10 +37,10 @@ async def test_verify_password():
 @pytest.mark.asyncio()
 async def test_create_access_token(content, expires_minutes, expected_delta):
     payload = await create_access_token(content, expires_minutes)
-    after = datetime.now(tz=timezone.utc)
+    after = datetime.utcnow()
     assert isinstance(payload, str)
     decoded_data = jwt.decode(payload, settings.SECRET_KEY)
     # Verify data integrity
     assert all(v == decoded_data[k] for k, v in content.items())
     # Check expiration
-    assert datetime.fromtimestamp(decoded_data["exp"], tz=timezone.utc) - timedelta(minutes=expected_delta) < after
+    assert datetime.utcfromtimestamp(decoded_data["exp"]) - timedelta(minutes=expected_delta) < after

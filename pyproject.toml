@@ -76,7 +76,6 @@ select = [
     "ASYNC",  # flake8-async
     "BLE",  # flake8-blind-except
     "A",  # flake8-builtins
-    "DTZ",  # flake8-datetimez
     "ICN",  # flake8-import-conventions
     "PIE",  # flake8-pie
     "ARG",  # flake8-unused-arguments

@@ -5,7 +5,7 @@
 
 import logging
 from base64 import b64decode
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
@@ -106,7 +106,7 @@ async def reorder_repo_guidelines(
     gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
     # Update all order
     return [
-        await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.now(tz=timezone.utc)))
+        await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.utcnow()))
         for order_idx, guideline_id in enumerate(payload.guideline_ids)
     ]
 

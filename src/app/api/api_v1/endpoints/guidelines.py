@@ -3,7 +3,7 @@
 # All rights reserved.
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, cast
 
 from fastapi import APIRouter, Depends, Path, Security, status
@@ -72,9 +72,7 @@ async def update_guideline_content(
     repos: RepositoryCRUD = Depends(get_repo_crud),
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
-    guideline = await guidelines.update(
-        guideline_id, ContentUpdate(**payload.dict(), updated_at=datetime.now(tz=timezone.utc))
-    )
+    guideline = await guidelines.update(guideline_id, ContentUpdate(**payload.dict(), updated_at=datetime.utcnow()))
     telemetry_client.capture(user.id, event="guideline-content", properties={"repo_id": guideline.repo_id})
     # Check if user is allowed
     repo = cast(Repository, await repos.get(guideline.repo_id, strict=True))
@@ -91,9 +89,7 @@ async def update_guideline_order(
     repos: RepositoryCRUD = Depends(get_repo_crud),
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
-    guideline = await guidelines.update(
-        guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.now(tz=timezone.utc))
-    )
+    guideline = await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.utcnow()))
     telemetry_client.capture(user.id, event="guideline-order", properties={"repo_id": guideline.repo_id})
     # Check if user is allowed
     repo = cast(Repository, await repos.get(guideline.repo_id, strict=True))

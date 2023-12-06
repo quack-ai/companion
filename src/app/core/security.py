@@ -3,7 +3,7 @@
 # All rights reserved.
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
 from jose import jwt
@@ -19,7 +19,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 async def create_access_token(content: Dict[str, Any], expires_minutes: Optional[int] = None) -> str:
     """Encode content dict using security algorithm, setting expiration."""
     expire_delta = timedelta(minutes=expires_minutes or settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    expire = datetime.now(tz=timezone.utc) + expire_delta
+    expire = datetime.utcnow() + expire_delta
     return jwt.encode({**content, "exp": expire}, settings.SECRET_KEY, algorithm=settings.JWT_ENCODING_ALGORITHM)
 
 
