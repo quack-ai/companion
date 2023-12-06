@@ -9,6 +9,7 @@ import time
 import sentry_sdk
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 
@@ -35,6 +36,7 @@ app = FastAPI(
     debug=settings.DEBUG,
     version=settings.VERSION,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    docs_url=None,
 )
 
 
@@ -72,7 +74,19 @@ if isinstance(settings.SENTRY_DSN, str):
     app.add_middleware(SentryAsgiMiddleware)
 
 
-# Docs
+# Overrides swagger to include favicon
+@app.get("/docs", include_in_schema=False)
+async def swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url=f"{settings.API_V1_STR}/openapi.json",
+        title=settings.PROJECT_NAME,
+        swagger_favicon_url="https://www.quackai.com/favicon.ico",
+        # Remove schemas from swagger
+        swagger_ui_parameters={"defaultModelsExpandDepth": -1},
+    )
+
+
+# OpenAPI config
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
