@@ -125,7 +125,6 @@ async def parse_guidelines_from_text(
     telemetry_client.capture(user.id, event="guideline-parse")
     # Analyze with LLM
     return openai_client.parse_guidelines_from_text(payload.content, user_id=str(user.id))
-    # return ollama_client.parse_guidelines_from_text(payload.content)
 
 
 @router.post("/examples", status_code=status.HTTP_200_OK)
@@ -136,4 +135,3 @@ async def generate_examples_for_text(
     telemetry_client.capture(user.id, event="guideline-examples")
     # Analyze with LLM
     return openai_client.generate_examples_for_instruction(payload.content, payload.language, user_id=str(user.id))
-    # return ollama_client.generate_examples_for_instruction(payload.content, payload.language)
