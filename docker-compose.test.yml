@@ -10,7 +10,7 @@ services:
       - "8050:8050"
     environment:
       - SUPERADMIN_GH_PAT=${SUPERADMIN_GH_PAT}
-      - SUPERADMIN_PWD=${SUPERADMIN_PWD}
+      - SUPERADMIN_PWD=superadmin_pwd
       - GH_OAUTH_ID=${GH_OAUTH_ID}
       - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
       - POSTGRES_URL=postgresql+asyncpg://dummy_login:dummy_pwd@test_db/dummy_db
