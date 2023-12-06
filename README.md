@@ -50,6 +50,8 @@ make run
 
 You can now navigate to [`http://localhost:8050/docs`](http://localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
 
+![API Swagger screenshot](docs/quack_api_swagger.png)
+
 In order to stop the service, run:
 ```shell
 make stop
