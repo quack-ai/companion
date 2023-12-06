@@ -17,11 +17,12 @@ __all__ = ["settings"]
 
 class Settings(BaseSettings):
     # State
-    PROJECT_NAME: str = "Contribution guideline API"
-    PROJECT_DESCRIPTION: str = "API for contribution guideline curation"
+    PROJECT_NAME: str = "Quack API - Guideline curation"
+    PROJECT_DESCRIPTION: str = "Your cohesive framework of seamless sharing and understanding of team expectations."
     VERSION: str = "0.1.0.dev0"
     API_V1_STR: str = "/api/v1"
     CORS_ORIGIN: str = "*"
+    SUPPORT_EMAIL: Union[str, None] = os.environ.get("SUPPORT_EMAIL")
     # Authentication
     SUPERADMIN_GH_PAT: str = os.environ["SUPERADMIN_GH_PAT"]
     SUPERADMIN_PWD: str = os.environ["SUPERADMIN_PWD"]
