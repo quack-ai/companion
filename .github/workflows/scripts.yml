@@ -24,12 +24,7 @@ jobs:
         run: poetry export -f requirements.txt --without-hashes --output requirements.txt
       - name: Build & run docker
         env:
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-          POSTGRES_LOGIN: ${{ secrets.POSTGRES_LOGIN }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          SUPERUSER_LOGIN: ${{ secrets.SUPERUSER_LOGIN }}
-          SUPERUSER_ID: ${{ secrets.SUPERUSER_ID }}
-          SUPERUSER_PWD: ${{ secrets.SUPERUSER_PWD }}
+          SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
           GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -43,5 +38,5 @@ jobs:
       - name: Run integration test
         env:
           SUPERUSER_LOGIN: ${{ secrets.SUPERUSER_LOGIN }}
-          SUPERUSER_PWD: ${{ secrets.SUPERUSER_PWD }}
+          SUPERUSER_PWD: superadmin_pwd
         run: python scripts/test_e2e.py

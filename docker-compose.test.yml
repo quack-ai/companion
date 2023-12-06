@@ -9,14 +9,12 @@ services:
     ports:
       - "8050:8050"
     environment:
-      - POSTGRES_URL=postgresql+asyncpg://dummy_login:dummy_pwd@test_db/dummy_db
-      - SUPERUSER_LOGIN=${SUPERUSER_LOGIN}
-      - SUPERUSER_ID=${SUPERUSER_ID}
-      - SUPERUSER_PWD=${SUPERUSER_PWD}
+      - SUPERADMIN_GH_PAT=${SUPERADMIN_GH_PAT}
+      - SUPERADMIN_PWD=superadmin_pwd
       - GH_OAUTH_ID=${GH_OAUTH_ID}
       - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
+      - POSTGRES_URL=postgresql+asyncpg://dummy_login:dummy_pwd@test_db/dummy_db
       - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - SERVER_NAME=dummy_server
       - DEBUG=true
     depends_on:
       test_db:

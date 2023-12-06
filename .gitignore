@@ -166,3 +166,7 @@ cython_debug/
 src/app/requirements.txt
 src/requirements-dev.txt
 requirements.txt
+# Ollama
+.ollama
+# SQL dump
+*.sql

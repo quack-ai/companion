@@ -40,7 +40,7 @@ You can run the API containers using this command:
 make run
 ```
 
-You can now navigate to [`http://api.localhost:8050/docs`](http://api.localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
+You can now navigate to [`http://localhost:8050/docs`](http://localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
 
 In order to stop the service, run:
 ```shell
@@ -77,42 +77,34 @@ The project was designed so that everything runs with Docker orchestration (stan
 
 In order to run the project, you will need to specific some information, which can be done using a `.env` file.
 This file will have to hold the following information:
-- `POSTGRES_DB`: the name of the [PostgreSQL](https://www.postgresql.org/) database that will be created
-- `POSTGRES_USER`: the login to the PostgreSQL database
-- `POSTGRES_PASSWORD`: the password to the PostgreSQL database
-- `SUPERUSER_LOGIN`: the login of the initial admin access
-- `SUPERUSER_ID`: the GitHub ID of the initial admin access
-- `SUPERUSER_PWD`: the password of the initial admin access
-- `GH_OAUTH_ID`: the ID of the GitHub Oauth app
-- `GH_OAUTH_SECRET`: the secret of the GitHub Oauth app
-- `OPENAI_API_KEY`: your API key for Open AI
+- `SUPERADMIN_GH_PAT`: the GitHub token of the initial admin access (Generate a new token on [GitHub](https://github.com/settings/tokens?type=beta), with no extra permissions = read-only)
+- `SUPERADMIN_PWD`*: the password of the initial admin access
+- `GH_OAUTH_ID`: the Client ID of the GitHub Oauth app (Create an OAuth app on [GitHub](https://github.com/settings/applications/new), pointing to your Quack dashboard w/ callback URL)
+- `GH_OAUTH_SECRET`: the secret of the GitHub Oauth app (Generate a new client secret on the created OAuth app)
+- `POSTGRES_DB`*: a name for the [PostgreSQL](https://www.postgresql.org/) database that will be created
+- `POSTGRES_USER`*: a login for the PostgreSQL database
+- `POSTGRES_PASSWORD`*: a password for the PostgreSQL database
+- `OPENAI_API_KEY`: your API key for Open AI (Create new secret key on [OpenAI](https://platform.openai.com/api-keys))
+
+_* marks the values where you can pick what you want._
 
 Optionally, the following information can be added:
-- `SENTRY_DSN`: the URL of the [Sentry](https://sentry.io/) project, which monitors back-end errors and report them back.
-- `SERVER_NAME`: the server tag to apply to events.
+- `SECRET_KEY`*: if set, tokens can be reused between sessions. All instances sharing the same secret key can use the same token.
+- `SENTRY_DSN`: the DSN for your [Sentry](https://sentry.io/) project, which monitors back-end errors and report them back.
+- `SERVER_NAME`*: the server tag that will be used to report events to Sentry.
+- `POSTHOG_KEY`: the project API key for PostHog [PostHog](https://eu.posthog.com/settings/project-details).
+- `SLACK_API_TOKEN`: the App key for your Slack bot (Create New App on [Slack](https://api.slack.com/apps), go to OAuth & Permissions and generate a bot User OAuth Token).
+- `SLACK_CHANNEL`: the Slack channel where your bot will post events (defaults to `#general`, you have to invite the App to your channel).
+- `DEBUG`: if set to false, silence debug logs.
 
-So your `.env` file should look like something similar to:
-```
-POSTGRES_DB=review_db
-POSTGRES_USER=admin
-POSTGRES_PASSWORD=my_password
-SUPERUSER_LOGIN=superadmin
-SUPERUSER_PWD=super_password
-SUPERUSER_ID=1
-SENTRY_DSN='https://replace.with.you.sentry.dsn/'
-SENTRY_SERVER_NAME=my_storage_bucket_name
-GH_OAUTH_ID=your_github_oauth_app_id
-GH_OAUTH_SECRET=your_github_oauth_app_secret
-OPENAI_API_KEY='you-openai-key'
-```
-
-The file should be placed at the root folder of your local copy of the project.
+So your `.env` file should look like something similar to [`.env.example`](.env.example)
+The file should be placed in the folder of your `./docker-compose.yml`.
 
 ## More goodies
 
 ### Documentation
 
-The full package documentation is available [here](https://quack-ai.github.io/contribution-api) for detailed specifications.
+Your API documentation gets a swagger automatically available on [here](http://localhost:8050/docs) for detailed specifications.
 
 
 ## Contributing

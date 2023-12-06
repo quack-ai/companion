@@ -10,7 +10,9 @@ Whatever the way you wish to contribute to the project, please respect the [code
 
 - [`src/app`](https://github.com/quack-ai/contribution-api/blob/main/src/app) - The actual API codebase
 - [`src/tests`](https://github.com/quack-ai/contribution-api/blob/main/src/tests) - The API unit tests
-- [`./traefik`](https://github.com/quack-ai/contribution-api/blob/main/traefik) - Configuration files for the reverse proxy
+- [`.github`](https://github.com/quack-ai/contribution-api/blob/main/.github) - Configuration for CI (GitHub Workflows)
+- [`docs`](https://github.com/quack-ai/contribution-api/blob/main/docs) - Everything related to documentation
+- [`scripts`](https://github.com/quack-ai/contribution-api/blob/main/scripts) - Custom scripts
 
 
 ## Continuous Integration
@@ -21,8 +23,9 @@ This project uses the following integrations to ensure proper codebase maintenan
 - [Codacy](https://www.codacy.com/) - analyzes commits for code quality
 - [Codecov](https://codecov.io/) - reports back coverage results
 - [Sentry](https://docs.sentry.io/platforms/python/) - automatically reports errors back to us
-- [LogTail](https://betterstack.com/logtail) - manage logs
 - [PostgreSQL](https://www.postgresql.org/) - storing and interacting with the metadata database
+- [PostHog](https://posthog.com/) - product analytics
+- [Slack](https://slack.com/) - event notifications
 - [Traefik](https://traefik.io/) - the reverse proxy and load balancer
 
 As a contributor, you will only have to ensure coverage of your code by adding appropriate unit testing of your code.

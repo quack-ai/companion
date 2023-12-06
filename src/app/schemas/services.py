@@ -13,10 +13,10 @@ __all__ = ["ChatCompletion"]
 
 class OpenAIModel(str, Enum):
     # https://platform.openai.com/docs/models/overview
-    GPT3_5: str = "gpt-3.5-turbo-1106"
-    GPT3_5_LEGACY: str = "gpt-3.5-turbo-0613"
-    GPT4: str = "gpt-4-1106-preview"
-    GPT4_LEGACY: str = "gpt-4-0613"
+    GPT3_5_TURBO: str = "gpt-3.5-turbo-1106"
+    GPT3_5_TURBO_LEGACY: str = "gpt-3.5-turbo-0613"
+    GPT4_TURBO: str = "gpt-4-1106-preview"
+    GPT4: str = "gpt-4-0613"
 
 
 class OpenAIChatRole(str, Enum):
@@ -71,7 +71,7 @@ class _ResponseFormat(BaseModel):
 
 
 class ChatCompletion(BaseModel):
-    model: OpenAIModel = OpenAIModel.GPT3_5
+    model: OpenAIModel = OpenAIModel.GPT3_5_TURBO
     messages: List[OpenAIMessage]
     functions: List[OpenAIFunction]
     function_call: Dict[str, str]

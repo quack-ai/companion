@@ -31,7 +31,7 @@ async def authorize_github(
     redirect_uri: HttpUrl,
 ) -> RedirectResponse:
     return RedirectResponse(
-        f"{settings.GH_AUTHORIZE_ENDPOINT}?scope={scope}&client_id={settings.GH_OAUTH_ID}&redirect_uri={redirect_uri}"
+        f"https://github.com/login/oauth/authorize?scope={scope}&client_id={settings.GH_OAUTH_ID}&redirect_uri={redirect_uri}"
     )
 
 

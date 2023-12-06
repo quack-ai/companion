@@ -11,6 +11,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.core.config import settings
 from app.core.security import hash_password
 from app.models import User, UserScope
+from app.services.github import gh_client
 
 __all__ = ["get_session", "init_db"]
 
@@ -29,14 +30,12 @@ async def init_db():
         await conn.run_sync(SQLModel.metadata.create_all)
 
     async with AsyncSession(engine) as session:
-        statement = select(User).where(User.login == settings.SUPERUSER_LOGIN)
+        # Fetch authenticated GitHub User
+        gh_user = gh_client.get_my_user(settings.SUPERADMIN_GH_PAT)
+        statement = select(User).where(User.login == gh_user["login"])
         results = await session.execute(statement=statement)
         current_user = results.scalar_one_or_none()
         if not current_user:
-            pwd = await hash_password(settings.SUPERUSER_PWD)
-            session.add(
-                User(
-                    id=settings.SUPERUSER_ID, login=settings.SUPERUSER_LOGIN, hashed_password=pwd, scope=UserScope.ADMIN
-                )
-            )
+            pwd = await hash_password(settings.SUPERADMIN_PWD)
+            session.add(User(id=gh_user["id"], login=gh_user["login"], hashed_password=pwd, scope=UserScope.ADMIN))
         await session.commit()
