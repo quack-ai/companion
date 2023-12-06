@@ -16,13 +16,11 @@ lock:
 # Build the docker
 build:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
-	git submodule update --init --recursive
 	docker build . -t quackai/contribution-api:python3.9-alpine3.14
 
 # Run the docker
 run:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
-	git submodule update --init --recursive
 	docker compose up -d --build
 
 # Run the docker
