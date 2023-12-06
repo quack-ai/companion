@@ -76,13 +76,20 @@ if isinstance(settings.SENTRY_DSN, str):
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
+    # https://fastapi.tiangolo.com/tutorial/metadata/
     openapi_schema = get_openapi(
         title=settings.PROJECT_NAME,
         version=settings.VERSION,
         description=settings.PROJECT_DESCRIPTION,
         routes=app.routes,
+        license_info={"name": "Apache 2.0", "url": "http://www.apache.org/licenses/LICENSE-2.0.html"},
+        contact={
+            "name": "API support",
+            "email": settings.SUPPORT_EMAIL,
+            "url": "https://github.com/quack-ai/contribution-api/issues",
+        },
     )
-    openapi_schema["info"]["x-logo"] = {"url": settings.LOGO_URL}
+    openapi_schema["info"]["x-logo"] = {"url": "https://www.quackai.com/quack.png"}
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 

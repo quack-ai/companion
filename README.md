@@ -2,7 +2,7 @@
   <a href="https://quack-ai.com"><img src="https://uploads-ssl.webflow.com/64a6527708bc7f2ce5fd6b2a/64a654825ed3d444b47c4935_quack-logo%20(copy).png" width="75" height="75"></a>
 </p>
 <h1 align="center">
- API for contribution assistance
+ Quack - API for contribution assistance
 </h1>
 
 <p align="center">
@@ -107,13 +107,6 @@ Optionally, the following information can be added:
 
 So your `.env` file should look like something similar to [`.env.example`](.env.example)
 The file should be placed in the folder of your `./docker-compose.yml`.
-
-## More goodies
-
-### Documentation
-
-Your API documentation gets a swagger automatically available on [here](http://localhost:8050/docs) for detailed specifications.
-
 
 ## Contributing
 
