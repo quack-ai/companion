@@ -10,7 +10,9 @@ Whatever the way you wish to contribute to the project, please respect the [code
 
 - [`src/app`](https://github.com/quack-ai/contribution-api/blob/main/src/app) - The actual API codebase
 - [`src/tests`](https://github.com/quack-ai/contribution-api/blob/main/src/tests) - The API unit tests
-- [`./traefik`](https://github.com/quack-ai/contribution-api/blob/main/traefik) - Configuration files for the reverse proxy
+- [`.github`](https://github.com/quack-ai/contribution-api/blob/main/.github) - Configuration for CI (GitHub Workflows)
+- [`docs`](https://github.com/quack-ai/contribution-api/blob/main/docs) - Everything related to documentation
+- [`scripts`](https://github.com/quack-ai/contribution-api/blob/main/scripts) - Custom scripts
 
 
 ## Continuous Integration

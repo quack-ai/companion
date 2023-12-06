@@ -40,7 +40,7 @@ You can run the API containers using this command:
 make run
 ```
 
-You can now navigate to [`http://api.localhost:8050/docs`](http://api.localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
+You can now navigate to [`http://localhost:8050/docs`](http://localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
 
 In order to stop the service, run:
 ```shell
