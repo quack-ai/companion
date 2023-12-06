@@ -36,6 +36,6 @@ async def init_db():
         results = await session.execute(statement=statement)
         current_user = results.scalar_one_or_none()
         if not current_user:
-            pwd = await hash_password(settings.SUPERUSER_PWD)
+            pwd = await hash_password(settings.SUPERADMIN_PWD)
             session.add(User(id=gh_user["id"], login=gh_user["login"], hashed_password=pwd, scope=UserScope.ADMIN))
         await session.commit()
