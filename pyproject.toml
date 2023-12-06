@@ -76,8 +76,10 @@ select = [
     "ASYNC",  # flake8-async
     "BLE",  # flake8-blind-except
     "A",  # flake8-builtins
-    "COM",  # flake8-commas
     "DTZ",  # flake8-datetimez
+    "ICN",  # flake8-import-conventions
+    "PIE",  # flake8-pie
+    "ARG",  # flake8-unused-arguments
 ]
 ignore = [
     "E501",  # line too long, handled by black
@@ -107,7 +109,7 @@ indent-style = "space"
 "scripts/**.py" = ["D", "T201", "S101", "ANN"]
 ".github/**.py" = ["D", "T201"]
 "client/docs/**.py" = ["E402"]
-"src/tests/**.py" = ["D103", "CPY001", "S101", "T201", "ANN001", "ANN201"]
+"src/tests/**.py" = ["D103", "CPY001", "S101", "T201", "ANN001", "ANN201", "ARG001"]
 "src/alembic/versions/**.py" = ["CPY001"]
 "src/alembic/**.py" = ["ANN"]
 "client/tests/**.py" = ["D103", "CPY001", "S101"]

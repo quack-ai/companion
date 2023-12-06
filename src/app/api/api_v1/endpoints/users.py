@@ -106,7 +106,7 @@ async def update_user_password(
 async def delete_user(
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
+    _: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> None:
     telemetry_client.capture(user_id, event="user-deletion", properties={"user_id": user_id})
     await users.delete(user_id)

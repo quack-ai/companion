@@ -196,7 +196,6 @@ async def parse_guidelines_from_github(
 @router.post("/{repo_id}/waitlist", status_code=status.HTTP_200_OK)
 async def add_repo_to_waitlist(
     repo_id: int = Path(..., gt=0),
-    repos: RepositoryCRUD = Depends(get_repo_crud),
     user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> None:
     telemetry_client.capture(user.id, event="repo-waitlist", properties={"repo_id": repo_id})
