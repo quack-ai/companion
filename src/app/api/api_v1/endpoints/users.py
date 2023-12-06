@@ -62,7 +62,7 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
     return user
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED, summary="Register a GitHub user")
 async def create_user(
     payload: UserCreate,
     users: UserCRUD = Depends(get_user_crud),
@@ -71,7 +71,7 @@ async def create_user(
     return await _create_user(payload, users, user)
 
 
-@router.get("/{user_id}", status_code=status.HTTP_200_OK)
+@router.get("/{user_id}", status_code=status.HTTP_200_OK, summary="Fetch the information of a specific user")
 async def get_user(
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
@@ -81,7 +81,7 @@ async def get_user(
     return cast(User, await users.get(user_id, strict=True))
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK, summary="Fetch all the users")
 async def fetch_users(
     users: UserCRUD = Depends(get_user_crud),
     user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
@@ -90,7 +90,7 @@ async def fetch_users(
     return [elt for elt in await users.fetch_all()]
 
 
-@router.put("/{user_id}", status_code=status.HTTP_200_OK)
+@router.put("/{user_id}", status_code=status.HTTP_200_OK, summary="Updates a user's password")
 async def update_user_password(
     payload: Cred,
     user_id: int = Path(..., gt=0),
@@ -102,7 +102,7 @@ async def update_user_password(
     return await users.update(user_id, CredHash(hashed_password=pwd))
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_200_OK)
+@router.delete("/{user_id}", status_code=status.HTTP_200_OK, summary="Delete a user")
 async def delete_user(
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),

@@ -30,7 +30,7 @@ from app.services.telemetry import telemetry_client
 router = APIRouter()
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED, summary="Create a coding guideline")
 async def create_guideline(
     payload: GuidelineCreate,
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
@@ -44,7 +44,7 @@ async def create_guideline(
     return await guidelines.create(GuidelineCreation(**payload.dict()))
 
 
-@router.get("/{guideline_id}", status_code=status.HTTP_200_OK)
+@router.get("/{guideline_id}", status_code=status.HTTP_200_OK, summary="Fetch a specific guideline")
 async def get_guideline(
     guideline_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
@@ -55,7 +55,7 @@ async def get_guideline(
     return guideline
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK, summary="Fetch all the guidelines")
 async def fetch_guidelines(
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
     user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
@@ -64,7 +64,7 @@ async def fetch_guidelines(
     return [elt for elt in await guidelines.fetch_all()]
 
 
-@router.put("/{guideline_id}", status_code=status.HTTP_200_OK)
+@router.put("/{guideline_id}", status_code=status.HTTP_200_OK, summary="Update a guideline content")
 async def update_guideline_content(
     payload: GuidelineEdit,
     guideline_id: int = Path(..., gt=0),
@@ -80,7 +80,9 @@ async def update_guideline_content(
     return guideline
 
 
-@router.put("/{guideline_id}/order/{order_idx}", status_code=status.HTTP_200_OK)
+@router.put(
+    "/{guideline_id}/order/{order_idx}", status_code=status.HTTP_200_OK, summary="Change the order of a guideline"
+)
 async def update_guideline_order(
     payload: OptionalGHToken,
     guideline_id: int = Path(..., gt=0),
@@ -97,7 +99,7 @@ async def update_guideline_order(
     return guideline
 
 
-@router.delete("/{guideline_id}", status_code=status.HTTP_200_OK)
+@router.delete("/{guideline_id}", status_code=status.HTTP_200_OK, summary="Delete a guideline")
 async def delete_guideline(
     payload: OptionalGHToken,
     guideline_id: int = Path(..., gt=0),
@@ -113,7 +115,7 @@ async def delete_guideline(
     await guidelines.delete(guideline_id)
 
 
-@router.post("/parse", status_code=status.HTTP_200_OK)
+@router.post("/parse", status_code=status.HTTP_200_OK, summary="Extract guidelines from a text corpus")
 async def parse_guidelines_from_text(
     payload: TextContent,
     user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
@@ -123,7 +125,7 @@ async def parse_guidelines_from_text(
     return openai_client.parse_guidelines_from_text(payload.content, user_id=str(user.id))
 
 
-@router.post("/examples", status_code=status.HTTP_200_OK)
+@router.post("/examples", status_code=status.HTTP_200_OK, summary="Request examples for a guideline")
 async def generate_examples_for_text(
     payload: ExampleRequest,
     user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),

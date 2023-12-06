@@ -17,7 +17,11 @@ from app.services.telemetry import telemetry_client
 router = APIRouter()
 
 
-@router.post("/analyze/{repo_id}", status_code=status.HTTP_200_OK)
+@router.post(
+    "/analyze/{repo_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Check code against the guidelines of a given repository",
+)
 async def check_code_against_repo_guidelines(
     payload: Snippet,
     repo_id: int = Path(..., gt=0),
@@ -36,7 +40,7 @@ async def check_code_against_repo_guidelines(
     )
 
 
-@router.post("/check/{guideline_id}", status_code=status.HTTP_200_OK)
+@router.post("/check/{guideline_id}", status_code=status.HTTP_200_OK, summary="Check code against a specific guideline")
 async def check_code_against_guideline(
     payload: Snippet,
     guideline_id: int = Path(..., gt=0),
