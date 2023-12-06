@@ -1,7 +1,7 @@
 # Copyright (C) 2023, Quack AI.
 
-# All rights reserved.
-# Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
+# This program is licensed under the Apache License 2.0.
+# See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 from typing import List, cast
 
