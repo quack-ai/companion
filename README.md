@@ -12,19 +12,27 @@
   <a href="https://github.com/astral-sh/ruff">
     <img src="https://img.shields.io/badge/Linter-Ruff-FCC21B?style=flat-square&logo=ruff&logoColor=white" alt="ruff">
   </a>
-  <a href="https://www.codacy.com/gh/quack-ai/contribution-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quack-ai/contribution-api&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/f8b24d4f9f674ef487b0889b2aa90e9c"/></a>
+  <a href="https://www.codacy.com/gh/quack-ai/contribution-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quack-ai/contribution-api&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/b51832763a394255941b541b0813750c"/></a>
   <a href="https://codecov.io/gh/quack-ai/contribution-api">
     <img src="https://img.shields.io/codecov/c/github/quack-ai/contribution-api.svg?logo=codecov&style=flat-square&token=fkT0jQefhO" alt="Test coverage percentage">
   </a>
 </p>
 <p align="center">
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/quack-ai/contribution-api">
+  <a href="https://hub.docker.com/repository/docker/quackai/contribution-api">
+    <img src="https://img.shields.io/docker/v/quackai/contribution-api?style=flat-square&logo=Docker&logoColor=fff&label=Docker" alt="Docker image">
+  </a>
   <a href="https://github.com/quack-ai/contribution-api/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/quack-ai/contribution-api.svg?label=License&logoColor=fff&style=flat-square" alt="License">
   </a>
 </p>
 <p align="center">
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/quack-ai/contribution-api">
-  <img alt="GitHub" src="https://img.shields.io/github/license/quack-ai/contribution-api">
+  <a target="_blank" href="https://discord.gg/E9rY3bVCWd" style="background:none">
+    <img src="https://img.shields.io/badge/Discord-join-continue.svg?labelColor=191937&color=6F6FF7&logo=discord" />
+  </a>
+  <a href="https://twitter.com/quack_ai">
+    <img src="https://img.shields.io/badge/-@quack_ai-1D9BF0?style=flat-square&logo=twitter&logoColor=white" alt="Twitter">
+  </a>
 </p>
 
 
@@ -111,12 +119,12 @@ Your API documentation gets a swagger automatically available on [here](http://l
 
 Any sort of contribution is greatly appreciated!
 
-You can find a short guide in [`CONTRIBUTING`](CONTRIBUTING.md) to help grow this project!
+You can find a short guide in [`CONTRIBUTING`](CONTRIBUTING.md) to help grow this project! And if you're interested, you can join us on [![](https://img.shields.io/badge/Discord-join-continue.svg?labelColor=191937&color=6F6FF7&logo=discord)](https://discord.gg/E9rY3bVCWd)
 
 
 ## Copying & distribution
 
 Copyright (C) 2023, Quack AI.
 
-All rights reserved.
-Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
+This program is licensed under the Apache License 2.0.
+See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
