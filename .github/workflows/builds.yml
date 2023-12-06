@@ -34,8 +34,8 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: docker-compose up -d --build
       - name: Docker sanity check
-        run: sleep 20 && nc -vz api.localhost 8050
+        run: sleep 20 && nc -vz localhost 8050
       - name: Debug
         run: docker-compose logs
       - name: Ping server
-        run: curl http://api.localhost:8050/docs
+        run: curl http://localhost:8050/docs
