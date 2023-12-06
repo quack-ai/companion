@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, Path, Security, status
 
 from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_crud
 from app.crud import GuidelineCRUD, RepositoryCRUD
-from app.models import Guideline, UserScope
+from app.models import Guideline, User, UserScope
 from app.schemas.compute import ComplianceResult, Snippet
 from app.services.openai import ExecutionMode, openai_client
 from app.services.telemetry import telemetry_client
@@ -23,7 +23,7 @@ async def check_code_against_repo_guidelines(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+    user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> List[ComplianceResult]:
     telemetry_client.capture(user.id, event="compute-analyze", properties={"repo_id": repo_id})
     # Check repo
@@ -41,7 +41,7 @@ async def check_code_against_guideline(
     payload: Snippet,
     guideline_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+    user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> ComplianceResult:
     # Check repo
     guideline = cast(Guideline, await guidelines.get(guideline_id, strict=True))

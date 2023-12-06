@@ -5,7 +5,7 @@
 
 import logging
 from base64 import b64decode
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
@@ -34,7 +34,9 @@ async def create_repo(
     # Check repo exists
     gh_repo = gh_client.get_repo(payload.id)
     telemetry_client.capture(
-        user.id, event="repo-creation", properties={"repo_id": payload.id, "full_name": gh_repo["full_name"]}
+        user.id,
+        event="repo-creation",
+        properties={"repo_id": payload.id, "full_name": gh_repo["full_name"]},
     )
     # Check if user is allowed
     gh_client.check_user_permission(user, gh_repo["full_name"], gh_repo["owner"]["id"], payload.github_token)
@@ -51,8 +53,11 @@ async def create_repo(
     )
     return await repos.create(
         RepoCreation(
-            id=payload.id, full_name=gh_repo["full_name"], owner_id=gh_repo["owner"]["id"], installed_by=user.id
-        )
+            id=payload.id,
+            full_name=gh_repo["full_name"],
+            owner_id=gh_repo["owner"]["id"],
+            installed_by=user.id,
+        ),
     )
 
 
@@ -60,7 +65,7 @@ async def create_repo(
 async def get_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
     telemetry_client.capture(user.id, event="repo-get", properties={"repo_id": repo_id})
     return cast(Repository, await repos.get(repo_id, strict=True))
@@ -69,7 +74,7 @@ async def get_repo(
 @router.get("/", status_code=status.HTTP_200_OK)
 async def fetch_repos(
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> List[Repository]:
     telemetry_client.capture(user.id, event="repo-fetch")
     entries = await repos.fetch_all() if user.scope == UserScope.ADMIN else await repos.fetch_all(("owner_id", user.id))
@@ -82,7 +87,7 @@ async def reorder_repo_guidelines(
     repo_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> List[Guideline]:
     telemetry_client.capture(user.id, event="guideline-order", properties={"repo_id": repo_id})
     # Ensure all IDs are unique
@@ -94,13 +99,14 @@ async def reorder_repo_guidelines(
     guideline_ids = [elt.id for elt in await guidelines.fetch_all(("repo_id", repo_id))]
     if set(payload.guideline_ids) != set(guideline_ids):
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Guideline IDs for that repo don't match."
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Guideline IDs for that repo don't match.",
         )
     # Check if user is allowed
     gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
     # Update all order
     return [
-        await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.utcnow()))
+        await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.now(tz=timezone.utc)))
         for order_idx, guideline_id in enumerate(payload.guideline_ids)
     ]
 
@@ -110,7 +116,7 @@ async def disable_repo(
     payload: OptionalGHToken,
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
     telemetry_client.capture(user.id, event="repo-disable", properties={"repo_id": repo_id})
     # Check if user is allowed
@@ -124,7 +130,7 @@ async def enable_repo(
     payload: OptionalGHToken,
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user=Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
     telemetry_client.capture(user.id, event="repo-enable", properties={"repo_id": repo_id})
     # Check if user is allowed
@@ -137,7 +143,7 @@ async def enable_repo(
 async def delete_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user=Security(get_current_user, scopes=[UserScope.ADMIN]),
+    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> None:
     telemetry_client.capture(user.id, event="repo-delete", properties={"repo_id": repo_id})
     await repos.delete(repo_id)
@@ -148,7 +154,7 @@ async def fetch_guidelines_from_repo(
     repo_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+    user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> List[Guideline]:
     telemetry_client.capture(user.id, event="repo-fetch-guidelines", properties={"repo_id": repo_id})
     await repos.get(repo_id, strict=True)
@@ -160,7 +166,7 @@ async def parse_guidelines_from_github(
     payload: OptionalGHToken,
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+    user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> List[ParsedGuideline]:
     telemetry_client.capture(user.id, event="repo-parse-guidelines", properties={"repo_id": repo_id})
     # Sanity check
@@ -177,8 +183,10 @@ async def parse_guidelines_from_github(
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="No useful information is accessible in the repository")
     # Analyze with LLM
     contributing_guidelines = openai_client.parse_guidelines_from_text(
-        b64decode(contributing["content"]).decode(), user_id=str(user.id)
+        b64decode(contributing["content"]).decode(),
+        user_id=str(user.id),
     )
+    # contributing_guidelines = ollama_client.parse_guidelines_from_text(b64decode(contributing["content"]).decode())
     return [
         ParsedGuideline(**guideline.dict(), repo_id=repo_id, origin_path=contributing["path"])
         for guideline in contributing_guidelines
@@ -189,7 +197,7 @@ async def parse_guidelines_from_github(
 async def add_repo_to_waitlist(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user=Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+    user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> None:
     telemetry_client.capture(user.id, event="repo-waitlist", properties={"repo_id": repo_id})
     gh_repo = gh_client.get_repo(repo_id)

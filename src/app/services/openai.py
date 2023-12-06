@@ -6,7 +6,7 @@
 import json
 import logging
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Union
 
@@ -42,7 +42,8 @@ MONO_SCHEMA = ObjectSchema(
     type="object",
     properties={
         "is_compliant": FieldSchema(
-            type="boolean", description="whether the guideline has been followed in the code snippet"
+            type="boolean",
+            description="whether the guideline has been followed in the code snippet",
         ),
         "comment": FieldSchema(
             type="string",
@@ -68,7 +69,8 @@ MULTI_SCHEMA = ObjectSchema(
                 type="object",
                 properties={
                     "is_compliant": FieldSchema(
-                        type="boolean", description="whether the guideline has been followed in the code snippet"
+                        type="boolean",
+                        description="whether the guideline has been followed in the code snippet",
                     ),
                     "comment": FieldSchema(
                         type="string",
@@ -124,10 +126,12 @@ EXAMPLE_SCHEMA = ObjectSchema(
     type="object",
     properties={
         "positive": FieldSchema(
-            type="string", description="a short code snippet where the instruction was correctly followed."
+            type="string",
+            description="a short code snippet where the instruction was correctly followed.",
         ),
         "negative": FieldSchema(
-            type="string", description="the same snippet with minimal modification that invalidate the instruction."
+            type="string",
+            description="the same snippet with minimal modification that invalidate the instruction.",
         ),
     },
     required=["positive", "negative"],
@@ -146,7 +150,11 @@ class OpenAIClient:
     ENDPOINT: str = "https://api.openai.com/v1/chat/completions"
 
     def __init__(
-        self, api_key: str, model: OpenAIModel, temperature: float = 0.0, frequency_penalty: float = 1.0
+        self,
+        api_key: str,
+        model: OpenAIModel,
+        temperature: float = 0.0,
+        frequency_penalty: float = 1.0,
     ) -> None:
         self.headers = self._get_headers(api_key)
         # Validate model
@@ -157,7 +165,7 @@ class OpenAIClient:
         self.temperature = temperature
         self.frequency_penalty = frequency_penalty
         logger.info(
-            f"Using OpenAI model: {self.model} (created at {datetime.fromtimestamp(model_card.json()['created']).isoformat()})"
+            f"Using OpenAI model: {self.model} (created at {datetime.fromtimestamp(model_card.json()['created'], tz=timezone.utc).isoformat()})",
         )
 
     @staticmethod
@@ -169,12 +177,13 @@ class OpenAIClient:
         code: str,
         guidelines: List[Guideline],
         mode: ExecutionMode = ExecutionMode.SINGLE,
-        **kwargs: Any,
+        **kwargs,
     ) -> List[ComplianceResult]:
         # Check args before sending a request
         if len(code) == 0 or len(guidelines) == 0 or any(len(guideline.details) == 0 for guideline in guidelines):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No code or guideline provided for analysis."
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="No code or guideline provided for analysis.",
             )
         # Ideas: check which programming language & whether it's correct code
         if mode == ExecutionMode.SINGLE:
@@ -210,11 +219,12 @@ class OpenAIClient:
             for guideline, res in zip(guidelines, parsed_response)
         ]
 
-    def check_code(self, code: str, guideline: Guideline, **kwargs: Any) -> ComplianceResult:
+    def check_code(self, code: str, guideline: Guideline, **kwargs) -> ComplianceResult:
         # Check args before sending a request
         if len(code) == 0 or len(guideline.details) == 0:
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="No code or guideline provided for analysis."
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="No code or guideline provided for analysis.",
             )
         res = self._analyze(MONO_PROMPT, {"code": code, "guideline": guideline.details}, MONO_SCHEMA, **kwargs)
         # Return with pydantic validation
@@ -277,11 +287,15 @@ class OpenAIClient:
         )
 
     def parse_guidelines_from_text(
-        self, corpus: str, timeout: int = 20, user_id: Union[str, None] = None
+        self,
+        corpus: str,
+        timeout: int = 20,
+        user_id: Union[str, None] = None,
     ) -> List[GuidelineContent]:
         if not isinstance(corpus, str):
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="The input corpus needs to be a string."
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="The input corpus needs to be a string.",
             )
         if len(corpus) == 0:
             return []
@@ -301,7 +315,11 @@ class OpenAIClient:
         return [GuidelineContent(**elt) for elt in response["result"]]
 
     def generate_examples_for_instruction(
-        self, instruction: str, language: str, timeout: int = 20, user_id: Union[str, None] = None
+        self,
+        instruction: str,
+        language: str,
+        timeout: int = 20,
+        user_id: Union[str, None] = None,
     ) -> GuidelineExample:
         if (
             not isinstance(instruction, str)

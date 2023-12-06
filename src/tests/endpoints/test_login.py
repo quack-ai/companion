@@ -110,12 +110,14 @@ async def test_request_github_token_from_code(
 async def test_authorize_github(
     async_client: AsyncClient,
     login_session: AsyncSession,
-    scope: Any,
-    redirect_uri: Any,
+    scope: str,
+    redirect_uri: str,
     status_code: int,
 ):
     response = await async_client.get(
-        "/login/authorize", params={"scope": scope, "redirect_uri": redirect_uri}, follow_redirects=False
+        "/login/authorize",
+        params={"scope": scope, "redirect_uri": redirect_uri},
+        follow_redirects=False,
     )
     assert response.status_code == status_code
     for key, _, val in response.headers._list:

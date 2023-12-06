@@ -40,7 +40,7 @@ app = FastAPI(
 
 # Database connection
 @app.on_event("startup")
-async def startup():
+async def startup() -> None:
     await init_db()
 
 
