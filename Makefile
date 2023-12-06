@@ -11,7 +11,7 @@ style:
 
 # Pin the dependencies
 lock:
-	poetry lock
+	poetry lock --no-update
 
 # Build the docker
 build:
