@@ -80,6 +80,7 @@ select = [
     "ICN",  # flake8-import-conventions
     "PIE",  # flake8-pie
     "ARG",  # flake8-unused-arguments
+    "FURB",  # refurb
 ]
 ignore = [
     "E501",  # line too long, handled by black
