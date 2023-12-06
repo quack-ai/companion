@@ -55,7 +55,7 @@ jobs:
       - name: Check the headers
         uses: frgfm/validate-python-headers@main
         with:
-          license-notice: '.github/license-notice.txt'
+          license: 'Apache-2.0'
           owner: 'Quack AI'
           starting-year: 2023
           ignore-files: 'version.py,__init__.py'
