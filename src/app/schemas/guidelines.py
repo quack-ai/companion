@@ -21,8 +21,12 @@ class ExampleRequest(TextContent):
 
 
 class GuidelineExample(BaseModel):
-    positive: str = Field(..., min_length=3)
-    negative: str = Field(..., min_length=3)
+    positive: str = Field(
+        ..., min_length=3, description="a minimal code snippet where the instruction was correctly followed."
+    )
+    negative: str = Field(
+        ..., min_length=3, description="the same snippet with minimal modifications that invalidates the instruction."
+    )
 
 
 class GuidelineContent(BaseModel):
