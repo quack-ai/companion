@@ -3,7 +3,7 @@
 # All rights reserved.
 # Copying and/or distributing is strictly prohibited without the express permission of its copyright owner.
 
-from typing import Any, Union
+from typing import Union
 
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -18,5 +18,5 @@ class UserCRUD(BaseCRUD[User, UserCreation, CredHash]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, User)
 
-    async def get_by_login(self, login: str, **kwargs: Any) -> Union[User, None]:
+    async def get_by_login(self, login: str, **kwargs) -> Union[User, None]:
         return await self.get_by("login", login, **kwargs)

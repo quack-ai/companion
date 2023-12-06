@@ -30,7 +30,7 @@ alembic = "^1.8.1"
 posthog = "^3.0.0"
 
 [tool.poetry.group.quality.dependencies]
-ruff = { version = "==0.1.3", optional = true }
+ruff = { version = "==0.1.7", optional = true }
 mypy = { version = "==1.6.1", optional = true }
 types-requests = { version = ">=2.0.0", optional = true }
 types-python-jose = { version = ">=3.3.0", optional = true }
@@ -57,7 +57,7 @@ select = [
     "I",  # isort
     "C4",  # flake8-comprehensions
     "B",  # flake8-bugbear
-    "CPY001",  # flake8-copyright
+    "CPY",  # flake8-copyright
     "ISC",  # flake8-implicit-str-concat
     "PYI",  # flake8-pyi
     "NPY",  # numpy
@@ -70,6 +70,16 @@ select = [
     "T20",  # flake8-print
     "PT",  # flake8-pytest-style
     "LOG",  # flake8-logging
+    "SIM",  # flake8-simplify
+    "YTT",  # flake8-2020
+    "ANN",  # flake8-annotations
+    "ASYNC",  # flake8-async
+    "BLE",  # flake8-blind-except
+    "A",  # flake8-builtins
+    "ICN",  # flake8-import-conventions
+    "PIE",  # flake8-pie
+    "ARG",  # flake8-unused-arguments
+    "FURB",  # refurb
 ]
 ignore = [
     "E501",  # line too long, handled by black
@@ -79,6 +89,11 @@ ignore = [
     "F403",  # star imports
     "E731",  # lambda assignment
     "C416",  # list comprehension to list()
+    "ANN101",  # missing type annotations on self
+    "ANN102",  # missing type annotations on cls
+    "ANN002",  # missing type annotations on *args
+    "ANN003",  # missing type annotations on **kwargs
+    "COM812",  # trailing comma missing
 ]
 exclude = [".git"]
 line-length = 120
@@ -91,12 +106,16 @@ indent-style = "space"
 
 [tool.ruff.per-file-ignores]
 "**/__init__.py" = ["I001", "F401", "CPY001"]
-"scripts/**.py" = ["D", "T201", "S101"]
+"scripts/**.py" = ["D", "T201", "S101", "ANN"]
 ".github/**.py" = ["D", "T201"]
 "client/docs/**.py" = ["E402"]
-"src/tests/**.py" = ["D103", "CPY001", "S101", "T201"]
+"src/tests/**.py" = ["D103", "CPY001", "S101", "T201", "ANN001", "ANN201", "ARG001"]
 "src/alembic/versions/**.py" = ["CPY001"]
+"src/alembic/**.py" = ["ANN"]
 "client/tests/**.py" = ["D103", "CPY001", "S101"]
+"src/app/main.py" = ["ANN"]
+"src/app/schemas/**.py" = ["A"]
+"src/app/models.py" = ["A"]
 
 [tool.ruff.flake8-quotes]
 docstring-quotes = "double"

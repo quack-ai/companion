@@ -38,7 +38,7 @@ class GitHubClient:
         token: Union[str, None] = None,
         timeout: int = 5,
         status_code_tolerance: Union[int, None] = None,
-        **kwargs: Any,
+        **kwargs,
     ) -> requests.Response:
         response = requests.get(
             f"{self.ENDPOINT}/{route}",
@@ -51,14 +51,15 @@ class GitHubClient:
         ):
             json_response = response.json()
             raise HTTPException(
-                status_code=response.status_code, detail=json_response.get("error", json_response["message"])
+                status_code=response.status_code,
+                detail=json_response.get("error", json_response["message"]),
             )
         return response
 
-    def get_repo(self, repo_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def get_repo(self, repo_id: int, **kwargs) -> Dict[str, Any]:
         return self._get(f"repositories/{repo_id}", **kwargs).json()
 
-    def get_user(self, user_id: int, **kwargs: Any) -> Dict[str, Any]:
+    def get_user(self, user_id: int, **kwargs) -> Dict[str, Any]:
         return self._get(f"user/{user_id}", **kwargs).json()
 
     def get_my_user(self, token: str) -> Dict[str, Any]:
@@ -82,11 +83,13 @@ class GitHubClient:
         ):
             if not isinstance(github_token, str):
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Expected `github_token` to check access."
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Expected `github_token` to check access.",
                 )
             if self.get_permission(repo_full_name, user.login, github_token) not in ("maintain", "admin"):
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Insufficient access (requires maintain or admin)."
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Insufficient access (requires maintain or admin).",
                 )
 
     def get_token_from_code(self, code: str, redirect_uri: HttpUrl, timeout: int = 5) -> GHToken:
@@ -116,7 +119,9 @@ class GitHubClient:
     def get_file(self, repo_name: str, file_path: str, token: Union[str, None] = None) -> Union[Dict[str, Any], None]:
         # https://docs.github.com/en/rest/repos/contents#get-repository-content
         response = self._get(
-            f"repos/{repo_name}/contents/{file_path}", token, status_code_tolerance=status.HTTP_404_NOT_FOUND
+            f"repos/{repo_name}/contents/{file_path}",
+            token,
+            status_code_tolerance=status.HTTP_404_NOT_FOUND,
         )
         return response.json() if response.status_code != status.HTTP_404_NOT_FOUND else None
 
@@ -132,10 +137,14 @@ class GitHubClient:
             per_page=per_page,
         ).json()
 
-    def list_review_comments(self, repo_name: str, token: Union[str, None] = None):
+    def list_review_comments(self, repo_name: str, token: Union[str, None] = None) -> List[Dict[str, Any]]:
         # https://docs.github.com/en/rest/pulls/comments#list-review-comments-in-a-repository
         comments = self._get(
-            f"repos/{repo_name}/pulls/comments", token, sort="created_at", direction="desc", per_page=100
+            f"repos/{repo_name}/pulls/comments",
+            token,
+            sort="created_at",
+            direction="desc",
+            per_page=100,
         ).json()
         # Get comments (filter account type == user, & user != author) --> take diff_hunk, body, path
         return [comment for comment in comments if comment["user"]["type"] == "User"]

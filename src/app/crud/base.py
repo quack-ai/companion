@@ -19,7 +19,7 @@ __all__ = ["BaseCRUD"]
 
 
 class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
-    def __init__(self, session: AsyncSession, model: Type[ModelType]):
+    def __init__(self, session: AsyncSession, model: Type[ModelType]) -> None:
         self.session = session
         self.model = model
 
@@ -47,7 +47,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             )
         return entry
 
-    async def get_by(self, field_name: str, val: Any, strict: bool = False) -> Union[ModelType, None]:
+    async def get_by(self, field_name: str, val: Union[str, int], strict: bool = False) -> Union[ModelType, None]:
         statement = select(self.model).where(getattr(self.model, field_name) == val)
         results = await self.session.execute(statement=statement)
         entry = results.scalar_one_or_none()

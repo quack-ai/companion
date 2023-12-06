@@ -25,7 +25,7 @@ async def get_session() -> AsyncSession:  # type: ignore[misc]
         yield session
 
 
-async def init_db():
+async def init_db() -> None:
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
