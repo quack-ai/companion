@@ -18,7 +18,7 @@ jobs:
         with:
           poetry-version: "1.6.1"
       - name: Resolve dependencies
-        run: poetry export -f requirements.txt --without-hashes --with dev --output requirements.txt
+        run: poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
       - name: Build & run docker
         env:
           SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
