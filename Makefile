@@ -28,7 +28,7 @@ stop:
 	docker compose down
 
 run-dev:
-	poetry export -f requirements.txt --without-hashes --with dev --output requirements.txt
+	poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
 	docker compose -f docker-compose.test.yml up -d --build
 
 stop-dev:
@@ -36,7 +36,7 @@ stop-dev:
 
 # Run tests for the library
 test:
-	poetry export -f requirements.txt --without-hashes --with dev --output requirements.txt
+	poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
 	docker compose -f docker-compose.test.yml up -d --build
 	docker compose exec -T backend pytest --cov=app
 	docker compose -f docker-compose.test.yml down
