@@ -4,6 +4,7 @@
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 import logging
+from operator import itemgetter
 from typing import Any, Dict, List, Union
 
 import requests
@@ -148,6 +149,96 @@ class GitHubClient:
         ).json()
         # Get comments (filter account type == user, & user != author) --> take diff_hunk, body, path
         return [comment for comment in comments if comment["user"]["type"] == "User"]
+
+    @staticmethod
+    def resolve_section(diff_hunk: str, first_line: int, last_line: int) -> str:
+        """Assumes the diff_hunk's last line is the last_line"""
+        num_lines = last_line - first_line + 1
+        return "\n".join(diff_hunk.split("\n")[-num_lines:])
+
+    def get_pull_review_threads(
+        self, repo_name: str, token: Union[str, None] = None
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        review_comments = {
+            # diff_hunk, body, path, user/id, pull_request_url, reactions/total_count, in_reply_to_id, id, original_start_line, original_line
+            comment["id"]: {
+                "id": comment["id"],
+                "code": self.resolve_section(
+                    comment["diff_hunk"],
+                    comment["original_start_line"] or comment["original_line"],
+                    comment["original_line"],
+                ),
+                "body": comment["body"],
+                "pull_request_url": comment["pull_request_url"],
+                "path": comment["path"],
+                "user_id": comment["user"]["id"],
+                "reactions_total_count": comment["reactions"]["total_count"],
+                "in_reply_to_id": comment["in_reply_to_id"],
+                "start_line": comment["original_start_line"] or comment["original_line"],
+                "end_line": comment["original_line"],
+                "commit_id": comment["commit_id"],
+            }
+            for comment in self.list_review_comments(repo_name, token)
+        }
+        # Chain the threads together
+        reply_map = {
+            comment["in_reply_to_id"]: comment["id"]
+            for comment in review_comments.values()
+            if comment.get("in_reply_to_id") is not None
+        }
+        threads = {
+            comment["id"]: [comment["id"]]
+            for comment in review_comments.values()
+            if comment.get("in_reply_to_id") is None
+        }
+        for head_id in threads:
+            temp_id = head_id
+            while isinstance(reply_map.get(temp_id), int):
+                threads[temp_id].append(reply_map[temp_id])
+                temp_id = reply_map[temp_id]
+        # Group by pull
+        pull_thread_map = {comment_id: int(review_comments[comment_id]["pull_request_url"]) for comment_id in threads}
+        pulls = {comment["pull_request_url"] for comment in review_comments.values()}
+        id_map = {
+            pull: sorted(
+                [thread for thread_id, thread in threads.items() if pull_thread_map[thread_id] == pull],
+                key=itemgetter(0),
+            )
+            for pull in pulls
+        }
+
+        return {
+            pull: [[review_comments[comment_id] for comment_id in thread] for thread in threads]
+            for pull, threads in id_map.items()
+        }
+
+    def list_issue_comments(self, repo_name: str, token: Union[str, None] = None) -> List[List[Dict[str, Any]]]:
+        # https://docs.github.com/en/rest/issues/comments#list-issue-comments-for-a-repository
+        # Get comments (filter account type == user, & user != author)
+        comments = [
+            comment
+            for comment in self._get(
+                f"repos/{repo_name}/issues/comments",
+                token,
+                sort="created_at",
+                direction="desc",
+                per_page=100,
+            ).json()
+            if comment["user"]["type"] == "User"
+        ]
+        # Group by issue
+        issue_map = {comment["id"]: comment["html_url"].rpartition("#")[0] for comment in comments}
+        return [
+            sorted([comment for comment in comments if issue_map[comment["id"]] == issue], key=itemgetter("id"))
+            for issue in sorted(set(issue_map.values()))
+        ]
+
+    def list_pull_comments(self, repo_name: str, token: Union[str, None] = None) -> List[List[Dict[str, Any]]]:
+        return [
+            comments
+            for comments in self.list_issue_comments(repo_name, token)
+            if comments[0]["html_url"].split("/")[-2] == "pull"
+        ]
 
 
 gh_client = GitHubClient(settings.GH_TOKEN)
