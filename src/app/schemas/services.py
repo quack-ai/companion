@@ -79,7 +79,7 @@ class ChatCompletion(BaseModel):
     frequency_penalty: float = 1.0
     response_format: _ResponseFormat = _ResponseFormat(type="json_object")
     user: Union[str, None] = None
-    # seed: int = 42
+    seed: int = 42
 
 
 class GHTokenRequest(BaseModel):
