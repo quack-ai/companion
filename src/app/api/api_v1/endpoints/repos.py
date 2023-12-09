@@ -180,23 +180,57 @@ async def parse_guidelines_from_github(
     # STATIC CONTENT
     # Parse CONTRIBUTING (README if CONTRIBUTING doesn't exist)
     contributing = gh_client.get_file(repo.full_name, "CONTRIBUTING.md", payload.github_token)
-    # readme = gh_client.get_readme(payload.github_token)
-    # diff_hunk, body, path
-    # comments = gh_client.list_review_comments(payload.github_token)
+    readme = gh_client.get_readme(payload.github_token)
+    # Pull request comments (!= review comments/threads)
+    # Remove the first pull comments since they're a description
+    pull_comments = [
+        pull[1:] for pull in gh_client.list_issue_comments(repo.full_name, payload.github_token) if len(pull) > 1
+    ]
+    logger.info(len(pull_comments))
+    # Review threads
+    # Keep: diff_hunk, body, path, user/id, reactions/total_count
+    # review_comments = gh_client.get_pull_review_threads(repo.full_name, payload.github_token)
     # Ideas: filter on pulls with highest amount of comments recently, add the review output rejection/etc
     # If not enough information, raise error
-    if contributing is None:
+    if contributing is None and readme is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="No useful information is accessible in the repository")
     # Analyze with LLM
-    contributing_guidelines = openai_client.parse_guidelines_from_text(
-        b64decode(contributing["content"]).decode(),
-        user_id=str(user.id),
-    )
-    # contributing_guidelines = ollama_client.parse_guidelines_from_text(b64decode(contributing["content"]).decode())
-    return [
-        ParsedGuideline(**guideline.dict(), repo_id=repo_id, origin_path=contributing["path"])
-        for guideline in contributing_guidelines
-    ]
+    guidelines = []
+    if contributing is not None:
+        guidelines.extend([
+            ParsedGuideline(**guideline.dict(), repo_id=repo_id, origin_path=contributing["path"])
+            for guideline in openai_client.parse_guidelines_from_text(
+                b64decode(contributing["content"]).decode(),
+                user_id=str(user.id),
+            )
+        ])
+    if readme is not None:
+        guidelines.extend([
+            ParsedGuideline(**guideline.dict(), repo_id=repo_id, origin_path=readme["path"])
+            for guideline in openai_client.parse_guidelines_from_text(
+                b64decode(readme["content"]).decode(),
+                user_id=str(user.id),
+            )
+        ])
+    if len(pull_comments) > 0:
+        # Keep: body, user/id, reactions/total_count
+        pull_comments_corpus = "# Code review history\n\n\n\n\n\n".join([
+            f"ISSUE: {issue[0]['issue_url']}\n\n"
+            + "\n\n".join(
+                f"Comment by user {comment['user']['id']} with {comment['reactions']['total_count']} reactions:\n{comment['body']}"
+                for comment in issue
+            )
+            for issue in pull_comments
+        ])
+        logger.info(len(pull_comments_corpus))
+        guidelines.extend([
+            ParsedGuideline(**guideline.dict(), repo_id=repo_id, origin_path="pull_request_comments")
+            for guideline in openai_client.parse_guidelines_from_text(
+                pull_comments_corpus,
+                user_id=str(user.id),
+            )
+        ])
+    return guidelines
 
 
 @router.post("/{repo_id}/waitlist", status_code=status.HTTP_200_OK, summary="Add a GitHub repository to the waitlist")
