@@ -99,13 +99,48 @@ PARSING_SCHEMA = ObjectSchema(
             items=ObjectSchema(
                 type="object",
                 properties={
-                    "title": FieldSchema(type="string", description="a short summary title of the guideline"),
+                    "source": FieldSchema(
+                        type="string",
+                        description="the text section the guideline was extracted from",
+                    ),
+                    "category": {
+                        "type": "string",
+                        "description": "the high-level category of the guideline",
+                        "enum": [
+                            "naming",
+                            "error handling",
+                            "syntax",
+                            "comments",
+                            "docstring",
+                            "documentation",
+                            "testing",
+                            "signature",
+                            "type hint",
+                            "formatting",
+                            "other",
+                        ],
+                    },
                     "details": FieldSchema(
                         type="string",
-                        description="a descriptive, comprehensive and inambiguous explanation of the guideline.",
+                        description="a descriptive, comprehensive, inambiguous and specific explanation of the guideline.",
+                    ),
+                    "title": FieldSchema(type="string", description="a summary title of the guideline"),
+                    "examples": ObjectSchema(
+                        type="object",
+                        properties={
+                            "positive": FieldSchema(
+                                type="string",
+                                description="a short code snippet where the guideline was correctly followed.",
+                            ),
+                            "negative": FieldSchema(
+                                type="string",
+                                description="the same snippet with minimal modification that invalidate the instruction.",
+                            ),
+                        },
+                        required=["positive", "negative"],
                     ),
                 },
-                required=["title", "details"],
+                required=["category", "details", "title", "examples"],
             ),
         ),
     },
