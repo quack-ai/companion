@@ -2,6 +2,7 @@ import pytest
 from fastapi import HTTPException
 
 from app.services.github import GitHubClient
+from app.services.utils import execute_in_parallel
 
 
 @pytest.mark.parametrize(
@@ -106,19 +107,107 @@ async def test_githubclient_list_pulls(repo_name, status_code, status_detail):
 
 
 @pytest.mark.parametrize(
-    ("repo_name", "status_code", "status_detail"),
+    ("repo_name", "issue_number", "status_code", "status_detail"),
     [
-        ("frgfm/hola", 404, "Not Found"),
-        ("frgfm/torch-cam", 200, None),
+        ("frgfm/hola", 1, 404, "Not Found"),
+        ("frgfm/torch-cam", 181, 200, None),
     ],
 )
 @pytest.mark.asyncio()
-async def test_githubclient_list_review_comments(repo_name, status_code, status_detail):
+async def test_githubclient_list_comments_from_issue(repo_name, issue_number, status_code, status_detail):
     github_client = GitHubClient()
     if status_code // 100 == 2:
-        response = github_client.list_review_comments(repo_name)
+        response = github_client.list_comments_from_issue(issue_number, repo_name)
         assert isinstance(response, list)
         assert all(isinstance(elt, dict) for elt in response)
     else:
         with pytest.raises(HTTPException):
-            github_client.list_review_comments(repo_name)
+            github_client.list_comments_from_issue(issue_number, repo_name)
+
+
+@pytest.mark.parametrize(
+    ("repo_name", "pull_number", "status_code", "status_detail"),
+    [
+        ("frgfm/hola", 1, 404, "Not Found"),
+        ("frgfm/Holocron", 279, 200, None),
+    ],
+)
+@pytest.mark.asyncio()
+async def test_githubclient_list_reviews_from_pull(repo_name, pull_number, status_code, status_detail):
+    github_client = GitHubClient()
+    if status_code // 100 == 2:
+        response = github_client.list_reviews_from_pull(repo_name, pull_number)
+        assert isinstance(response, list)
+        assert all(isinstance(elt, dict) for elt in response)
+    else:
+        with pytest.raises(HTTPException):
+            github_client.list_reviews_from_pull(repo_name, pull_number)
+
+
+@pytest.mark.parametrize(
+    ("repo_name", "pull_number", "status_code", "status_detail"),
+    [
+        ("frgfm/hola", 1, 404, "Not Found"),
+        ("frgfm/Holocron", 279, 200, None),
+    ],
+)
+@pytest.mark.asyncio()
+async def test_githubclient_list_review_comments_from_pull(repo_name, pull_number, status_code, status_detail):
+    github_client = GitHubClient()
+    if status_code // 100 == 2:
+        response = github_client.list_review_comments_from_pull(pull_number, repo_name)
+        assert isinstance(response, list)
+        assert all(isinstance(elt, dict) for elt in response)
+    else:
+        with pytest.raises(HTTPException):
+            github_client.list_review_comments_from_pull(pull_number, repo_name)
+
+
+@pytest.mark.parametrize(
+    ("repo_name", "status_code", "status_detail"),
+    [
+        ("frgfm/hola", 404, "Not Found"),
+        ("frgfm/Holocron", 200, None),
+    ],
+)
+@pytest.mark.asyncio()
+async def test_githubclient_fetch_reviews_from_repo(repo_name, status_code, status_detail):
+    github_client = GitHubClient()
+    if status_code // 100 == 2:
+        response = github_client.fetch_reviews_from_repo(repo_name, num_pulls=1)
+        assert isinstance(response, list)
+        assert all(isinstance(elt, dict) for elt in response)
+    else:
+        with pytest.raises(HTTPException):
+            github_client.fetch_reviews_from_repo(repo_name, num_pulls=1)
+
+
+@pytest.mark.parametrize(
+    ("repo_name", "status_code", "status_detail"),
+    [
+        ("frgfm/hola", 404, "Not Found"),
+        ("frgfm/Holocron", 200, None),
+    ],
+)
+@pytest.mark.asyncio()
+async def test_githubclient_fetch_pull_comments_from_repo(repo_name, status_code, status_detail):
+    github_client = GitHubClient()
+    if status_code // 100 == 2:
+        response = github_client.fetch_pull_comments_from_repo(repo_name, num_pulls=1)
+        assert isinstance(response, list)
+        assert all(isinstance(elt, dict) for elt in response)
+    else:
+        with pytest.raises(HTTPException):
+            github_client.fetch_pull_comments_from_repo(repo_name, num_pulls=1)
+
+
+@pytest.mark.parametrize(
+    ("func", "arr", "output"),
+    [
+        (lambda x: x**2, [1, 2, 3], [1, 4, 9]),
+    ],
+)
+@pytest.mark.asyncio()
+async def test_execute_in_parallel(func, arr, output):
+    assert list(execute_in_parallel(func, arr, num_threads=1)) == output
+    assert list(execute_in_parallel(func, arr, num_threads=2)) == output

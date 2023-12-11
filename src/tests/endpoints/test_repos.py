@@ -379,3 +379,29 @@ async def test_add_repo_to_waitlist(
     assert response.status_code == status_code, print(response.json())
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
+
+
+@pytest.mark.parametrize(
+    ("user_idx", "repo_id", "status_code", "status_detail"),
+    [
+        (None, 12345, 401, "Not authenticated"),
+        (0, 100, 404, "Not Found"),
+    ],
+)
+@pytest.mark.asyncio()
+async def test_parse_guidelines_from_github(
+    async_client: AsyncClient,
+    guideline_session: AsyncSession,
+    user_idx: Union[int, None],
+    repo_id: int,
+    status_code: int,
+    status_detail: Union[str, None],
+):
+    auth = None
+    if isinstance(user_idx, int):
+        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+
+    response = await async_client.post(f"/repos/{repo_id}/parse", headers=auth)
+    assert response.status_code == status_code, print(response.json())
+    if isinstance(status_detail, str):
+        assert response.json()["detail"] == status_detail
