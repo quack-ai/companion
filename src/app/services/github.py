@@ -4,6 +4,7 @@
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 import logging
+from functools import partial
 from operator import itemgetter
 from typing import Any, Dict, List, Union
 
@@ -14,6 +15,7 @@ from pydantic import HttpUrl
 from app.core.config import settings
 from app.models import User, UserScope
 from app.schemas.services import GHToken, GHTokenRequest
+from app.services.utils import execute_in_parallel
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -132,7 +134,7 @@ class GitHubClient:
             f"repos/{repo_name}/pulls",
             token,
             state="closed",
-            sort="popularity",
+            sort="created",
             direction="desc",
             base=self._get(f"repos/{repo_name}", token).json()["default_branch"],
             per_page=per_page,
@@ -231,6 +233,163 @@ class GitHubClient:
         return [
             sorted([comment for comment in comments if issue_map[comment["id"]] == issue], key=itemgetter("id"))
             for issue in sorted(set(issue_map.values()))
+        ]
+
+    def list_comments_from_issue(
+        self, issue_number: int, repo_name: str, token: Union[str, None] = None, **kwargs
+    ) -> List[Dict[str, Any]]:
+        # https://docs.github.com/en/rest/issues/comments#list-issue-comments
+        return [
+            comment
+            for comment in self._get(
+                f"repos/{repo_name}/issues/{issue_number}/comments",
+                token,
+                **kwargs,
+            ).json()
+            if comment["user"]["type"] == "User"
+        ]
+
+    def list_reviews_from_pull(
+        self, repo_name: str, pull_number: int, token: Union[str, None] = None, **kwargs
+    ) -> List[Dict[str, Any]]:
+        # https://docs.github.com/en/rest/pulls/reviews#list-reviews-for-a-pull-request
+        # Get comments (filter account type == user, & user != author)
+        return self._get(
+            f"repos/{repo_name}/pulls/{pull_number}/reviews",
+            token,
+            **kwargs,
+        ).json()
+
+    def list_threads_from_review(
+        self, repo_name: str, pull_number: int, review_id: int, token: Union[str, None] = None, **kwargs
+    ) -> List[Dict[str, Any]]:
+        # https://docs.github.com/en/rest/pulls/reviews#list-reviews-for-a-pull-request
+        # Get comments (filter account type == user, & user != author)
+        return self._get(
+            f"repos/{repo_name}/pulls/{pull_number}/reviews/{review_id}/comments",
+            token,
+            **kwargs,
+        ).json()
+
+    def list_review_comments_from_pull(
+        self, pull_number: int, repo_name: str, token: Union[str, None] = None, **kwargs
+    ) -> List[List[Dict[str, Any]]]:
+        # https://docs.github.com/en/rest/pulls/comments#list-review-comments-on-a-pull-request
+        # Get comments (filter account type == user, & user != author)
+        return [
+            comment
+            for comment in self._get(
+                f"repos/{repo_name}/pulls/{pull_number}/comments",
+                token,
+                sort="created_at",
+                **kwargs,
+            ).json()
+            if comment["user"]["type"] == "User"
+        ]
+
+    def fetch_reviews_from_repo(
+        self, repo_name: str, num_pulls: int = 30, token: Union[str, None] = None, **kwargs
+    ) -> List[Dict[str, Any]]:
+        # Fetch pulls & filter them
+        pulls = self.list_pulls(repo_name, token, per_page=num_pulls)
+        # Fetch reviews from those (parallelize)
+        # reviews = [self.list_reviews_from_pull(repo_name, pull["number"], token, per_page=100) for pull in pulls]
+        # Fetch comments (parallelize)
+        comments = execute_in_parallel(
+            partial(self.list_review_comments_from_pull, repo_name=repo_name, token=token, per_page=100, **kwargs),
+            (pull["number"] for pull in pulls),
+            len(pulls),
+        )
+        # Arrange them in threads
+        id_map = {
+            # diff_hunk, body, path, user/id, pull_request_url, reactions/total_count, in_reply_to_id, id, original_start_line, original_line
+            comment["id"]: {
+                "id": comment["id"],
+                "code": self.resolve_section(
+                    comment["diff_hunk"],
+                    comment["original_start_line"] or comment["original_line"],
+                    comment["original_line"],
+                ),
+                "body": comment["body"],
+                "path": comment["path"],
+                "user_id": comment["user"]["id"],
+                "reactions_total_count": comment["reactions"]["total_count"],
+                "in_reply_to_id": comment.get("in_reply_to_id"),
+                "start_line": comment["original_start_line"] or comment["original_line"],
+                "end_line": comment["original_line"],
+                "commit_id": comment["commit_id"],
+            }
+            for pull in comments
+            for comment in pull
+        }
+        return [
+            {
+                "pull": {
+                    "number": pull["number"],
+                    "title": pull["title"],
+                    "body": pull["body"],
+                    "user_id": pull["user"]["id"],
+                },
+                "threads": [[id_map[_id] for _id in thread] for thread in self.arrange_in_threads(_comments)],
+            }
+            for pull, _comments in zip(pulls, comments)
+        ]
+
+    def arrange_in_threads(self, comments: List[Dict[str, Any]]) -> List[List[int]]:
+        # Chain the threads together
+        unused_nodes = {comment["id"] for comment in comments}
+        prev_map = {comment["id"]: comment.get("in_reply_to_id") for comment in comments}
+        next_map = {
+            comment["in_reply_to_id"]: comment["id"]
+            for comment in comments
+            if isinstance(comment.get("in_reply_to_id"), int)
+        }
+
+        threads = []
+        while len(unused_nodes) > 0:
+            _id = next(iter(unused_nodes))
+            _thread = [_id]
+            unused_nodes.remove(_id)
+            while isinstance(next_map.get(_thread[-1]), int):
+                _thread.append(next_map[_thread[-1]])
+                unused_nodes.remove(next_map[_thread[-1]])
+            while isinstance(prev_map.get(_thread[0]), int):
+                _thread.insert(0, prev_map[_thread[0]])
+                unused_nodes.remove(prev_map[_thread[0]])
+            threads.append(_thread)
+
+        return sorted(threads, key=itemgetter(0))
+
+    def fetch_pull_comments_from_repo(
+        self, repo_name: str, num_pulls: int = 30, token: Union[str, None] = None, **kwargs
+    ) -> List[Dict[str, Any]]:
+        # Fetch pulls & filter them
+        pulls = self.list_pulls(repo_name, token, per_page=num_pulls)
+        # Fetch comments from those (parallelize)
+        comments = execute_in_parallel(
+            partial(self.list_comments_from_issue, repo_name=repo_name, token=token, per_page=100, **kwargs),
+            (pull["number"] for pull in pulls),
+            len(pulls),
+        )
+        return [
+            {
+                "pull": {
+                    "number": pull["number"],
+                    "title": pull["title"],
+                    "body": pull["body"],
+                    "user_id": pull["user"]["id"],
+                },
+                "comments": [
+                    {
+                        "id": _comment["id"],
+                        "body": _comment["body"],
+                        "user_id": _comment["user"]["id"],
+                        "reactions_total_count": _comment["reactions"]["total_count"],
+                    }
+                    for _comment in _comments
+                ],
+            }
+            for pull, _comments in zip(pulls, comments)
         ]
 
     def list_pull_comments(self, repo_name: str, token: Union[str, None] = None) -> List[List[Dict[str, Any]]]:
