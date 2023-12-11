@@ -30,7 +30,7 @@ class GuidelineExample(BaseModel):
 
 
 class GuidelineContent(BaseModel):
-    title: str = Field(..., min_length=6, max_length=100)
+    title: str = Field(..., min_length=3, max_length=100)
     details: str = Field(..., min_length=6, max_length=1000)
 
 
