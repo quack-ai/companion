@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Union
 
 import requests
 from fastapi import HTTPException, status
+from pydantic import BaseModel, ValidationError
 
 from app.core.config import settings
 from app.models import Guideline
@@ -153,7 +154,7 @@ PARSING_PROMPT = (
     "Consider only guidelines that can be verified for a specific snippet of code (nothing about git, commits or community interactions) "
     "by a human developer without running additional commands or tools, it should only relate to the code within each file. "
     "Only include guidelines for which you could generate positive and negative code snippets, "
-    "don't invent anything that isn't present in the input text. "
+    "don't invent anything that isn't present in the input text or someone will die. "
     "You should answer in JSON format with only the list of string guidelines."
 )
 
@@ -338,16 +339,25 @@ class OpenAIClient:
         response = self._request(
             PARSING_PROMPT,
             OpenAIFunction(
-                name="parse_guidelines_from_text",
-                description="Parse guidelines from corpus",
+                name="validate_guidelines_from_text",
+                description="Validate extracted coding guidelines from corpus",
                 parameters=PARSING_SCHEMA,
             ),
             json.dumps(corpus),
             timeout,
             user_id,
         )
+        guidelines = [self.validate_model(GuidelineContent, elt) for elt in response["result"]]
+        if any(guideline is None for guideline in guidelines):
+            logger.info("Validation errors on some guidelines")
+        return [guideline for guideline in guidelines if guideline is not None]
 
-        return [GuidelineContent(**elt) for elt in response["result"]]
+    @staticmethod
+    def validate_model(model: BaseModel, data: Dict[str, Any]) -> Union[BaseModel, None]:
+        try:
+            return model(**data)
+        except ValidationError:
+            return None
 
     def generate_examples_for_instruction(
         self,
