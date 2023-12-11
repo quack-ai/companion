@@ -401,7 +401,7 @@ async def test_parse_guidelines_from_github(
     if isinstance(user_idx, int):
         auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
 
-    response = await async_client.post(f"/repos/{repo_id}/parse", headers=auth)
+    response = await async_client.post(f"/repos/{repo_id}/parse", json={}, headers=auth)
     assert response.status_code == status_code, print(response.json())
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
