@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     JWT_ENCODING_ALGORITHM: str = "HS256"
     # Compute
     OPENAI_API_KEY: str = os.environ["OPENAI_API_KEY"]
-    OPENAI_MODEL: OpenAIModel = OpenAIModel.GPT4_TURBO
+    OPENAI_MODEL: OpenAIModel = OpenAIModel.GPT3_5_TURBO
 
     # Error monitoring
     SENTRY_DSN: Union[str, None] = os.environ.get("SENTRY_DSN")
