@@ -6,7 +6,7 @@
 import json
 import logging
 import re
-from typing import Any, Callable, Dict, List
+from typing import Callable, Dict, List, TypeVar
 
 import requests
 from fastapi import HTTPException, status
@@ -15,6 +15,7 @@ from app.schemas.guidelines import GuidelineContent, GuidelineExample
 
 logger = logging.getLogger("uvicorn.error")
 
+ValidationOut = TypeVar("ValidationOut")
 # __all__ = ["ollama_client"]
 
 
@@ -84,9 +85,9 @@ class OllamaClient:
         self,
         system_prompt: str,
         message: str,
-        validate_fn: Callable[[str], Dict[str, Any]],
+        validate_fn: Callable[[str], ValidationOut],
         timeout: int = 20,
-    ) -> Dict[str, Any]:
+    ) -> ValidationOut:
         # Send the request
         response = requests.post(
             f"{self.endpoint}/api/generate",
