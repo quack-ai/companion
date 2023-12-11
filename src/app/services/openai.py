@@ -8,10 +8,11 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import requests
 from fastapi import HTTPException, status
+from pydantic import ValidationError
 
 from app.core.config import settings
 from app.models import Guideline
@@ -99,13 +100,48 @@ PARSING_SCHEMA = ObjectSchema(
             items=ObjectSchema(
                 type="object",
                 properties={
-                    "title": FieldSchema(type="string", description="a short summary title of the guideline"),
+                    "source": FieldSchema(
+                        type="string",
+                        description="the text section the guideline was extracted from",
+                    ),
+                    "category": {
+                        "type": "string",
+                        "description": "the high-level category of the guideline",
+                        "enum": [
+                            "naming",
+                            "error handling",
+                            "syntax",
+                            "comments",
+                            "docstring",
+                            "documentation",
+                            "testing",
+                            "signature",
+                            "type hint",
+                            "formatting",
+                            "other",
+                        ],
+                    },
                     "details": FieldSchema(
                         type="string",
-                        description="a descriptive, comprehensive and inambiguous explanation of the guideline.",
+                        description="a descriptive, comprehensive, inambiguous and specific explanation of the guideline.",
+                    ),
+                    "title": FieldSchema(type="string", description="a summary title of the guideline"),
+                    "examples": ObjectSchema(
+                        type="object",
+                        properties={
+                            "positive": FieldSchema(
+                                type="string",
+                                description="a short code snippet where the guideline was correctly followed.",
+                            ),
+                            "negative": FieldSchema(
+                                type="string",
+                                description="the same snippet with minimal modification that invalidate the instruction.",
+                            ),
+                        },
+                        required=["positive", "negative"],
                     ),
                 },
-                required=["title", "details"],
+                required=["category", "details", "title", "examples"],
             ),
         ),
     },
@@ -118,7 +154,7 @@ PARSING_PROMPT = (
     "Consider only guidelines that can be verified for a specific snippet of code (nothing about git, commits or community interactions) "
     "by a human developer without running additional commands or tools, it should only relate to the code within each file. "
     "Only include guidelines for which you could generate positive and negative code snippets, "
-    "don't invent anything that isn't present in the input text. "
+    "don't invent anything that isn't present in the input text or someone will die. "
     "You should answer in JSON format with only the list of string guidelines."
 )
 
@@ -144,6 +180,15 @@ EXAMPLE_PROMPT = (
     "and a similar version with minimal modifications that violates the rule. "
     "Make sure your code is functional, don't extra comments or explanation."
 )
+
+ModelInp = TypeVar("ModelInp")
+
+
+def validate_model(model: Type[ModelInp], data: Dict[str, Any]) -> Union[ModelInp, None]:
+    try:
+        return model(**data)
+    except ValidationError:
+        return None
 
 
 class OpenAIClient:
@@ -303,16 +348,18 @@ class OpenAIClient:
         response = self._request(
             PARSING_PROMPT,
             OpenAIFunction(
-                name="parse_guidelines_from_text",
-                description="Parse guidelines from corpus",
+                name="validate_guidelines_from_text",
+                description="Validate extracted coding guidelines from corpus",
                 parameters=PARSING_SCHEMA,
             ),
             json.dumps(corpus),
             timeout,
             user_id,
         )
-
-        return [GuidelineContent(**elt) for elt in response["result"]]
+        guidelines = [validate_model(GuidelineContent, elt) for elt in response["result"]]
+        if any(guideline is None for guideline in guidelines):
+            logger.info("Validation errors on some guidelines")
+        return [guideline for guideline in guidelines if guideline is not None]
 
     def generate_examples_for_instruction(
         self,

@@ -30,13 +30,13 @@ class GuidelineExample(BaseModel):
 
 
 class GuidelineContent(BaseModel):
-    title: str = Field(..., min_length=6, max_length=100)
+    title: str = Field(..., min_length=3, max_length=100)
     details: str = Field(..., min_length=6, max_length=1000)
 
 
 class ParsedGuideline(GuidelineContent):
     repo_id: int = Field(..., gt=0)
-    origin_path: str
+    source: str
 
 
 class GuidelineLocation(BaseModel):
