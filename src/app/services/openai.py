@@ -8,11 +8,11 @@ import logging
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Type, TypeVar, Union
 
 import requests
 from fastapi import HTTPException, status
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 
 from app.core.config import settings
 from app.models import Guideline
@@ -181,6 +181,15 @@ EXAMPLE_PROMPT = (
     "Make sure your code is functional, don't extra comments or explanation."
 )
 
+ModelInp = TypeVar("ModelInp")
+
+
+def validate_model(model: Type[ModelInp], data: Dict[str, Any]) -> Union[ModelInp, None]:
+    try:
+        return model(**data)
+    except ValidationError:
+        return None
+
 
 class OpenAIClient:
     ENDPOINT: str = "https://api.openai.com/v1/chat/completions"
@@ -347,17 +356,10 @@ class OpenAIClient:
             timeout,
             user_id,
         )
-        guidelines = [self.validate_model(GuidelineContent, elt) for elt in response["result"]]
+        guidelines = [validate_model(GuidelineContent, elt) for elt in response["result"]]
         if any(guideline is None for guideline in guidelines):
             logger.info("Validation errors on some guidelines")
         return [guideline for guideline in guidelines if guideline is not None]
-
-    @staticmethod
-    def validate_model(model: BaseModel, data: Dict[str, Any]) -> Union[BaseModel, None]:
-        try:
-            return model(**data)
-        except ValidationError:
-            return None
 
     def generate_examples_for_instruction(
         self,

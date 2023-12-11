@@ -6,7 +6,7 @@
 import logging
 from functools import partial
 from operator import itemgetter
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, cast
 
 import requests
 from fastapi import HTTPException, status
@@ -160,7 +160,7 @@ class GitHubClient:
 
     def get_pull_review_threads(
         self, repo_name: str, token: Union[str, None] = None
-    ) -> Dict[str, List[Dict[str, Any]]]:
+    ) -> Dict[str, List[List[Dict[str, Any]]]]:
         review_comments = {
             # diff_hunk, body, path, user/id, pull_request_url, reactions/total_count, in_reply_to_id, id, original_start_line, original_line
             comment["id"]: {
@@ -295,10 +295,13 @@ class GitHubClient:
         # Fetch reviews from those (parallelize)
         # reviews = [self.list_reviews_from_pull(repo_name, pull["number"], token, per_page=100) for pull in pulls]
         # Fetch comments (parallelize)
-        comments = execute_in_parallel(
-            partial(self.list_review_comments_from_pull, repo_name=repo_name, token=token, per_page=100, **kwargs),
-            (pull["number"] for pull in pulls),
-            len(pulls),
+        comments = cast(
+            List[List[Dict[str, Any]]],
+            execute_in_parallel(
+                partial(self.list_review_comments_from_pull, repo_name=repo_name, token=token, per_page=100, **kwargs),
+                (pull["number"] for pull in pulls),
+                len(pulls),
+            ),
         )
         # Arrange them in threads
         id_map = {
@@ -335,7 +338,8 @@ class GitHubClient:
             for pull, _comments in zip(pulls, comments)
         ]
 
-    def arrange_in_threads(self, comments: List[Dict[str, Any]]) -> List[List[int]]:
+    @staticmethod
+    def arrange_in_threads(comments: List[Dict[str, Any]]) -> List[List[int]]:
         # Chain the threads together
         unused_nodes = {comment["id"] for comment in comments}
         prev_map = {comment["id"]: comment.get("in_reply_to_id") for comment in comments}
