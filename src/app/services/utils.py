@@ -18,7 +18,7 @@ def execute_in_parallel(
     func: Callable[[Inp], Out],
     arr: Union[Sequence[Inp], Generator[Inp, None, None]],
     num_threads: Optional[int] = None,
-) -> Union[Sequence[Out], map[Out]]:
+) -> Sequence[Out]:
     """Execute a function in parallel on a sequence of inputs
 
     Args:
@@ -30,9 +30,9 @@ def execute_in_parallel(
         list: list of function's results
     """
     num_threads = num_threads if isinstance(num_threads, int) else min(16, mp.cpu_count())
-    results: Union[Sequence[Out], map[Out]]
+    results: Sequence[Out]
     if num_threads < 2:
-        results = map(func, arr)
+        results = map(func, arr)  # type: ignore[assignment]
     else:
         with ThreadPool(num_threads) as tp:
             results = tp.map(func, arr)
@@ -44,7 +44,7 @@ def run_executions_in_parallel(
     funcs: Sequence[Callable[[Inp], Out]],
     arr: Sequence[Inp],
     **kwargs,
-) -> Union[Sequence[Out], map[Out]]:
+) -> Sequence[Out]:
     """Execute distinct function calls in parallel
 
     Args:
