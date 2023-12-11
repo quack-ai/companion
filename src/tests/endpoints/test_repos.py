@@ -385,7 +385,7 @@ async def test_add_repo_to_waitlist(
     ("user_idx", "repo_id", "status_code", "status_detail"),
     [
         (None, 12345, 401, "Not authenticated"),
-        (0, 100, 404, "Not Found"),
+        (0, 100, 404, "Table Repository has no corresponding entry."),
     ],
 )
 @pytest.mark.asyncio()
