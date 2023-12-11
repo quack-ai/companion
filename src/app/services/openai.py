@@ -178,7 +178,7 @@ EXAMPLE_PROMPT = (
     "This will be used to teach new developers our way of engineering software. "
     "You should answer in JSON format with only two short code snippets in the specified programming language: one that follows the rule correctly, "
     "and a similar version with minimal modifications that violates the rule. "
-    "Make sure your code is functional, don't extra comments or explanation."
+    "Make sure your code is functional, don't extra comments or explanation, or someone will die."
 )
 
 ModelInp = TypeVar("ModelInp")
