@@ -48,6 +48,8 @@ class Settings(BaseSettings):
     # Compute
     OPENAI_API_KEY: str = os.environ["OPENAI_API_KEY"]
     OPENAI_MODEL: OpenAIModel = OpenAIModel.GPT3_5_TURBO
+    # OLLAMA_ENDPOINT: str = os.environ["OLLAMA_ENDPOINT"]
+    # OLLAMA_MODEL: str = os.environ.get("OLLAMA_MODEL", "starling-lm:7b-alpha")
 
     # Error monitoring
     SENTRY_DSN: Union[str, None] = os.environ.get("SENTRY_DSN")
