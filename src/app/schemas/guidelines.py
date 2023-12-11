@@ -36,7 +36,7 @@ class GuidelineContent(BaseModel):
 
 class ParsedGuideline(GuidelineContent):
     repo_id: int = Field(..., gt=0)
-    origin_path: str
+    source: str
 
 
 class GuidelineLocation(BaseModel):
