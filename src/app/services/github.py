@@ -22,6 +22,12 @@ logger = logging.getLogger("uvicorn.error")
 __all__ = ["gh_client"]
 
 
+def resolve_diff_section(diff_hunk: str, first_line: int, last_line: int) -> str:
+    """Assumes the diff_hunk's last line is the last_line"""
+    num_lines = last_line - first_line + 1
+    return "\n".join(diff_hunk.split("\n")[-num_lines:])
+
+
 class GitHubClient:
     ENDPOINT: str = "https://api.github.com"
     OAUTH_ENDPOINT: str = "https://github.com/login/oauth/access_token"
@@ -213,7 +219,7 @@ class GitHubClient:
             # diff_hunk, body, path, user/id, pull_request_url, reactions/total_count, in_reply_to_id, id, original_start_line, original_line
             comment["id"]: {
                 "id": comment["id"],
-                "code": self.resolve_section(
+                "code": resolve_diff_section(
                     comment["diff_hunk"],
                     comment["original_start_line"] or comment["original_line"],
                     comment["original_line"],
