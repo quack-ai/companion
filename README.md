@@ -4,6 +4,12 @@
 <h1 align="center">
  Quack - API for contribution assistance
 </h1>
+<p align="center">
+  <a href="https://github.com/quack-ai/companion">VSCode extension</a> ・
+  <a href="https://github.com/quack-ai/contribution-api">Backend API</a> ・
+  <a href="https://github.com/quack-ai/platform">Guideline management platform</a>
+</p>
+<h2 align="center"></h2>
 
 <p align="center">
   <a href="https://github.com/quack-ai/contribution-api/actions?query=workflow%3Abuilds">
@@ -35,8 +41,6 @@
   </a>
 </p>
 
-
-The building blocks of our contribution assistance API.
 
 ## Quick Tour
 
