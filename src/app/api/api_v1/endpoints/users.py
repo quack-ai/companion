@@ -29,7 +29,6 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
         properties={
             "login": gh_user["login"],
             "name": gh_user["name"],
-            "email": gh_user["email"],
             "twitter_username": gh_user["twitter_username"],
         },
     )
