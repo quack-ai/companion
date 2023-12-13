@@ -187,7 +187,7 @@ ModelInp = TypeVar("ModelInp")
 def validate_model(model: Type[ModelInp], data: Dict[str, Any]) -> Union[ModelInp, None]:
     try:
         return model(**data)
-    except ValidationError:
+    except (ValidationError, TypeError):
         return None
 
 
@@ -281,11 +281,12 @@ class OpenAIClient:
         openai_fn: OpenAIFunction,
         message: str,
         timeout: int = 20,
+        model: Union[OpenAIModel, None] = None,
         user_id: Union[str, None] = None,
     ) -> Dict[str, Any]:
         # Prepare the request
         _payload = ChatCompletion(
-            model=self.model,
+            model=model or self.model,
             messages=[
                 OpenAIMessage(
                     role=OpenAIChatRole.SYSTEM,
@@ -316,8 +317,7 @@ class OpenAIClient:
         prompt: str,
         payload: Dict[str, Any],
         schema: ObjectSchema,
-        timeout: int = 20,
-        user_id: Union[str, None] = None,
+        **kwargs,
     ) -> Dict[str, Any]:
         return self._request(
             prompt,
@@ -327,15 +327,13 @@ class OpenAIClient:
                 parameters=schema,
             ),
             json.dumps(payload),
-            timeout,
-            user_id,
+            **kwargs,
         )
 
     def parse_guidelines_from_text(
         self,
         corpus: str,
-        timeout: int = 20,
-        user_id: Union[str, None] = None,
+        **kwargs,
     ) -> List[GuidelineContent]:
         if not isinstance(corpus, str):
             raise HTTPException(
@@ -353,8 +351,7 @@ class OpenAIClient:
                 parameters=PARSING_SCHEMA,
             ),
             json.dumps(corpus),
-            timeout,
-            user_id,
+            **kwargs,
         )
         guidelines = [validate_model(GuidelineContent, elt) for elt in response["result"]]
         if any(guideline is None for guideline in guidelines):
@@ -365,8 +362,7 @@ class OpenAIClient:
         self,
         instruction: str,
         language: str,
-        timeout: int = 20,
-        user_id: Union[str, None] = None,
+        **kwargs,
     ) -> GuidelineExample:
         if (
             not isinstance(instruction, str)
@@ -388,8 +384,7 @@ class OpenAIClient:
                     parameters=EXAMPLE_SCHEMA,
                 ),
                 json.dumps({"instruction": instruction, "language": language}),
-                timeout,
-                user_id,
+                **kwargs,
             )
         )
 
