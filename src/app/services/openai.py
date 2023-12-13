@@ -187,7 +187,7 @@ ModelInp = TypeVar("ModelInp")
 def validate_model(model: Type[ModelInp], data: Dict[str, Any]) -> Union[ModelInp, None]:
     try:
         return model(**data)
-    except ValidationError:
+    except (ValidationError, TypeError):
         return None
 
 
