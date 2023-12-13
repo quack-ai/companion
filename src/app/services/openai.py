@@ -281,11 +281,12 @@ class OpenAIClient:
         openai_fn: OpenAIFunction,
         message: str,
         timeout: int = 20,
+        model: Union[OpenAIModel, None] = None,
         user_id: Union[str, None] = None,
     ) -> Dict[str, Any]:
         # Prepare the request
         _payload = ChatCompletion(
-            model=self.model,
+            model=model or self.model,
             messages=[
                 OpenAIMessage(
                     role=OpenAIChatRole.SYSTEM,
