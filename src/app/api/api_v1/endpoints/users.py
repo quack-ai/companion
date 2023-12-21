@@ -51,7 +51,7 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
     slack_client.notify(
         "*New user* :partying_face:",
         [
-            ("Name", gh_user["name"]),
+            ("Name", gh_user["name"] or "N/A"),
             ("Email", gh_user["email"] or "N/A"),
             ("Company", f"`{gh_user['company']}`" if gh_user["company"] else "N/A"),
             ("GitHub", f"<{gh_user['html_url']}|{gh_user['login']}> ({gh_user['followers']} followers)"),
