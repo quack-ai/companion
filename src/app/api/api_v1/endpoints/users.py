@@ -51,11 +51,16 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
     slack_client.notify(
         "*New user* :partying_face:",
         [
-            ("Name", gh_user["name"]),
-            ("Email", gh_user["email"]),
-            ("Company", f"`{gh_user['company']}`"),
+            ("Name", gh_user["name"] or "N/A"),
+            ("Email", gh_user["email"] or "N/A"),
+            ("Company", f"`{gh_user['company']}`" if gh_user["company"] else "N/A"),
             ("GitHub", f"<{gh_user['html_url']}|{gh_user['login']}> ({gh_user['followers']} followers)"),
-            ("Twitter", f"<https://twitter.com/{gh_user['twitter_username']}|{gh_user['twitter_username']}>"),
+            (
+                "Twitter",
+                f"<https://twitter.com/{gh_user['twitter_username']}|{gh_user['twitter_username']}>"
+                if gh_user["twitter_username"]
+                else "N/A",
+            ),
         ],
     )
     return user
