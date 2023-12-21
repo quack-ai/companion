@@ -266,13 +266,14 @@ class GitHubClient:
             _thread = [_id]
             unused_nodes.remove(_id)
             while isinstance(next_map.get(_thread[-1]), int):
-                _thread.append(next_map[_thread[-1]])
                 unused_nodes.remove(next_map[_thread[-1]])
+                _thread.append(next_map[_thread[-1]])
             while isinstance(prev_map.get(_thread[0]), int):
-                _thread.insert(0, prev_map[_thread[0]])
                 unused_nodes.remove(prev_map[_thread[0]])
+                _thread.insert(0, prev_map[_thread[0]])
             threads.append(_thread)
 
+        # Sort threads by the ID of the first comment
         return sorted(threads, key=itemgetter(0))
 
     def fetch_pull_comments_from_repo(
