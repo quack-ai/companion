@@ -202,6 +202,30 @@ async def test_githubclient_fetch_pull_comments_from_repo(repo_name, status_code
 
 
 @pytest.mark.parametrize(
+    ("comments", "expected_output"),
+    [
+        # cf. https://github.com/StanGirard/quivr/pull/1883
+        (
+            [
+                {"id": 1425674031},
+                {"id": 1425677116},
+                {"id": 1425684351},
+                {"id": 1425692412},
+                {"id": 1425694380, "in_reply_to_id": 1425692412},
+                {"id": 1425696753},
+                {"id": 1425696853, "in_reply_to_id": 1425696753},
+                {"id": 1426417539, "in_reply_to_id": 1425684351},
+            ],
+            [[1425674031], [1425677116], [1425684351, 1426417539], [1425692412, 1425694380], [1425696753, 1425696853]],
+        ),
+    ],
+)
+@pytest.mark.asyncio()
+async def test_githubclient_arrange_in_threads(comments, expected_output):
+    assert GitHubClient.arrange_in_threads(comments) == expected_output
+
+
+@pytest.mark.parametrize(
     ("func", "arr", "output"),
     [
         (lambda x: x**2, [1, 2, 3], [1, 4, 9]),
