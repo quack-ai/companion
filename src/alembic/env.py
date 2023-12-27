@@ -19,7 +19,7 @@ from app.core.config import settings
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
 
-from app.models import *  # noqa F401
+from app.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
