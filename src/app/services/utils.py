@@ -55,7 +55,7 @@ def run_executions_in_parallel(
     Returns:
         list: list of function's results
     """
-    return execute_in_parallel(  # type: ignore[misc]
+    return execute_in_parallel(
         lambda fn_arg: fn_arg[0](fn_arg[1]),  # type: ignore[index]
         zip(funcs, arr),  # type: ignore[arg-type]
         **kwargs,
