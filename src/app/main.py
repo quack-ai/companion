@@ -11,6 +11,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
+from prometheus_fastapi_instrumentator import Instrumentator
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 
 from app.api.api_v1.router import api_router
@@ -109,3 +110,6 @@ def custom_openapi():
 
 
 app.openapi = custom_openapi  # type: ignore[method-assign]
+Instrumentator(
+    excluded_handlers=["/metrics", "/docs", ".*openapi.json"],
+).instrument(app).expose(app, include_in_schema=False)
