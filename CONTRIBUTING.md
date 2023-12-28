@@ -26,6 +26,8 @@ This project uses the following integrations to ensure proper codebase maintenan
 - [PostgreSQL](https://www.postgresql.org/) - storing and interacting with the metadata database
 - [PostHog](https://posthog.com/) - product analytics
 - [Slack](https://slack.com/) - event notifications
+- [Prometheus](https://prometheus.io/) - Scraping API metrics
+- [Grafana](https://grafana.com/) - Dashboard for API monitoring (dashboard adapted from https://github.com/Kludex/fastapi-prometheus-grafana)
 - [Traefik](https://traefik.io/) - the reverse proxy and load balancer
 
 As a contributor, you will only have to ensure coverage of your code by adding appropriate unit testing of your code.

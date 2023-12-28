@@ -4,8 +4,8 @@
 'ext: scripts':
 - scripts/*
 
-'ext: dashboard':
-- dashboard/*
+'ext: apm':
+- apm/*
 
 'module: database':
 - src/app/db.py
