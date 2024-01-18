@@ -11,12 +11,13 @@ from typing import Callable, Dict, List, TypeVar
 import requests
 from fastapi import HTTPException, status
 
+from app.core.config import settings
 from app.schemas.guidelines import GuidelineContent, GuidelineExample
 
 logger = logging.getLogger("uvicorn.error")
 
 ValidationOut = TypeVar("ValidationOut")
-# __all__ = ["ollama_client"]
+__all__ = ["ollama_client"]
 
 
 EXAMPLE_PROMPT = (
@@ -53,6 +54,12 @@ PARSING_PROMPT = (
     "- details: a descriptive, comprehensive and inambiguous explanation of the guideline."
 )
 PARSING_PATTERN = r"\{\s*\"title\":\s+\"(?P<title>.*?)\",\s+\"details\":\s+\"(?P<details>.*?)\"\s*\}"
+
+
+CHAT_PROMPT = (
+    "You are an AI programming assistant, developed by the company Quack AI, and you only answer questions related to computer science "
+    "(refuse to answer for the rest)."
+)
 
 
 def validate_parsing_response(response: str) -> List[Dict[str, str]]:
@@ -97,6 +104,7 @@ class OllamaClient:
                 "options": {"temperature": self.temperature},
                 "system": system_prompt,
                 "prompt": message,
+                "format": "json",
             },
             timeout=timeout,
         )
@@ -108,6 +116,34 @@ class OllamaClient:
         # Regex to locate JSON string
         logger.info(response.json()["response"].strip())
         return validate_fn(response.json()["response"])
+
+    def _chat(
+        self,
+        system_prompt: str,
+        message: str,
+        timeout: int = 20,
+    ) -> requests.Response:
+        return requests.post(
+            f"{self.endpoint}/api/chat",
+            json={
+                "model": self.model_name,
+                "stream": True,
+                "options": {"temperature": self.temperature},
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message},
+                ],
+            },
+            stream=True,
+            timeout=timeout,
+        )
+
+    def chat(
+        self,
+        message: str,
+        **kwargs,
+    ) -> requests.Response:
+        return self._chat(CHAT_PROMPT, message, **kwargs)
 
     def parse_guidelines_from_text(
         self,
@@ -158,4 +194,4 @@ class OllamaClient:
         )
 
 
-# ollama_client = OllamaClient(settings.OLLAMA_ENDPOINT, settings.OLLAMA_MODEL)
+ollama_client = OllamaClient(settings.OLLAMA_ENDPOINT, settings.OLLAMA_MODEL)
