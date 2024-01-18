@@ -77,7 +77,6 @@ def main(args):
     # Warmup
     for _ in range(args.warmup):
         _generate(args.endpoint, args.model, speed_system, speed_prompt)
-        # _format_response(response, speed_system, speed_prompt)
 
     # Run
     timings = []
