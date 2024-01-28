@@ -9,8 +9,8 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-      time: "06:00"
-      timezone: "Europe/Paris"
+      # time: "06:00"
+      # timezone: "Europe/Paris"
     groups:
       gh-actions:
         patterns:
@@ -23,9 +23,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "06:00"
-      timezone: "Europe/Paris"
+      # day: "monday"
+      # time: "06:00"
+      # timezone: "Europe/Paris"
     reviewers:
       - "frgfm"
     assignees:
