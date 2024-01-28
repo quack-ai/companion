@@ -26,7 +26,7 @@ requests = "^2.20.0"
 python-multipart = "==0.0.5"
 SQLAlchemy-Utils = "^0.38.3"
 sentry-sdk = { version = "^1.14.0", extras = ["fastapi"] }
-alembic = "^1.8.1"
+alembic = "^1.13.1"
 posthog = "^3.0.0"
 prometheus-fastapi-instrumentator = "^6.1.0"
 
