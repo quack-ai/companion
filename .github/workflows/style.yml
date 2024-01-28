@@ -22,7 +22,7 @@ jobs:
           architecture: x64
       - uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: "1.6.1"
+          poetry-version: "1.7.1"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --only quality --output requirements.txt
       - name: Cache python modules
@@ -53,7 +53,7 @@ jobs:
           architecture: x64
       - uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: "1.6.1"
+          poetry-version: "1.7.1"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --with quality --output requirements.txt
       - name: Cache python modules
@@ -85,7 +85,7 @@ jobs:
           architecture: x64
       - uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: "1.6.1"
+          poetry-version: "1.7.1"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --only quality --output requirements.txt
       - name: Cache python modules

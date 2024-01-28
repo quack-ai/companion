@@ -16,7 +16,7 @@ jobs:
           python-version: "3.9"
       - uses: abatilo/actions-poetry@v2
         with:
-          poetry-version: "1.6.1"
+          poetry-version: "1.7.1"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
       - name: Build & run docker
