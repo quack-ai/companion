@@ -76,7 +76,7 @@ pre-commit install
 #### Commits
 
 - **Code**: ensure to provide docstrings to your Python code. In doing so, please follow [Google-style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) so it can ease the process of documentation later.
-- **Commit message**: please follow [Udacity guide](http://udacity.github.io/git-styleguide/)
+- **Commit message**: please follow [Angular commit format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format)
 
 #### Unit tests
 
