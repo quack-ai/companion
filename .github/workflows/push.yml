@@ -31,7 +31,7 @@ jobs:
     needs: dockerhub
     runs-on: ubuntu-latest
     steps:
-      - uses: appleboy/ssh-action@v1
+      - uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_DEV_HOST }}
           username: ${{ secrets.SSH_DEV_USERNAME }}
