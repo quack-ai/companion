@@ -9,7 +9,7 @@ from typing import List
 
 from sqlmodel import Field, Relationship, SQLModel
 
-__all__ = ["GHRole", "UserScope", "User", "Repository", "Guideline"]
+__all__ = ["GHRole", "Guideline", "Repository", "User", "UserScope"]
 
 
 class GHRole(str, Enum):

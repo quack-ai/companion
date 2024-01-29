@@ -6,7 +6,7 @@
 
 from pydantic import BaseModel, Field
 
-__all__ = ["Snippet", "ComplianceResult"]
+__all__ = ["ComplianceResult", "Snippet"]
 
 
 class Snippet(BaseModel):

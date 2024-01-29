@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 from .base import OptionalGHToken
 
-__all__ = ["GuidelineCreate", "GuidelineEdit", "ContentUpdate", "OrderUpdate"]
+__all__ = ["ContentUpdate", "GuidelineCreate", "GuidelineEdit", "OrderUpdate"]
 
 
 class TextContent(BaseModel):
@@ -32,6 +32,7 @@ class GuidelineExample(BaseModel):
 class GuidelineContent(BaseModel):
     title: str = Field(..., min_length=3, max_length=100)
     details: str = Field(..., min_length=6, max_length=1000)
+    # category: str
 
 
 class ParsedGuideline(GuidelineContent):

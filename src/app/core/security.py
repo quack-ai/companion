@@ -11,7 +11,7 @@ from passlib.context import CryptContext
 
 from app.core.config import settings
 
-__all__ = ["create_access_token", "verify_password", "hash_password"]
+__all__ = ["create_access_token", "hash_password", "verify_password"]
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
