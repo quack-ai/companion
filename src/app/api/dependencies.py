@@ -17,7 +17,7 @@ from app.db import get_session
 from app.models import User, UserScope
 from app.schemas.login import TokenPayload
 
-__all__ = ["get_user_crud", "get_repo_crud", "get_guideline_crud", "get_current_user"]
+__all__ = ["get_current_user", "get_guideline_crud", "get_repo_crud", "get_user_crud"]
 
 # Scope definition
 oauth2_scheme = OAuth2PasswordBearer(

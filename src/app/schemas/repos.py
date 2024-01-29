@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 from .base import OptionalGHToken, _Id
 
-__all__ = ["RepoCreate", "RepoCreation", "RepoUpdate", "GuidelineOrder"]
+__all__ = ["GuidelineOrder", "RepoCreate", "RepoCreation", "RepoUpdate"]
 
 
 class RepoCreate(_Id, OptionalGHToken):

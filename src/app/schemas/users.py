@@ -9,7 +9,7 @@ from app.models import UserScope
 
 from .base import _Id
 
-__all__ = ["UserCreate", "UserCreation", "Cred", "CredHash"]
+__all__ = ["Cred", "CredHash", "UserCreate", "UserCreation"]
 
 
 # Accesses
