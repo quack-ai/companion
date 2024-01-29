@@ -23,7 +23,7 @@ bcrypt = "^3.2.0"
 passlib = { version = "^1.7.4", extras = ["bcrypt"] }
 python-jose = "^3.2.0"
 requests = "^2.20.0"
-python-multipart = "==0.0.5"
+python-multipart = "==0.0.6"
 SQLAlchemy-Utils = "^0.38.3"
 sentry-sdk = { version = "^1.14.0", extras = ["fastapi"] }
 alembic = "^1.8.1"
