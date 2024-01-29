@@ -10,6 +10,12 @@
 - changed-files:
   - any-glob-to-any-file: apm/*
 
+'module: core':
+- changed-files:
+  - any-glob-to-any-file:
+    - src/app/main.py
+    - src/app/core/*
+
 'module: database':
 - changed-files:
   - any-glob-to-any-file: src/app/db.py
@@ -17,12 +23,6 @@
 'module: services':
 - changed-files:
   - any-glob-to-any-file: src/app/services/*
-
-'module: core':
-- changed-files:
-  - any-glob-to-any-file:
-    - src/app/main.py
-    - src/app/core/*
 
 'module: models':
 - changed-files:
@@ -84,19 +84,13 @@
     - Dockerfile
     - traefik/*
 
-'topic: documentation':
+'topic: docs':
 - changed-files:
   - any-glob-to-any-file:
     - README.md
     - CONTRIBUTING.md
     - CODE_OF_CONDUCT.md
 
-'topic: security':
-- changed-files:
-  - any-glob-to-any-file:
-    - src/app/api/dependencies.py
-    - src/app/security.py
-
-'type: code quality':
+'topic: style':
 - changed-files:
   - any-glob-to-any-file: .pre-commit-config.yaml
