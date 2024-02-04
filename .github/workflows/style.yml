@@ -114,9 +114,17 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           architecture: x64
+      - uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: "1.7.1"
+      - name: Resolve dependencies
+        run: poetry export -f requirements.txt --without-hashes --only quality --output requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
       - name: Run pre-commit hooks
         run: |
-          pip install pre-commit
           git checkout -b temp
           pre-commit install
           pre-commit --version
