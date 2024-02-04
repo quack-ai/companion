@@ -34,7 +34,7 @@ prometheus-fastapi-instrumentator = "^6.1.0"
 optional = true
 
 [tool.poetry.group.quality.dependencies]
-ruff = "==0.1.14"
+ruff = "==0.2.0"
 mypy = "==1.8.0"
 types-requests = ">=2.0.0"
 types-python-jose = ">=3.3.0"
