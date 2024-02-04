@@ -101,3 +101,23 @@ jobs:
         run: |
           ruff --version
           ruff format --check --diff .
+
+  precommit-hooks:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python: [3.9]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: x64
+      - name: Run pre-commit hooks
+        run: |
+          pip install pre-commit
+          git checkout -b temp
+          pre-commit install
+          pre-commit --version
+          pre-commit run --all-files
