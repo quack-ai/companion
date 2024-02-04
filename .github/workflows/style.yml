@@ -101,3 +101,31 @@ jobs:
         run: |
           ruff --version
           ruff format --check --diff .
+
+  precommit-hooks:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python: [3.9]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: x64
+      - uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: "1.7.1"
+      - name: Resolve dependencies
+        run: poetry export -f requirements.txt --without-hashes --only quality --output requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run pre-commit hooks
+        run: |
+          git checkout -b temp
+          pre-commit install
+          pre-commit --version
+          pre-commit run --all-files
