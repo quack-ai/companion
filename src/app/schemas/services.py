@@ -13,10 +13,10 @@ __all__ = ["ChatCompletion"]
 
 class OpenAIModel(str, Enum):
     # https://platform.openai.com/docs/models/overview
-    GPT3_5_TURBO: str = "gpt-3.5-turbo-1106"
-    GPT3_5_TURBO_LEGACY: str = "gpt-3.5-turbo-0613"
-    GPT4_TURBO: str = "gpt-4-1106-preview"
-    GPT4: str = "gpt-4-0613"
+    GPT3_5_TURBO: str = "gpt-3.5-turbo-0125"
+    GPT3_5_TURBO_LEGACY: str = "gpt-3.5-turbo-1106"
+    GPT4_TURBO: str = "gpt-4-0125-preview"
+    GPT4_TURBO_LEGACY: str = "gpt-4-1106-preview"
 
 
 class OpenAIChatRole(str, Enum):
