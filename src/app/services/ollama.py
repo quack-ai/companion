@@ -105,6 +105,7 @@ class OllamaClient:
                 "system": system_prompt,
                 "prompt": message,
                 "format": "json",
+                "keep_alive": "30s",
             },
             timeout=timeout,
         )
@@ -133,6 +134,7 @@ class OllamaClient:
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": message},
                 ],
+                "keep_alive": "30s",
             },
             stream=True,
             timeout=timeout,
