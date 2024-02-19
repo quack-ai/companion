@@ -1,71 +1,96 @@
 'ext: tests':
-- src/tests/*
+- changed-files:
+  - any-glob-to-any-file: src/tests/*
 
 'ext: scripts':
-- scripts/*
+- changed-files:
+  - any-glob-to-any-file: scripts/*
 
 'ext: apm':
-- apm/*
-
-'module: database':
-- src/app/db.py
-
-'module: services':
-- src/app/services/*
+- changed-files:
+  - any-glob-to-any-file: apm/*
 
 'module: core':
-- src/app/main.py
-- src/app/core/*
+- changed-files:
+  - any-glob-to-any-file:
+    - src/app/main.py
+    - src/app/core/*
+
+'module: database':
+- changed-files:
+  - any-glob-to-any-file: src/app/db.py
+
+'module: services':
+- changed-files:
+  - any-glob-to-any-file: src/app/services/*
 
 'module: models':
-- src/app/models.py
+- changed-files:
+  - any-glob-to-any-file: src/app/models.py
 
 'module: schemas':
-- src/app/schemas/*
+- changed-files:
+  - any-glob-to-any-file: src/app/schemas/*
 
 'module: crud':
-- src/app/crud/*
+- changed-files:
+  - any-glob-to-any-file: src/app/crud/*
 
 'endpoint: login':
-- src/app/api/*/endpoints/login.py
+- changed-files:
+  - any-glob-to-any-file: src/app/api/*/endpoints/login.py
 
 'endpoint: users':
-- src/app/api/*/endpoints/users.py
+- changed-files:
+  - any-glob-to-any-file: src/app/api/*/endpoints/users.py
 
 'endpoint: repos':
-- src/app/api/*/endpoints/repos.py
+- changed-files:
+  - any-glob-to-any-file: src/app/api/*/endpoints/repos.py
 
 'endpoint: guidelines':
-- src/app/api/*/endpoints/guidelines.py
+- changed-files:
+  - any-glob-to-any-file: src/app/api/*/endpoints/guidelines.py
 
 'endpoint: compute':
-- src/app/api/*/endpoints/compute.py
+- changed-files:
+  - any-glob-to-any-file: src/app/api/*/endpoints/compute.py
+
+'endpoint: code':
+- changed-files:
+  - any-glob-to-any-file: src/app/api/*/endpoints/code.py
 
 'topic: build':
-- pyproject.toml
-- poetry.lock
+- changed-files:
+  - any-glob-to-any-file:
+    - pyproject.toml
+    - poetry.lock
 
 'topic: migration':
-- src/alembic.ini
-- src/alembic/*
+- changed-files:
+  - any-glob-to-any-file:
+    - src/alembic.ini
+    - src/alembic/*
 
 'topic: ci':
-- .github/*
+- changed-files:
+  - any-glob-to-any-file: .github/*
 
 'topic: docker':
-- docker-compose.yml
-- docker-compose.test.yml
-- Dockerfile
-- traefik/*
+- changed-files:
+  - any-glob-to-any-file:
+    - docker-compose.yml
+    - docker-compose.test.yml
+    - Dockerfile
+    - traefik/*
 
-'topic: documentation':
-- README.md
-- CONTRIBUTING.md
-- CODE_OF_CONDUCT.md
+'topic: docs':
+- changed-files:
+  - any-glob-to-any-file:
+    - README.md
+    - CONTRIBUTING.md
+    - CODE_OF_CONDUCT.md
 
-'topic: security':
-- src/app/api/dependencies.py
-- src/app/security.py
-
-'type: code quality':
-- .pre-commit-config.yaml
+'topic: style':
+- changed-files:
+  - any-glob-to-any-file: .pre-commit-config.yaml

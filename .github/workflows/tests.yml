@@ -10,13 +10,13 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.9"
-      - uses: abatilo/actions-poetry@v2
+      - uses: abatilo/actions-poetry@v3
         with:
-          poetry-version: "1.6.1"
+          poetry-version: "1.7.1"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
       - name: Build & run docker
@@ -49,7 +49,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - name: Check the headers

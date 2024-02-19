@@ -7,7 +7,7 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
-__all__ = ["Snippet", "ComplianceResult", "ChatMessage"]
+__all__ = ["ChatMessage", "ComplianceResult", "Snippet"]
 
 
 class Snippet(BaseModel):

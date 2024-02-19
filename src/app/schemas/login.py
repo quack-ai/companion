@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field, HttpUrl
 
 from app.models import UserScope
 
-__all__ = ["Token", "GHAccessToken"]
+__all__ = ["GHAccessToken", "Token"]
 
 
 class GHAccessToken(BaseModel):
