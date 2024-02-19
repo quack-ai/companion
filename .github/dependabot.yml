@@ -6,8 +6,9 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
       day: "monday"
       time: "06:00"
       timezone: "Europe/Paris"
@@ -20,6 +21,7 @@ updates:
     assignees:
       - "frgfm"
   - package-ecosystem: "pip"
+    directory: "/"
     schedule:
       interval: "monthly"
       day: "monday"
