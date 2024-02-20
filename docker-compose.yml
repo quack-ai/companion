@@ -27,15 +27,15 @@ services:
 
   ollama:
     image: ollama/ollama:0.1.25
-    command: serve && ollama pull ${OLLAMA_MODEL}
+    command: serve
     volumes:
       - "$HOME/.ollama:/root/.ollama"
     expose:
       - 11434
     healthcheck:
-      test: ["CMD-SHELL", "ollama list | grep -q '${OLLAMA_MODEL}'"]
-      interval: 10s
-      timeout: 3s
+      test: ["CMD-SHELL", "ollama pull '${OLLAMA_MODEL}'"]
+      interval: 5s
+      timeout: 1m
       retries: 3
     deploy:
       resources:

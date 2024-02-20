@@ -39,15 +39,15 @@ services:
 
   ollama:
     image: ollama/ollama:0.1.25
-    command: serve && ollama pull 'tinydolphin:1.1b-v2.8-q4_0'
+    command: serve
     volumes:
       - "$HOME/.ollama:/root/.ollama"
     expose:
       - 11434
     healthcheck:
-      test: ["CMD-SHELL", "ollama list | grep -q 'tinydolphin:1.1b-v2.8-q4_0'"]
-      interval: 30s
-      timeout: 3s
+      test: ["CMD-SHELL", "ollama pull 'tinydolphin:1.1b-v2.8-q4_0'"]
+      interval: 5s
+      timeout: 1m
       retries: 3
     # deploy:
     #   resources:
