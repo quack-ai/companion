@@ -14,17 +14,14 @@ from app.models import Guideline, Repository, User, UserScope
 from app.schemas.base import OptionalGHToken
 from app.schemas.guidelines import (
     ContentUpdate,
-    ExampleRequest,
-    GuidelineContent,
     GuidelineCreate,
     GuidelineCreation,
     GuidelineEdit,
-    GuidelineExample,
     OrderUpdate,
-    TextContent,
 )
 from app.services.github import gh_client
-from app.services.openai import openai_client
+
+# from app.services.openai import openai_client
 from app.services.telemetry import telemetry_client
 
 router = APIRouter()
@@ -115,23 +112,23 @@ async def delete_guideline(
     await guidelines.delete(guideline_id)
 
 
-@router.post("/parse", status_code=status.HTTP_200_OK, summary="Extract guidelines from a text corpus")
-async def parse_guidelines_from_text(
-    payload: TextContent,
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
-) -> List[GuidelineContent]:
-    telemetry_client.capture(user.id, event="guideline-parse")
-    # Analyze with LLM
-    return openai_client.parse_guidelines_from_text(payload.content, user_id=str(user.id))
-    # return ollama_client.parse_guidelines_from_text(payload.content)
+# @router.post("/parse", status_code=status.HTTP_200_OK, summary="Extract guidelines from a text corpus")
+# async def parse_guidelines_from_text(
+#     payload: TextContent,
+#     user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+# ) -> List[GuidelineContent]:
+#     telemetry_client.capture(user.id, event="guideline-parse")
+#     # Analyze with LLM
+#     return openai_client.parse_guidelines_from_text(payload.content, user_id=str(user.id))
+#     # return ollama_client.parse_guidelines_from_text(payload.content)
 
 
-@router.post("/examples", status_code=status.HTTP_200_OK, summary="Request examples for a guideline")
-async def generate_examples_for_text(
-    payload: ExampleRequest,
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
-) -> GuidelineExample:
-    telemetry_client.capture(user.id, event="guideline-examples")
-    # Analyze with LLM
-    return openai_client.generate_examples_for_instruction(payload.content, payload.language, user_id=str(user.id))
-    # return ollama_client.generate_examples_for_instruction(payload.content, payload.language)
+# @router.post("/examples", status_code=status.HTTP_200_OK, summary="Request examples for a guideline")
+# async def generate_examples_for_text(
+#     payload: ExampleRequest,
+#     user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+# ) -> GuidelineExample:
+#     telemetry_client.capture(user.id, event="guideline-examples")
+#     # Analyze with LLM
+#     return openai_client.generate_examples_for_instruction(payload.content, payload.language, user_id=str(user.id))
+#     # return ollama_client.generate_examples_for_instruction(payload.content, payload.language)

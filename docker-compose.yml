@@ -14,11 +14,14 @@ services:
       - GH_OAUTH_ID=${GH_OAUTH_ID}
       - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
       - POSTGRES_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+      # - POSTGRES_URL=postgresql+asyncpg://postgres:K#p9&drDxA43rRn9@db.jqaovscwhukwcignjxms.supabase.co/postgres
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - SECRET_KEY=${SECRET_KEY}
-      - SENTRY_DSN=${SENTRY_DSN}
-      - SERVER_NAME=${SERVER_NAME}
-      - POSTHOG_KEY=${POSTHOG_KEY}
+      - OLLAMA_ENDPOINT=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      # - SENTRY_DSN=${SENTRY_DSN}
+      # - SERVER_NAME=${SERVER_NAME}
+      # - POSTHOG_KEY=${POSTHOG_KEY}
       - SLACK_API_TOKEN=${SLACK_API_TOKEN}
       - SLACK_CHANNEL=${SLACK_CHANNEL}
       - SUPPORT_EMAIL=${SUPPORT_EMAIL}
@@ -26,6 +29,28 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      ollama:
+        condition: service_healthy
+
+  ollama:
+    image: ollama/ollama:0.1.25
+    command: serve && ollama pull ${OLLAMA_MODEL}
+    volumes:
+      - "$HOME/.ollama:/root/.ollama"
+    expose:
+      - 11434
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list | grep -q '${OLLAMA_MODEL}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
   db:
     image: postgres:15-alpine
@@ -71,3 +96,4 @@ services:
 
 volumes:
   postgres_data:
+  ollama:

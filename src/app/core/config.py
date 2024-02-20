@@ -10,8 +10,6 @@ from typing import Union
 
 from pydantic import BaseSettings, validator
 
-from app.schemas.services import OpenAIModel
-
 __all__ = ["settings"]
 
 
@@ -45,9 +43,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ACCESS_TOKEN_UNLIMITED_MINUTES: int = 60 * 24 * 365
     JWT_ENCODING_ALGORITHM: str = "HS256"
-    # Compute
-    OPENAI_API_KEY: str = os.environ["OPENAI_API_KEY"]
-    OPENAI_MODEL: OpenAIModel = OpenAIModel.GPT3_5_TURBO
+    # LLM Compute
     OLLAMA_ENDPOINT: str = os.environ["OLLAMA_ENDPOINT"]
     OLLAMA_MODEL: str = os.environ.get("OLLAMA_MODEL", "dolphin-mistral:7b-v2.6-dpo-laser-q4_0")
 

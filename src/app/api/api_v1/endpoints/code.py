@@ -1,4 +1,4 @@
-# Copyright (C) 2023-2024, Quack AI.
+# Copyright (C) 2024, Quack AI.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
@@ -9,7 +9,7 @@ from fastapi.responses import StreamingResponse
 
 from app.api.dependencies import get_current_user
 from app.models import User, UserScope
-from app.schemas.compute import ChatMessage
+from app.schemas.code import ChatMessage
 from app.services.ollama import ollama_client
 from app.services.telemetry import telemetry_client
 

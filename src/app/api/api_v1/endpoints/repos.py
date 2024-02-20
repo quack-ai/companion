@@ -4,9 +4,7 @@
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 import logging
-from base64 import b64decode
 from datetime import datetime
-from functools import partial
 from typing import List, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
@@ -15,13 +13,13 @@ from app.api.dependencies import get_current_user, get_guideline_crud, get_repo_
 from app.crud import GuidelineCRUD, RepositoryCRUD
 from app.models import Guideline, Repository, User, UserScope
 from app.schemas.base import OptionalGHToken
-from app.schemas.guidelines import OrderUpdate, ParsedGuideline
+from app.schemas.guidelines import OrderUpdate
 from app.schemas.repos import GuidelineOrder, RepoCreate, RepoCreation, RepoUpdate
 from app.services.github import gh_client
-from app.services.openai import openai_client
+
+# from app.services.openai import openai_client
 from app.services.slack import slack_client
 from app.services.telemetry import telemetry_client
-from app.services.utils import execute_in_parallel
 
 logger = logging.getLogger("uvicorn.error")
 router = APIRouter()
@@ -167,75 +165,75 @@ async def fetch_guidelines_from_repo(
     return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
 
 
-@router.post(
-    "/{repo_id}/parse", status_code=status.HTTP_200_OK, summary="Extracts the guidelines from a GitHub repository"
-)
-async def parse_guidelines_from_github(
-    payload: OptionalGHToken,
-    repo_id: int = Path(..., gt=0),
-    repos: RepositoryCRUD = Depends(get_repo_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
-) -> List[ParsedGuideline]:
-    telemetry_client.capture(user.id, event="repo-parse-guidelines", properties={"repo_id": repo_id})
-    # Sanity check
-    repo = cast(Repository, await repos.get(repo_id, strict=True))
-    # Stage all the text sources
-    sources = []
-    # Parse CONTRIBUTING (README if CONTRIBUTING doesn't exist)
-    contributing = gh_client.get_file(repo.full_name, "CONTRIBUTING.md", payload.github_token)
-    readme = gh_client.get_readme(repo.full_name, payload.github_token) if contributing is None else None
-    if contributing is not None:
-        sources.append((contributing["path"], b64decode(contributing["content"]).decode()))
-    if readme is not None:
-        sources.append((readme["path"], b64decode(readme["content"]).decode()))
-    # Pull request comments (!= review comments/threads)
-    pull_comments = [
-        pull
-        for pull in gh_client.fetch_pull_comments_from_repo(repo.full_name, token=payload.github_token)
-        if len(pull["comments"]) > 0
-    ]
-    if len(pull_comments) > 0:
-        # Keep: body, user/id, reactions/total_count
-        corpus = "# Pull request comments\n\n\n\n\n\n".join([
-            f"PULL REQUEST {pull['pull']['number']} from user {pull['pull']['user_id']}\n\n"
-            + "\n\n".join(f"[User {comment['user_id']}] {comment['body']}" for comment in pull["comments"])
-            for pull in pull_comments
-        ])
-        sources.append(("pull_request_comments", corpus))
-    # Review threads
-    review_comments = [
-        pull
-        for pull in gh_client.fetch_reviews_from_repo(repo.full_name, token=payload.github_token)
-        if len(pull["threads"]) > 0
-    ]
-    # Ideas: filter on pulls with highest amount of comments recently, add the review output rejection/etc
-    if len(review_comments) > 0:
-        # Keep: code, body, user/id, reactions/total_count
-        corpus = "# Code review history\n\n\n\n\n\n".join([
-            f"PULL: {pull['pull']['number']} from user {pull['pull']['user_id']}\n\n"
-            + "\n\n".join(
-                f"[Code diff]\n```{thread[0]['code']}\n```\n"
-                + "\n".join(f"[User {comment['user_id']}] {comment['body']}" for comment in thread)
-                for thread in pull["threads"]
-            )
-            for pull in review_comments
-        ])
-        sources.append(("review_comments", corpus))
-    # If not enough information, raise error
-    if len(sources) == 0:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="No useful information is accessible in the repository")
-    # Process all sources in parallel
-    responses = execute_in_parallel(
-        partial(openai_client.parse_guidelines_from_text, user_id=str(user.id)),
-        (corpus for _, corpus in sources),
-        num_threads=len(sources),
-    )
-    guidelines = [
-        ParsedGuideline(**guideline.dict(), repo_id=repo_id, source=source)
-        for (source, _), response in zip(sources, responses)
-        for guideline in response
-    ]
-    return guidelines
+# @router.post(
+#     "/{repo_id}/parse", status_code=status.HTTP_200_OK, summary="Extracts the guidelines from a GitHub repository"
+# )
+# async def parse_guidelines_from_github(
+#     payload: OptionalGHToken,
+#     repo_id: int = Path(..., gt=0),
+#     repos: RepositoryCRUD = Depends(get_repo_crud),
+#     user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
+# ) -> List[ParsedGuideline]:
+#     telemetry_client.capture(user.id, event="repo-parse-guidelines", properties={"repo_id": repo_id})
+#     # Sanity check
+#     repo = cast(Repository, await repos.get(repo_id, strict=True))
+#     # Stage all the text sources
+#     sources = []
+#     # Parse CONTRIBUTING (README if CONTRIBUTING doesn't exist)
+#     contributing = gh_client.get_file(repo.full_name, "CONTRIBUTING.md", payload.github_token)
+#     readme = gh_client.get_readme(repo.full_name, payload.github_token) if contributing is None else None
+#     if contributing is not None:
+#         sources.append((contributing["path"], b64decode(contributing["content"]).decode()))
+#     if readme is not None:
+#         sources.append((readme["path"], b64decode(readme["content"]).decode()))
+#     # Pull request comments (!= review comments/threads)
+#     pull_comments = [
+#         pull
+#         for pull in gh_client.fetch_pull_comments_from_repo(repo.full_name, token=payload.github_token)
+#         if len(pull["comments"]) > 0
+#     ]
+#     if len(pull_comments) > 0:
+#         # Keep: body, user/id, reactions/total_count
+#         corpus = "# Pull request comments\n\n\n\n\n\n".join([
+#             f"PULL REQUEST {pull['pull']['number']} from user {pull['pull']['user_id']}\n\n"
+#             + "\n\n".join(f"[User {comment['user_id']}] {comment['body']}" for comment in pull["comments"])
+#             for pull in pull_comments
+#         ])
+#         sources.append(("pull_request_comments", corpus))
+#     # Review threads
+#     review_comments = [
+#         pull
+#         for pull in gh_client.fetch_reviews_from_repo(repo.full_name, token=payload.github_token)
+#         if len(pull["threads"]) > 0
+#     ]
+#     # Ideas: filter on pulls with highest amount of comments recently, add the review output rejection/etc
+#     if len(review_comments) > 0:
+#         # Keep: code, body, user/id, reactions/total_count
+#         corpus = "# Code review history\n\n\n\n\n\n".join([
+#             f"PULL: {pull['pull']['number']} from user {pull['pull']['user_id']}\n\n"
+#             + "\n\n".join(
+#                 f"[Code diff]\n```{thread[0]['code']}\n```\n"
+#                 + "\n".join(f"[User {comment['user_id']}] {comment['body']}" for comment in thread)
+#                 for thread in pull["threads"]
+#             )
+#             for pull in review_comments
+#         ])
+#         sources.append(("review_comments", corpus))
+#     # If not enough information, raise error
+#     if len(sources) == 0:
+#         raise HTTPException(status.HTTP_404_NOT_FOUND, detail="No useful information is accessible in the repository")
+#     # Process all sources in parallel
+#     responses = execute_in_parallel(
+#         partial(openai_client.parse_guidelines_from_text, user_id=str(user.id)),
+#         (corpus for _, corpus in sources),
+#         num_threads=len(sources),
+#     )
+#     guidelines = [
+#         ParsedGuideline(**guideline.dict(), repo_id=repo_id, source=source)
+#         for (source, _), response in zip(sources, responses)
+#         for guideline in response
+#     ]
+#     return guidelines
 
 
 @router.post("/{repo_id}/waitlist", status_code=status.HTTP_200_OK, summary="Add a GitHub repository to the waitlist")
