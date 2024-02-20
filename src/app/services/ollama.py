@@ -78,12 +78,12 @@ class OllamaClient:
         # Check endpoint
         response = requests.get(f"{self.endpoint}/api/tags", timeout=2)
         if response.status_code != 200:
-            raise HTTPException(status_code=status.HTTP_404, detail="Unavailable endpoint")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unavailable endpoint")
         # Pull model
         logger.info("Loading Ollama model...")
         response = requests.post(f"{self.endpoint}/api/pull", json={"name": model_name, "stream": False}, timeout=10)
         if response.status_code != 200 or response.json()["status"] != "success":
-            raise HTTPException(status_code=status.HTTP_404, detail="Unavailable model")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unavailable model")
         self.temperature = temperature
         self.model_name = model_name
         logger.info(f"Using Ollama model: {self.model_name}")
