@@ -11,7 +11,7 @@ services:
     environment:
       - POSTGRES_URL=postgresql+asyncpg://dummy_login:dummy_pwd@test_db/dummy_db
       - OLLAMA_ENDPOINT=http://ollama:11434
-      - OLLAMA_MODEL='tinydolphin:1.1b-v2.8-q4_0'
+      - OLLAMA_MODEL=tinydolphin:1.1b-v2.8-q4_0
       - SUPERADMIN_GH_PAT=${SUPERADMIN_GH_PAT}
       - SUPERADMIN_PWD=superadmin_pwd
       - GH_OAUTH_ID=${GH_OAUTH_ID}
@@ -56,3 +56,6 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+
+volumes:
+  ollama:

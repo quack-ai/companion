@@ -17,7 +17,7 @@ router = APIRouter()
 
 
 @router.post("/chat", status_code=status.HTTP_200_OK, summary="Chat with our code model")
-async def chat_about_code(
+async def chat(
     payload: ChatMessage,
     user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> StreamingResponse:
