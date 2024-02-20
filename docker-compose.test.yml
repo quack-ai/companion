@@ -46,8 +46,8 @@ services:
       - 11434
     healthcheck:
       test: ["CMD-SHELL", "ollama list | grep -q 'tinydolphin:1.1b-v2.8-q4_0'"]
-      interval: 10s
-      timeout: 60s
+      interval: 30s
+      timeout: 3s
       retries: 3
     # deploy:
     #   resources:
