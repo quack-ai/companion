@@ -62,6 +62,27 @@ In order to stop the service, run:
 make stop
 ```
 
+### Latency benchmark
+
+You crave for perfect codde suggestions, but you don't know whether it fits your needs in terms of latency?
+In the table below, you will find a latency benchmark for all tested LLMs from Ollama:
+
+| Model                                                        | Ingestion mean (std)   | Generation mean (std) |
+| ------------------------------------------------------------ | ---------------------- | --------------------- |
+| [tinyllama:1.1b-chat-v1-q4_0](https://ollama.com/library/tinyllama:1.1b-chat-v1-q4_0) | 2014.63 tok/s (±12.62) | 227.13 tok/s (±2.26)  |
+| [dolphin-phi:2.7b-v2.6-q4_0](https://ollama.com/library/dolphin-phi:2.7b-v2.6-q4_0) | 684.07 tok/s (±3.85)   | 122.25 toks/s (±0.87) |
+| [dolphin-mistral:7b-v2.6](https://ollama.com/library/dolphin-mistral:7b-v2.6) | 291.94 tok/s (±0.4)    | 60.56 tok/s (±0.15)   |
+
+
+This benchmark was performed over 20 iterations on the same input sequence, on a **laptop** to better reflect performances that can be expected by common users. The hardware setup includes an [Intel(R) Core(TM) i7-12700H](https://ark.intel.com/content/www/us/en/ark/products/132228/intel-core-i7-12700h-processor-24m-cache-up-to-4-70-ghz.html) for the CPU, and a [NVIDIA GeForce RTX 3060](https://www.nvidia.com/fr-fr/geforce/graphics-cards/30-series/rtx-3060-3060ti/) for the laptop GPU.
+
+You can run this latency benchmark for any Ollama model on your hardware as follows:
+```bash
+python scripts/evaluate_ollama_latency.py dolphin-mistral:7b-v2.6-dpo-laser-q4_0 --endpoint http://localhost:3000
+```
+
+*All script arguments can be checked using `python scripts/evaluate_ollama_latency.py --help`*
+
 
 ### How is the database organized
 
@@ -88,23 +109,23 @@ The back-end core feature is to interact with the metadata tables. For the servi
 
 The project was designed so that everything runs with Docker orchestration (standalone virtual environment), so you won't need to install any additional libraries.
 
-## Configuration
+### Configuration
 
 In order to run the project, you will need to specific some information, which can be done using a `.env` file.
 This file will have to hold the following information:
+- `POSTGRES_DB`*: a name for the [PostgreSQL](https://www.postgresql.org/) database that will be created
+- `POSTGRES_USER`*: a login for the PostgreSQL database
+- `POSTGRES_PASSWORD`*: a password for the PostgreSQL database
 - `SUPERADMIN_GH_PAT`: the GitHub token of the initial admin access (Generate a new token on [GitHub](https://github.com/settings/tokens?type=beta), with no extra permissions = read-only)
 - `SUPERADMIN_PWD`*: the password of the initial admin access
 - `GH_OAUTH_ID`: the Client ID of the GitHub Oauth app (Create an OAuth app on [GitHub](https://github.com/settings/applications/new), pointing to your Quack dashboard w/ callback URL)
 - `GH_OAUTH_SECRET`: the secret of the GitHub Oauth app (Generate a new client secret on the created OAuth app)
-- `POSTGRES_DB`*: a name for the [PostgreSQL](https://www.postgresql.org/) database that will be created
-- `POSTGRES_USER`*: a login for the PostgreSQL database
-- `POSTGRES_PASSWORD`*: a password for the PostgreSQL database
-- `OPENAI_API_KEY`: your API key for Open AI (Create new secret key on [OpenAI](https://platform.openai.com/api-keys))
 
 _* marks the values where you can pick what you want._
 
 Optionally, the following information can be added:
 - `SECRET_KEY`*: if set, tokens can be reused between sessions. All instances sharing the same secret key can use the same token.
+- `OLLAMA_MODEL`: the model tag in [Ollama library](https://ollama.com/library) that will be used for the API.
 - `SENTRY_DSN`: the DSN for your [Sentry](https://sentry.io/) project, which monitors back-end errors and report them back.
 - `SERVER_NAME`*: the server tag that will be used to report events to Sentry.
 - `POSTHOG_KEY`: the project API key for PostHog [PostHog](https://eu.posthog.com/settings/project-details).
@@ -112,6 +133,9 @@ Optionally, the following information can be added:
 - `SLACK_CHANNEL`: the Slack channel where your bot will post events (defaults to `#general`, you have to invite the App to your channel).
 - `SUPPORT_EMAIL`: the email used for support of your API.
 - `DEBUG`: if set to false, silence debug logs.
+- `OPENAI_API_KEY`**: your API key for Open AI (Create new secret key on [OpenAI](https://platform.openai.com/api-keys))
+
+_** marks the deprecated values._
 
 So your `.env` file should look like something similar to [`.env.example`](.env.example)
 The file should be placed in the folder of your `./docker-compose.yml`.

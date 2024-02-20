@@ -14,9 +14,8 @@ import requests
 from fastapi import HTTPException, status
 from pydantic import ValidationError
 
-from app.core.config import settings
 from app.models import Guideline
-from app.schemas.compute import ComplianceResult
+from app.schemas.code import ComplianceResult
 from app.schemas.guidelines import GuidelineContent, GuidelineExample
 from app.schemas.services import (
     ArraySchema,
@@ -31,7 +30,7 @@ from app.schemas.services import (
 
 logger = logging.getLogger("uvicorn.error")
 
-__all__ = ["openai_client"]
+# __all__ = ["openai_client"]
 
 
 class ExecutionMode(str, Enum):
@@ -203,7 +202,7 @@ class OpenAIClient:
     ) -> None:
         self.headers = self._get_headers(api_key)
         # Validate model
-        model_card = requests.get(f"https://api.openai.com/v1/models/{model}", headers=self.headers, timeout=2)
+        model_card = requests.get(f"https://api.openai.com/v1/models/{model}", headers=self.headers, timeout=5)
         if model_card.status_code != 200:
             raise HTTPException(status_code=model_card.status_code, detail=model_card.json()["error"]["message"])
         self.model = model
@@ -389,4 +388,4 @@ class OpenAIClient:
         )
 
 
-openai_client = OpenAIClient(settings.OPENAI_API_KEY, settings.OPENAI_MODEL)
+# openai_client = OpenAIClient(settings.OPENAI_API_KEY, settings.OPENAI_MODEL)

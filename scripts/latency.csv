@@ -1,0 +1,4 @@
+model,hardware,ingestion_mean (tok/s),ingestion_std (tok/s),generation_mean (tok/s),generation_std (tok/s)
+dolphin-mistral:7b-v2.6,NVIDIA RTX 3060 (laptop),291.94,0.4,60.56,0.15
+dolphin-phi:2.7b-v2.6-q4_0,NVIDIA RTX 3060 (laptop),684.07,3.85,122.25,0.87
+tinyllama:1.1b-chat-v1-q4_0,NVIDIA RTX 3060 (laptop),2014.63,12.62,227.13,2.26
