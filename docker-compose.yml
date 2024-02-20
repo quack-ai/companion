@@ -9,21 +9,14 @@ services:
     ports:
       - "8050:8050"
     environment:
+      - POSTGRES_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+      - OLLAMA_ENDPOINT=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - SECRET_KEY=${SECRET_KEY}
       - SUPERADMIN_GH_PAT=${SUPERADMIN_GH_PAT}
       - SUPERADMIN_PWD=${SUPERADMIN_PWD}
       - GH_OAUTH_ID=${GH_OAUTH_ID}
       - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
-      - POSTGRES_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
-      # - POSTGRES_URL=postgresql+asyncpg://postgres:K#p9&drDxA43rRn9@db.jqaovscwhukwcignjxms.supabase.co/postgres
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - SECRET_KEY=${SECRET_KEY}
-      - OLLAMA_ENDPOINT=http://ollama:11434
-      - OLLAMA_MODEL=${OLLAMA_MODEL}
-      # - SENTRY_DSN=${SENTRY_DSN}
-      # - SERVER_NAME=${SERVER_NAME}
-      # - POSTHOG_KEY=${POSTHOG_KEY}
-      - SLACK_API_TOKEN=${SLACK_API_TOKEN}
-      - SLACK_CHANNEL=${SLACK_CHANNEL}
       - SUPPORT_EMAIL=${SUPPORT_EMAIL}
       - DEBUG=true
     depends_on:

@@ -9,21 +9,24 @@ services:
     ports:
       - "8050:8050"
     environment:
+      - POSTGRES_URL=postgresql+asyncpg://dummy_login:dummy_pwd@test_db/dummy_db
+      - OLLAMA_ENDPOINT=http://ollama:11434
+      - OLLAMA_MODEL='tinydolphin:1.1b-v2.8-q4_0'
       - SUPERADMIN_GH_PAT=${SUPERADMIN_GH_PAT}
       - SUPERADMIN_PWD=superadmin_pwd
       - GH_OAUTH_ID=${GH_OAUTH_ID}
       - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
-      - POSTGRES_URL=postgresql+asyncpg://dummy_login:dummy_pwd@test_db/dummy_db
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DEBUG=true
     depends_on:
       test_db:
         condition: service_healthy
+      ollama:
+        condition: service_healthy
 
   test_db:
     image: postgres:15-alpine
-    ports:
-      - "5432:5432"
+    expose:
+      - 5432
     environment:
       - POSTGRES_USER=dummy_login
       - POSTGRES_PASSWORD=dummy_pwd
@@ -33,3 +36,23 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
+
+  ollama:
+    image: ollama/ollama:0.1.25
+    command: serve && ollama pull tinydolphin:1.1b-v2.8-q4_0
+    volumes:
+      - "$HOME/.ollama:/root/.ollama"
+    expose:
+      - 11434
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list | grep -q 'tinydolphin:1.1b-v2.8-q4_0'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
