@@ -92,19 +92,19 @@ The project was designed so that everything runs with Docker orchestration (stan
 
 In order to run the project, you will need to specific some information, which can be done using a `.env` file.
 This file will have to hold the following information:
+- `POSTGRES_DB`*: a name for the [PostgreSQL](https://www.postgresql.org/) database that will be created
+- `POSTGRES_USER`*: a login for the PostgreSQL database
+- `POSTGRES_PASSWORD`*: a password for the PostgreSQL database
 - `SUPERADMIN_GH_PAT`: the GitHub token of the initial admin access (Generate a new token on [GitHub](https://github.com/settings/tokens?type=beta), with no extra permissions = read-only)
 - `SUPERADMIN_PWD`*: the password of the initial admin access
 - `GH_OAUTH_ID`: the Client ID of the GitHub Oauth app (Create an OAuth app on [GitHub](https://github.com/settings/applications/new), pointing to your Quack dashboard w/ callback URL)
 - `GH_OAUTH_SECRET`: the secret of the GitHub Oauth app (Generate a new client secret on the created OAuth app)
-- `POSTGRES_DB`*: a name for the [PostgreSQL](https://www.postgresql.org/) database that will be created
-- `POSTGRES_USER`*: a login for the PostgreSQL database
-- `POSTGRES_PASSWORD`*: a password for the PostgreSQL database
-- `OPENAI_API_KEY`: your API key for Open AI (Create new secret key on [OpenAI](https://platform.openai.com/api-keys))
 
 _* marks the values where you can pick what you want._
 
 Optionally, the following information can be added:
 - `SECRET_KEY`*: if set, tokens can be reused between sessions. All instances sharing the same secret key can use the same token.
+- `OLLAMA_MODEL`: the model tag in [Ollama library](https://ollama.com/library) that will be used for the API.
 - `SENTRY_DSN`: the DSN for your [Sentry](https://sentry.io/) project, which monitors back-end errors and report them back.
 - `SERVER_NAME`*: the server tag that will be used to report events to Sentry.
 - `POSTHOG_KEY`: the project API key for PostHog [PostHog](https://eu.posthog.com/settings/project-details).
@@ -112,6 +112,9 @@ Optionally, the following information can be added:
 - `SLACK_CHANNEL`: the Slack channel where your bot will post events (defaults to `#general`, you have to invite the App to your channel).
 - `SUPPORT_EMAIL`: the email used for support of your API.
 - `DEBUG`: if set to false, silence debug logs.
+- `OPENAI_API_KEY`**: your API key for Open AI (Create new secret key on [OpenAI](https://platform.openai.com/api-keys))
+
+_** marks the deprecated values._
 
 So your `.env` file should look like something similar to [`.env.example`](.env.example)
 The file should be placed in the folder of your `./docker-compose.yml`.
