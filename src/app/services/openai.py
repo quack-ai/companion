@@ -15,7 +15,7 @@ from fastapi import HTTPException, status
 from pydantic import ValidationError
 
 from app.models import Guideline
-from app.schemas.compute import ComplianceResult
+from app.schemas.code import ComplianceResult
 from app.schemas.guidelines import GuidelineContent, GuidelineExample
 from app.schemas.services import (
     ArraySchema,
