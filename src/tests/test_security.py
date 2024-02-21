@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
+import jwt
 import pytest
-from jose import jwt
 
 from app.core.config import settings
 from app.core.security import create_access_token, hash_password, verify_password
@@ -39,7 +39,7 @@ async def test_create_access_token(content, expires_minutes, expected_delta):
     payload = await create_access_token(content, expires_minutes)
     after = datetime.utcnow()
     assert isinstance(payload, str)
-    decoded_data = jwt.decode(payload, settings.SECRET_KEY)
+    decoded_data = jwt.decode(payload, settings.SECRET_KEY, algorithms=[settings.JWT_ENCODING_ALGORITHM])
     # Verify data integrity
     assert all(v == decoded_data[k] for k, v in content.items())
     # Check expiration
