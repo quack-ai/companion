@@ -8,7 +8,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
-__all__ = ["ChatHistory", "ChatMessage", "ChatRole", "ComplianceResult", "Snippet", "UserMessage"]
+__all__ = ["ChatHistory", "ChatMessage", "ChatRole", "ComplianceResult", "Snippet"]
 
 
 class Snippet(BaseModel):
@@ -34,7 +34,3 @@ class ChatMessage(BaseModel):
 
 class ChatHistory(BaseModel):
     messages: List[ChatMessage]
-
-
-class UserMessage(BaseModel):
-    content: str = Field(..., min_length=1)
