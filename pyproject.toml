@@ -38,7 +38,7 @@ mypy = "==1.8.0"
 types-requests = ">=2.0.0"
 types-python-jose = ">=3.3.0"
 types-passlib = ">=1.7.0"
-pre-commit = "^3.6.0"
+pre-commit = "^3.6.2"
 
 [tool.poetry.group.test]
 optional = true
