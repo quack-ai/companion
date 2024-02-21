@@ -4,10 +4,11 @@
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 from enum import Enum
+from typing import List
 
 from pydantic import BaseModel, Field
 
-__all__ = ["ChatMessage", "ComplianceResult", "Snippet"]
+__all__ = ["ChatHistory", "ChatMessage", "ChatRole", "ComplianceResult", "Snippet"]
 
 
 class Snippet(BaseModel):
@@ -29,3 +30,7 @@ class ChatRole(str, Enum):
 class ChatMessage(BaseModel):
     role: ChatRole = Field(ChatRole.USER, example=ChatRole.USER)
     content: str = Field(..., min_length=1)
+
+
+class ChatHistory(BaseModel):
+    messages: List[ChatMessage]

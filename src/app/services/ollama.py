@@ -121,7 +121,7 @@ class OllamaClient:
     def _chat(
         self,
         system_prompt: str,
-        message: str,
+        messages: List[Dict[str, str]],
         timeout: int = 20,
     ) -> requests.Response:
         return requests.post(
@@ -130,10 +130,7 @@ class OllamaClient:
                 "model": self.model_name,
                 "stream": True,
                 "options": {"temperature": self.temperature},
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": message},
-                ],
+                "messages": [{"role": "system", "content": system_prompt}, *messages],
                 "keep_alive": "30s",
             },
             stream=True,
@@ -142,10 +139,10 @@ class OllamaClient:
 
     def chat(
         self,
-        message: str,
+        messages: List[Dict[str, str]],
         **kwargs,
     ) -> requests.Response:
-        return self._chat(CHAT_PROMPT, message, **kwargs)
+        return self._chat(CHAT_PROMPT, messages, **kwargs)
 
     def parse_guidelines_from_text(
         self,

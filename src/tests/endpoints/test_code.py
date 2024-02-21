@@ -24,9 +24,46 @@ async def code_session(async_session: AsyncSession, monkeypatch):
 @pytest.mark.parametrize(
     ("user_idx", "payload", "status_code", "status_detail"),
     [
-        (None, {"role": "user", "content": "Is Python 3.11 faster than 3.10?"}, 401, "Not authenticated"),
-        (0, {"role": "alien", "content": "Is Python 3.11 faster than 3.10?"}, 422, None),
-        (0, {"role": "user", "content": "Is Python 3.11 faster than 3.10?"}, 200, None),
+        (None, {"content": "Is Python 3.11 faster than 3.10?"}, 401, "Not authenticated"),
+        (0, {"role": "user", "content": "Is Python 3.11 faster than 3.10?"}, 422, None),
+        (0, [{"content": "Is Python 3.11 faster than 3.10?"}], 422, None),
+        (0, [{"role": "user", "content": "Is Python 3.11 faster than 3.10?"}], 422, None),
+        (0, {"messages": [{"role": "alien", "content": "Is Python 3.11 faster than 3.10?"}]}, 422, None),
+        (
+            0,
+            [
+                {"role": "user", "content": "Is Python 3.11 faster than 3.10?"},
+                {"role": "assistant", "content": "yes"},
+                {"role": "user", "content": "elaborate"},
+            ],
+            422,
+            None,
+        ),
+        (
+            0,
+            {
+                "messages": [
+                    {"role": "user", "content": "Is Python 3.11 faster than 3.10?"},
+                    {"role": "assistant", "content": "yes"},
+                    {"role": "alien", "content": "elaborate"},
+                ]
+            },
+            422,
+            None,
+        ),
+        (0, {"messages": [{"role": "user", "content": "Is Python 3.11 faster than 3.10?"}]}, 200, None),
+        (
+            0,
+            {
+                "messages": [
+                    {"role": "user", "content": "Is Python 3.11 faster than 3.10?"},
+                    {"role": "assistant", "content": "yes"},
+                    {"role": "user", "content": "elaborate"},
+                ]
+            },
+            200,
+            None,
+        ),
     ],
 )
 @pytest.mark.asyncio()
