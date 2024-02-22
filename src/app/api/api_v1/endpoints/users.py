@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 from app.api.dependencies import get_current_user, get_user_crud
 from app.core.security import hash_password
 from app.crud import UserCRUD
-from app.models import User, UserScope
+from app.models import Provider, User, UserScope
 from app.schemas.users import Cred, CredHash, UserCreate, UserCreation
 from app.services.github import gh_client
 from app.services.slack import slack_client
@@ -20,37 +20,33 @@ router = APIRouter()
 
 
 async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[User, None] = None) -> User:
-    # Check that user exists on GitHub
-    gh_user = gh_client.get_user(payload.id)
-    if gh_user["type"] != "User":
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user")
-    telemetry_client.identify(
-        gh_user["id"],
-        properties={
-            "login": gh_user["login"],
+    valid_creds = False
+    provider_user_id = None
+    user_props = {"login": payload.login, "provider_login": None, "name": None, "twitter_username": None}
+    notif_info = []
+    # Provider check
+    if payload.provider is not None and payload.provider_user_id is not None:
+        # Provider processing
+        if payload.provider == Provider.GITHUB:
+            # Check that user exists on GitHub
+            gh_user = gh_client.get_user(payload.provider_user_id)
+            if gh_user["type"] != "User":
+                raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user.")
+        else:
+            # Validation error
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid provider.")
+        # Unicity check
+        provider_user_id = f"{payload.provider}|{payload.provider_user_id}"
+        if (await users.get_by("provider_user_id", provider_user_id, strict=False)) is not None:
+            raise HTTPException(status.HTTP_409_CONFLICT, "User already registered")
+        valid_creds = True
+        user_props.update({
+            "provider_login": f"{payload.provider}|{gh_user['login']}",
             "name": gh_user["name"],
             "twitter_username": gh_user["twitter_username"],
-        },
-    )
-    # Create the entry
-    user = await users.create(
-        UserCreation(
-            id=payload.id,
-            login=gh_user["login"],
-            hashed_password=await hash_password(payload.password),
-            scope=payload.scope,
-        )
-    )
-    # Assume the requester is the new user if none was specified
-    telemetry_client.capture(
-        requester.id if isinstance(requester, User) else user.id,
-        event="user-creation",
-        properties={"login": gh_user["login"]},
-    )
-    # Notify slack
-    slack_client.notify(
-        "*New user* :partying_face:",
-        [
+        })
+        # Notif
+        notif_info = [
             ("Name", gh_user["name"] or "N/A"),
             ("Email", gh_user["email"] or "N/A"),
             ("Company", f"`{gh_user['company']}`" if gh_user["company"] else "N/A"),
@@ -61,12 +57,52 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
                 if gh_user["twitter_username"]
                 else "N/A",
             ),
-        ],
+        ]
+        # Remove N/A
+        notif_info = [(k, v) for k, v in notif_info if v != "N/A"]
+
+    # Creds check
+    hashed_password = None
+    if payload.login is not None and payload.password is not None:
+        # Check for unicity
+        if (await users.get_by_login(payload.login, strict=False)) is not None:
+            raise HTTPException(status.HTTP_409_CONFLICT, "Login already taken")
+        valid_creds = True
+        hashed_password = await hash_password(payload.password)
+
+    if not valid_creds:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "You need to provide either provider and provider_user_id, or login and password.",
+        )
+
+    # Create the entry
+    user = await users.create(
+        UserCreation(
+            login=payload.login,
+            hashed_password=hashed_password,
+            scope=payload.scope,
+            provider_user_id=provider_user_id,
+        )
     )
+
+    # Enrich user data
+    telemetry_client.identify(user.id, properties=user_props)
+    if isinstance(provider_user_id, str):
+        telemetry_client.alias(user.id, provider_user_id)
+
+    # Assume the requester is the new user if none was specified
+    telemetry_client.capture(
+        requester.id if isinstance(requester, User) else user.id,
+        event="user-creation",
+        properties={"created_user_id": user.id},
+    )
+    # Notify slack
+    slack_client.notify("*New user* :partying_face:", notif_info)
     return user
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED, summary="Register a GitHub user")
+@router.post("/", status_code=status.HTTP_201_CREATED, summary="Register a new user")
 async def create_user(
     payload: UserCreate,
     users: UserCRUD = Depends(get_user_crud),
