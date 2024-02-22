@@ -7,7 +7,7 @@ from typing import Union
 
 from pydantic import BaseModel, Field
 
-from app.models import Provider, UserScope
+from app.models import UserScope
 
 __all__ = ["Cred", "CredHash", "UserCreate", "UserCreation"]
 
@@ -30,7 +30,6 @@ class Scope(BaseModel):
 
 
 class UserCreate(Scope):
-    provider: Union[Provider, None] = Field(None, example=Provider.GITHUB)
     provider_user_id: Union[int, None] = Field(None, gt=0)
     login: Union[str, None] = Field(None, min_length=3, max_length=50, example="JohnDoe")
     password: Union[str, None] = Field(None, min_length=3, example="PickARobustOne")

@@ -33,17 +33,17 @@ class User(SQLModel, table=True):
     # Allow sign-up/in via provider or login + password
     id: int = Field(None, primary_key=True)
     scope: UserScope = Field(UserScope.USER, nullable=False)
-    provider_user_id: Union[str, None] = Field(None, min_length=9, max_length=30)
+    provider_user_id: Union[int, None] = Field(None, gt=0)
     login: Union[str, None] = Field(None, min_length=2, max_length=50)
     hashed_password: Union[str, None] = Field(None, min_length=5, max_length=70)
+    registered_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
 
 class Repository(SQLModel, table=True):
     id: int = Field(None, primary_key=True)
-    name: str = Field(..., nullable=False)
-    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-    provider_repo_id = Union[str, None] = Field(None, min_length=9, max_length=30)
+    provider_repo_id: int = Field(index=True, nullable=True, gt=0)
     ruleset_id: Union[int, None] = Field(None, foreign_key="ruleset.id", nullable=True)
+    registered_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
 
 class Guideline(SQLModel, table=True):

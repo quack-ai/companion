@@ -11,7 +11,7 @@ from app.api.dependencies import get_current_user, get_user_crud
 from app.core.security import hash_password
 from app.crud import UserCRUD
 from app.models import Provider, User, UserScope
-from app.schemas.users import Cred, CredHash, UserCreate, UserCreation
+from app.schemas.users import Cred, CredHash, UserCreate
 from app.services.github import gh_client
 from app.services.slack import slack_client
 from app.services.telemetry import telemetry_client
@@ -25,23 +25,17 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
     user_props = {"login": payload.login, "provider_login": None, "name": None, "twitter_username": None}
     notif_info = []
     # Provider check
-    if payload.provider is not None and payload.provider_user_id is not None:
-        # Provider processing
-        if payload.provider == Provider.GITHUB:
-            # Check that user exists on GitHub
-            gh_user = gh_client.get_user(payload.provider_user_id)
-            if gh_user["type"] != "User":
-                raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user.")
-        else:
-            # Validation error
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Invalid provider.")
+    if payload.provider_user_id is not None:
+        # Check that user exists on GitHub
+        gh_user = gh_client.get_user(payload.provider_user_id)
+        if gh_user["type"] != "User":
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user.")
         # Unicity check
-        provider_user_id = f"{payload.provider}|{payload.provider_user_id}"
-        if (await users.get_by("provider_user_id", provider_user_id, strict=False)) is not None:
+        if (await users.get_by("provider_user_id", payload.provider_user_id, strict=False)) is not None:
             raise HTTPException(status.HTTP_409_CONFLICT, "User already registered")
         valid_creds = True
         user_props.update({
-            "provider_login": f"{payload.provider}|{gh_user['login']}",
+            "provider_login": f"{Provider.GITHUB}|{gh_user['login']}",
             "name": gh_user["name"],
             "twitter_username": gh_user["twitter_username"],
         })
@@ -73,12 +67,12 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
     if not valid_creds:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "You need to provide either provider and provider_user_id, or login and password.",
+            "You need to provide either provider_user_id, or login and password.",
         )
 
     # Create the entry
     user = await users.create(
-        UserCreation(
+        User(
             login=payload.login,
             hashed_password=hashed_password,
             scope=payload.scope,
@@ -88,8 +82,8 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
 
     # Enrich user data
     telemetry_client.identify(user.id, properties=user_props)
-    if isinstance(provider_user_id, str):
-        telemetry_client.alias(user.id, provider_user_id)
+    if isinstance(payload.provider_user_id, int):
+        telemetry_client.alias(user.id, f"{Provider.GITHUB}|{payload.provider_user_id}")
 
     # Assume the requester is the new user if none was specified
     telemetry_client.capture(
