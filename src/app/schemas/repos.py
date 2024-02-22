@@ -28,3 +28,7 @@ class RepoUpdate(BaseModel):
 
 class GuidelineOrder(OptionalGHToken):
     guideline_ids: List[int]
+
+
+class RepoRegistration(OptionalGHToken):
+    repo_id: int = Field(..., gt=0)
