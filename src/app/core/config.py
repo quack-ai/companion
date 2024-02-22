@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     SUPPORT_EMAIL: Union[str, None] = os.environ.get("SUPPORT_EMAIL")
     # Authentication
     SUPERADMIN_GH_PAT: str = os.environ["SUPERADMIN_GH_PAT"]
+    SUPERADMIN_LOGIN: str = os.environ["SUPERADMIN_LOGIN"]
     SUPERADMIN_PWD: str = os.environ["SUPERADMIN_PWD"]
     GH_OAUTH_ID: str = os.environ["GH_OAUTH_ID"]
     GH_OAUTH_SECRET: str = os.environ["GH_OAUTH_SECRET"]
