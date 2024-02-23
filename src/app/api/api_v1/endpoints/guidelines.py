@@ -5,7 +5,7 @@
 
 from typing import List, cast
 
-from fastapi import APIRouter, Depends, Path, Security, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
 from app.api.dependencies import get_current_user, get_guideline_crud
 from app.crud import GuidelineCRUD
@@ -56,6 +56,9 @@ async def update_guideline_content(
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
     telemetry_client.capture(user.id, event="guideline-update-content", properties={"guideline_id": guideline_id})
+    guideline = await guidelines.get(guideline_id, strict=True)
+    if user.scope != UserScope.ADMIN and user.id != guideline.creator_id:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Insufficient permissions.")
     return await guidelines.update(guideline_id, ContentUpdate(**payload.dict()))
 
 
@@ -66,6 +69,9 @@ async def delete_guideline(
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> None:
     telemetry_client.capture(user.id, event="guideline-deletion", properties={"guideline_id": guideline_id})
+    guideline = await guidelines.get(guideline_id, strict=True)
+    if user.scope != UserScope.ADMIN and user.id != guideline.creator_id:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Insufficient permissions.")
     await guidelines.delete(guideline_id)
 
 
