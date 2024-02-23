@@ -31,4 +31,4 @@ class GuidelineOrder(OptionalGHToken):
 
 
 class RepoRegistration(OptionalGHToken):
-    repo_id: int = Field(..., gt=0)
+    provider_repo_id: int = Field(..., gt=0)

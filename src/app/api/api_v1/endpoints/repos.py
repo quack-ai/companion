@@ -27,11 +27,10 @@ async def register_repo(
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Repository:
     # Check if repo is already registered
-    provider_repo_id = f"{Provider.GITHUB}|{payload.repo_id}"
-    if (await repos.get_by("provider_repo_id", provider_repo_id, strict=False)) is not None:
+    if (await repos.get_by("provider_repo_id", payload.provider_repo_id, strict=False)) is not None:
         raise HTTPException(status.HTTP_409_CONFLICT, "Repo already registered")
     # Check if provider repo exists
-    gh_repo = gh_client.get_repo(payload.repo_id, token=payload.github_token)
+    gh_repo = gh_client.get_repo(payload.provider_repo_id, token=payload.github_token)
     # Check permission
     if user.scope != UserScope.ADMIN:
         if not isinstance(payload.github_token, str):
@@ -56,7 +55,10 @@ async def register_repo(
     telemetry_client.capture(
         user.id,
         event="repo-creation",
-        properties={"provider_repo_id": f"{Provider.GITHUB}|{payload.repo_id}", "full_name": gh_repo["full_name"]},
+        properties={
+            "provider_repo_id": f"{Provider.GITHUB}|{payload.provider_repo_id}",
+            "full_name": gh_repo["full_name"],
+        },
     )
     # Notify slack
     slack_client.notify(
@@ -69,7 +71,7 @@ async def register_repo(
             ("Language", gh_repo["language"]),
         ],
     )
-    return await repos.create(Repository(provider_repo_id=payload.repo_id))
+    return await repos.create(Repository(provider_repo_id=payload.provider_repo_id))
 
 
 @router.get("/{repo_id}", status_code=status.HTTP_200_OK, summary="Fetch a specific repository")
@@ -85,11 +87,10 @@ async def get_repo(
 @router.get("/", status_code=status.HTTP_200_OK, summary="Fetch all repositories")
 async def fetch_repos(
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
 ) -> List[Repository]:
     telemetry_client.capture(user.id, event="repo-fetch")
-    entries = await repos.fetch_all() if user.scope == UserScope.ADMIN else await repos.fetch_all(("owner_id", user.id))
-    return [elt for elt in entries]
+    return [elt for elt in await repos.fetch_all()]
 
 
 # @router.put(
