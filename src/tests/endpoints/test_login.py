@@ -10,8 +10,22 @@ from app.api.api_v1.endpoints import login, users
 from app.models import User
 
 USER_TABLE = [
-    {"id": 1, "login": "first_login", "hashed_password": "hashed_first_pwd", "scope": "user"},
-    {"id": 2, "login": "second_login", "hashed_password": "hashed_second_pwd", "scope": "user"},
+    {
+        "id": 1,
+        "provider_user_id": 123,
+        "login": "first_login",
+        "hashed_password": "hashed_first_pwd",
+        "scope": "user",
+        "created_at": "2024-02-23T08:18:45.447773",
+    },
+    {
+        "id": 2,
+        "provider_user_id": 456,
+        "login": "second_login",
+        "hashed_password": "hashed_second_pwd",
+        "scope": "user",
+        "created_at": "2024-02-23T08:18:45.447774",
+    },
 ]
 
 
@@ -103,7 +117,7 @@ async def test_request_github_token_from_code(
 @pytest.mark.parametrize(
     ("scope", "redirect_uri", "status_code"),
     [
-        ("read:user%20user:email%20repo", "https://app.quack-ai.com", 307),
+        ("read:user%20user:email%20repo", "https://app.quackai.com", 307),
     ],
 )
 @pytest.mark.asyncio()

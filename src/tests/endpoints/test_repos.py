@@ -9,38 +9,47 @@ from app.api.api_v1.endpoints import users
 from app.models import Guideline, Repository, User
 
 USER_TABLE = [
-    {"id": 1, "login": "first_login", "hashed_password": "hashed_first_pwd", "scope": "admin"},
-    {"id": 2, "login": "second_login", "hashed_password": "hashed_second_pwd", "scope": "user"},
+    {
+        "id": 1,
+        "provider_user_id": 123,
+        "login": "first_login",
+        "hashed_password": "hashed_first_pwd",
+        "scope": "admin",
+        "created_at": "2024-02-23T08:18:45.447773",
+    },
+    {
+        "id": 2,
+        "provider_user_id": 456,
+        "login": "second_login",
+        "hashed_password": "hashed_second_pwd",
+        "scope": "user",
+        "created_at": "2024-02-23T08:18:45.447774",
+    },
 ]
 
 REPO_TABLE = [
     {
-        "id": 12345,
-        "full_name": "quack-ai/dummy-repo",
-        "installed_by": 1,
-        "owner_id": 1,
-        "installed_at": "2023-11-07T15:07:19.226673",
-        "is_active": True,
+        "id": 1,
+        "provider_repo_id": 12345,
+        "name": "quack-ai/dummy-repo",
+        "created_at": "2023-11-07T15:07:19.226673",
     },
     {
-        "id": 123456,
-        "full_name": "quack-ai/another-repo",
-        "installed_by": 2,
-        "owner_id": 2,
-        "installed_at": "2023-11-07T15:07:19.226673",
-        "is_active": True,
+        "id": 2,
+        "provider_repo_id": 123456,
+        "name": "quack-ai/another-repo",
+        "created_at": "2023-11-07T15:07:19.226673",
     },
 ]
+
 
 GUIDELINE_TABLE = [
     {
         "id": 1,
-        "repo_id": 12345,
-        "title": "Object naming",
-        "details": "Ensure function and class/instance methods have a meaningful & informative name",
-        "order": 1,
-        "created_at": "2023-11-07T15:08:19.226673",
-        "updated_at": "2023-11-07T15:08:19.226673",
+        "creator_id": 2,
+        "content": "Ensure function and class/instance methods have a meaningful & informative name",
+        "created_at": "2024-11-07T15:08:19.226673",
+        "updated_at": "2024-11-07T15:08:19.226673",
     },
 ]
 
@@ -68,32 +77,28 @@ async def guideline_session(repo_session: AsyncSession):
 @pytest.mark.parametrize(
     ("user_idx", "payload", "status_code", "status_detail", "expected_response"),
     [
-        (None, {"id": 249513553}, 401, "Not authenticated", None),
+        (None, {"provider_repo_id": 249513553}, 401, "Not authenticated", None),
         (0, {"full_name": "frgfm/torch-cam"}, 422, None, None),
         (
             0,
-            {"id": 249513553},
+            {"provider_repo_id": 249513553},
             201,
             None,
             {
-                "id": 249513553,
-                "full_name": "frgfm/torch-cam",
-                "owner_id": 26927750,
-                "installed_by": 1,
-                "is_active": True,
+                "id": 3,
+                "provider_repo_id": 249513553,
+                "name": "frgfm/torch-cam",
             },
         ),
         (
             1,
-            {"id": 249513553},
+            {"provider_repo_id": 249513553},
             422,
             None,
             {
-                "id": 249513553,
-                "full_name": "frgfm/torch-cam",
-                "owner_id": 26927750,
-                "installed_by": 2,
-                "is_active": True,
+                "id": 3,
+                "provider_repo_id": 249513553,
+                "name": "frgfm/torch-cam",
             },
         ),
     ],
@@ -117,7 +122,7 @@ async def test_create_repo(
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
-        assert {k: v for k, v in response.json().items() if k != "installed_at"} == expected_response
+        assert {k: v for k, v in response.json().items() if k != "created_at"} == expected_response
 
 
 @pytest.mark.parametrize(
@@ -125,9 +130,9 @@ async def test_create_repo(
     [
         (None, 12345, 401, "Not authenticated", None),
         (0, 0, 422, None, None),
-        (0, 1, 404, "Table Repository has no corresponding entry.", None),
-        (0, 12345, 200, None, 0),
-        (1, 12345, 200, None, 0),
+        (0, 100, 404, "Table Repository has no corresponding entry.", None),
+        (0, 1, 200, None, 0),
+        (1, 1, 200, None, 0),
     ],
 )
 @pytest.mark.asyncio()
@@ -157,7 +162,7 @@ async def test_get_repo(
     [
         (None, 401, "Not authenticated", None),
         (0, 200, None, REPO_TABLE),
-        (1, 200, None, REPO_TABLE[1:]),
+        (1, 403, "Not authorized", None),
     ],
 )
 @pytest.mark.asyncio()
@@ -214,171 +219,32 @@ async def test_delete_repo(
         assert response.json() is None
 
 
-@pytest.mark.parametrize(
-    ("user_idx", "repo_id", "status_code", "status_detail", "expected_idx"),
-    [
-        (None, 12345, 401, "Not authenticated", None),
-        (0, 0, 422, None, None),
-        (0, 100, 404, "Table Repository has no corresponding entry.", None),
-        (0, 12345, 200, None, 0),
-        (0, 123456, 200, None, 1),
-        (1, 12345, 422, "Expected `github_token` to check access.", None),
-        (1, 123456, 200, None, 1),
-    ],
-)
-@pytest.mark.asyncio()
-async def test_enable_repo(
-    async_client: AsyncClient,
-    repo_session: AsyncSession,
-    user_idx: Union[int, None],
-    repo_id: int,
-    status_code: int,
-    status_detail: Union[str, None],
-    expected_idx: Union[int, None],
-):
-    auth = None
-    if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+# @pytest.mark.parametrize(
+#     ("user_idx", "repo_id", "status_code", "status_detail"),
+#     [
+#         (None, 12345, 401, "Not authenticated"),
+#         (0, 100, 404, "Not Found"),
+#         (0, 249513553, 200, None),
+#         (1, 249513553, 200, None),
+#     ],
+# )
+# @pytest.mark.asyncio()
+# async def test_add_repo_to_waitlist(
+#     async_client: AsyncClient,
+#     guideline_session: AsyncSession,
+#     user_idx: Union[int, None],
+#     repo_id: int,
+#     status_code: int,
+#     status_detail: Union[str, None],
+# ):
+#     auth = None
+#     if isinstance(user_idx, int):
+#         auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
 
-    response = await async_client.put(f"/repos/{repo_id}/enable", json={}, headers=auth)
-    assert response.status_code == status_code, print(response.__dict__)
-    if isinstance(status_detail, str):
-        assert response.json()["detail"] == status_detail
-    if response.status_code // 100 == 2:
-        assert response.json() == {**REPO_TABLE[expected_idx], "is_active": True}
-
-
-@pytest.mark.parametrize(
-    ("user_idx", "repo_id", "status_code", "status_detail", "expected_idx"),
-    [
-        (None, 12345, 401, "Not authenticated", None),
-        (0, 0, 422, None, None),
-        (0, 100, 404, "Table Repository has no corresponding entry.", None),
-        (0, 12345, 200, None, 0),
-        (0, 123456, 200, None, 1),
-        (1, 12345, 422, "Expected `github_token` to check access.", None),
-        (1, 123456, 200, None, 1),
-    ],
-)
-@pytest.mark.asyncio()
-async def test_disable_repo(
-    async_client: AsyncClient,
-    repo_session: AsyncSession,
-    user_idx: Union[int, None],
-    repo_id: int,
-    status_code: int,
-    status_detail: Union[str, None],
-    expected_idx: Union[int, None],
-):
-    auth = None
-    if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
-
-    response = await async_client.put(f"/repos/{repo_id}/disable", json={}, headers=auth)
-    assert response.status_code == status_code, print(response.__dict__)
-    if isinstance(status_detail, str):
-        assert response.json()["detail"] == status_detail
-    if response.status_code // 100 == 2:
-        assert response.json() == {**REPO_TABLE[expected_idx], "is_active": False}
-
-
-@pytest.mark.parametrize(
-    ("user_idx", "repo_id", "status_code", "status_detail", "expected_response"),
-    [
-        (None, 12345, 401, "Not authenticated", None),
-        (0, 0, 422, None, None),
-        (0, 100, 404, "Table Repository has no corresponding entry.", None),
-        (0, 12345, 200, None, GUIDELINE_TABLE),
-        (1, 12345, 200, None, GUIDELINE_TABLE),
-    ],
-)
-@pytest.mark.asyncio()
-async def test_fetch_guidelines_from_repo(
-    async_client: AsyncClient,
-    guideline_session: AsyncSession,
-    user_idx: Union[int, None],
-    repo_id: int,
-    status_code: int,
-    status_detail: Union[str, None],
-    expected_response: Union[List[Dict[str, Any]], None],
-):
-    auth = None
-    if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
-
-    response = await async_client.get(f"/repos/{repo_id}/guidelines", headers=auth)
-    assert response.status_code == status_code, print(response.__dict__)
-    if isinstance(status_detail, str):
-        assert response.json()["detail"] == status_detail
-    if response.status_code // 100 == 2:
-        assert response.json() == expected_response
-
-
-@pytest.mark.parametrize(
-    ("user_idx", "repo_id", "payload", "status_code", "status_detail"),
-    [
-        (None, 12345, {"guideline_ids": [1]}, 401, "Not authenticated"),
-        (0, 100, {"guideline_ids": [1]}, 404, "Table Repository has no corresponding entry."),
-        (0, 12345, {"guideline_ids": [1, 2]}, 422, None),
-        (0, 12345, {"guideline_ids": [1, 1]}, 422, None),
-        (0, 12345, {"guideline_ids": [1]}, 200, None),
-        (0, 123456, {"guideline_ids": [1]}, 422, None),
-        (1, 12345, {"guideline_ids": [1]}, 422, None),
-    ],
-)
-@pytest.mark.asyncio()
-async def test_reorder_repo_guidelines(
-    async_client: AsyncClient,
-    guideline_session: AsyncSession,
-    user_idx: Union[int, None],
-    repo_id: int,
-    payload: Dict[str, Any],
-    status_code: int,
-    status_detail: Union[str, None],
-):
-    auth = None
-    if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
-
-    response = await async_client.put(f"/repos/{repo_id}/guidelines/order", json=payload, headers=auth)
-    assert response.status_code == status_code, print(response.json())
-    if isinstance(status_detail, str):
-        assert response.json()["detail"] == status_detail
-    if response.status_code // 100 == 2:
-        assert [{k: v for k, v in entry.items() if k not in {"updated_at", "order"}} for entry in response.json()] == [
-            {k: v for k, v in entry.items() if k not in {"updated_at", "order"}} for entry in GUIDELINE_TABLE
-        ]
-        assert [entry["order"] for entry in response.json()] == [
-            payload["guideline_ids"].index(entry["id"]) for entry in GUIDELINE_TABLE
-        ]
-
-
-@pytest.mark.parametrize(
-    ("user_idx", "repo_id", "status_code", "status_detail"),
-    [
-        (None, 12345, 401, "Not authenticated"),
-        (0, 100, 404, "Not Found"),
-        (0, 249513553, 200, None),
-        (1, 249513553, 200, None),
-    ],
-)
-@pytest.mark.asyncio()
-async def test_add_repo_to_waitlist(
-    async_client: AsyncClient,
-    guideline_session: AsyncSession,
-    user_idx: Union[int, None],
-    repo_id: int,
-    status_code: int,
-    status_detail: Union[str, None],
-):
-    auth = None
-    if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
-
-    response = await async_client.post(f"/repos/{repo_id}/waitlist", headers=auth)
-    assert response.status_code == status_code, print(response.json())
-    if isinstance(status_detail, str):
-        assert response.json()["detail"] == status_detail
+#     response = await async_client.post(f"/repos/{repo_id}/waitlist", headers=auth)
+#     assert response.status_code == status_code, print(response.json())
+#     if isinstance(status_detail, str):
+#         assert response.json()["detail"] == status_detail
 
 
 # @pytest.mark.parametrize(

@@ -8,8 +8,22 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.models import User
 
 USER_TABLE = [
-    {"id": 1, "login": "first_login", "hashed_password": "hashed_first_pwd", "scope": "admin"},
-    {"id": 2, "login": "second_login", "hashed_password": "hashed_second_pwd", "scope": "user"},
+    {
+        "id": 1,
+        "provider_user_id": 123,
+        "login": "first_login",
+        "hashed_password": "hashed_first_pwd",
+        "scope": "admin",
+        "created_at": "2024-02-23T08:18:45.447773",
+    },
+    {
+        "id": 2,
+        "provider_user_id": 456,
+        "login": "second_login",
+        "hashed_password": "hashed_second_pwd",
+        "scope": "user",
+        "created_at": "2024-02-23T08:18:45.447774",
+    },
 ]
 
 

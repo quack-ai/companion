@@ -9,8 +9,22 @@ from app.api.api_v1.endpoints import users
 from app.models import User
 
 USER_TABLE = [
-    {"id": 26927750, "login": "first_login", "hashed_password": "hashed_first_pwd", "scope": "admin"},
-    {"id": 2, "login": "second_login", "hashed_password": "hashed_second_pwd", "scope": "user"},
+    {
+        "id": 1,
+        "provider_user_id": 26927750,
+        "login": "first_login",
+        "hashed_password": "hashed_first_pwd",
+        "scope": "admin",
+        "created_at": "2024-02-23T08:18:45.447773",
+    },
+    {
+        "id": 2,
+        "provider_user_id": 456,
+        "login": "second_login",
+        "hashed_password": "hashed_second_pwd",
+        "scope": "user",
+        "created_at": "2024-02-23T08:18:45.447774",
+    },
 ]
 
 
@@ -187,13 +201,15 @@ async def test_update_user_password(
     if isinstance(user_idx, int):
         auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
 
-    response = await async_client.put(f"/users/{user_id}", json=payload, headers=auth)
+    response = await async_client.patch(f"/users/{user_id}", json=payload, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
         assert response.json() == {
             "id": USER_TABLE[expected_idx]["id"],
+            "provider_user_id": USER_TABLE[expected_idx]["provider_user_id"],
+            "created_at": USER_TABLE[expected_idx]["created_at"],
             "login": USER_TABLE[expected_idx]["login"],
             "hashed_password": f"hashed_{payload['password']}",
             "scope": USER_TABLE[expected_idx]["scope"],
