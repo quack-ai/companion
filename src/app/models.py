@@ -5,9 +5,9 @@
 
 from datetime import datetime
 from enum import Enum
-from typing import List, Union
+from typing import Union
 
-from sqlmodel import JSON, Column, Field, SQLModel
+from sqlmodel import Field, SQLModel
 
 __all__ = ["GHRole", "Guideline", "Repository", "User", "UserScope"]
 
@@ -30,9 +30,9 @@ class Provider(str, Enum):
 
 
 class User(SQLModel, table=True):
-    # Allow sign-up/in via provider or login + password
     id: int = Field(None, primary_key=True)
     scope: UserScope = Field(UserScope.USER, nullable=False)
+    # Allow sign-up/in via provider or login + password
     provider_user_id: Union[int, None] = Field(None, gt=0)
     login: Union[str, None] = Field(None, min_length=2, max_length=50)
     hashed_password: Union[str, None] = Field(None, min_length=5, max_length=70)
@@ -42,28 +42,25 @@ class User(SQLModel, table=True):
 class Repository(SQLModel, table=True):
     id: int = Field(None, primary_key=True)
     provider_repo_id: int = Field(index=True, nullable=True, gt=0)
-    ruleset_id: Union[int, None] = Field(None, foreign_key="ruleset.id", nullable=True)
     registered_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
 
 class Guideline(SQLModel, table=True):
     id: int = Field(None, primary_key=True)
-    title: str = Field(..., min_length=6, max_length=100, nullable=False)
-    details: str = Field(..., min_length=6, max_length=1000, nullable=False)
-    creator_user_id: int = Field(..., foreign_key="user.id", nullable=False)
-    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
-    # origin
-
-
-class RuleSet(SQLModel, table=True):
-    id: int = Field(None, primary_key=True)
-    name: str = Field(..., min_length=6, max_length=100, nullable=False)
-    guidelines: List[int] = Field(sa_column=Column(JSON))
-    creator_user_id: int = Field(..., foreign_key="user.id", nullable=False)
+    content: str = Field(..., min_length=6, max_length=1000, nullable=False)
+    creator_id: int = Field(..., foreign_key="user.id", nullable=False)
     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
-    # Needed for Column(JSON)
-    class Config:
-        arbitrary_types_allowed = True
+
+# class Collection(SQLModel, table=True):
+#     id: int = Field(None, primary_key=True)
+#     name: str = Field(..., min_length=6, max_length=100, nullable=False)
+#     guidelines: List[int] = Field(sa_column=Column(JSON))
+#     creator_user_id: int = Field(..., foreign_key="user.id", nullable=False)
+#     created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+#     updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+
+#     # Needed for Column(JSON)
+#     class Config:
+#         arbitrary_types_allowed = True
