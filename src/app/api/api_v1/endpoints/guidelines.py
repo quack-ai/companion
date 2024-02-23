@@ -26,7 +26,7 @@ async def create_guideline(
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
     telemetry_client.capture(user.id, event="guideline-creation")
-    return await guidelines.create(Guideline(creator_user_id=user.id, **payload.dict()))
+    return await guidelines.create(Guideline(creator_id=user.id, **payload.dict()))
 
 
 @router.get("/{guideline_id}", status_code=status.HTTP_200_OK, summary="Read a specific guideline")
@@ -48,7 +48,7 @@ async def fetch_guidelines(
     return [elt for elt in await guidelines.fetch_all()]
 
 
-@router.put("/{guideline_id}", status_code=status.HTTP_200_OK, summary="Update a guideline content")
+@router.patch("/{guideline_id}", status_code=status.HTTP_200_OK, summary="Update a guideline content")
 async def update_guideline_content(
     payload: GuidelineContent,
     guideline_id: int = Path(..., gt=0),
