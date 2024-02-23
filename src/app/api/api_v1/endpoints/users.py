@@ -124,7 +124,7 @@ async def fetch_users(
     return [elt for elt in await users.fetch_all()]
 
 
-@router.put("/{user_id}", status_code=status.HTTP_200_OK, summary="Updates a user's password")
+@router.patch("/{user_id}", status_code=status.HTTP_200_OK, summary="Updates a user's password")
 async def update_user_password(
     payload: Cred,
     user_id: int = Path(..., gt=0),
