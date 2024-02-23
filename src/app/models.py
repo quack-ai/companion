@@ -36,13 +36,14 @@ class User(SQLModel, table=True):
     provider_user_id: Union[int, None] = Field(None, gt=0)
     login: Union[str, None] = Field(None, min_length=2, max_length=50)
     hashed_password: Union[str, None] = Field(None, min_length=5, max_length=70)
-    registered_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
 
 class Repository(SQLModel, table=True):
     id: int = Field(None, primary_key=True)
     provider_repo_id: int = Field(index=True, nullable=True, gt=0)
-    registered_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    name: str = Field(..., min_length=2, max_length=100, nullable=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
 
 
 class Guideline(SQLModel, table=True):

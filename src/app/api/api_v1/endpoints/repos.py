@@ -71,7 +71,7 @@ async def register_repo(
             ("Language", gh_repo["language"]),
         ],
     )
-    return await repos.create(Repository(provider_repo_id=payload.provider_repo_id))
+    return await repos.create(Repository(provider_repo_id=payload.provider_repo_id, name=gh_repo["full_name"]))
 
 
 @router.get("/{repo_id}", status_code=status.HTTP_200_OK, summary="Fetch a specific repository")
