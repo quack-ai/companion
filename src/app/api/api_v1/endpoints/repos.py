@@ -93,68 +93,6 @@ async def fetch_repos(
     return [elt for elt in await repos.fetch_all()]
 
 
-# @router.put(
-#     "/{repo_id}/guidelines/order",
-#     status_code=status.HTTP_200_OK,
-#     summary="Updates the order of the guidelines for a specific repository",
-# )
-# async def reorder_repo_guidelines(
-#     payload: GuidelineOrder,
-#     repo_id: int = Path(..., gt=0),
-#     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-#     repos: RepositoryCRUD = Depends(get_repo_crud),
-#     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
-# ) -> List[Guideline]:
-#     telemetry_client.capture(user.id, event="guideline-order", properties={"repo_id": repo_id})
-#     # Ensure all IDs are unique
-#     if len(payload.guideline_ids) != len(set(payload.guideline_ids)):
-#         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Duplicate IDs were passed.")
-#     # Check the repo
-#     repo = cast(Repository, await repos.get(repo_id, strict=True))
-#     # Ensure all IDs are valid
-#     guideline_ids = [elt.id for elt in await guidelines.fetch_all(("repo_id", repo_id))]
-#     if set(payload.guideline_ids) != set(guideline_ids):
-#         raise HTTPException(
-#             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-#             detail="Guideline IDs for that repo don't match.",
-#         )
-#     # Check if user is allowed
-#     gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
-#     # Update all order
-#     return [
-#         await guidelines.update(guideline_id, OrderUpdate(order=order_idx, updated_at=datetime.utcnow()))
-#         for order_idx, guideline_id in enumerate(payload.guideline_ids)
-#     ]
-
-
-# @router.put("/{repo_id}/disable", status_code=status.HTTP_200_OK, summary="Disable a specific repository")
-# async def disable_repo(
-#     payload: OptionalGHToken,
-#     repo_id: int = Path(..., gt=0),
-#     repos: RepositoryCRUD = Depends(get_repo_crud),
-#     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
-# ) -> Repository:
-#     telemetry_client.capture(user.id, event="repo-disable", properties={"repo_id": repo_id})
-#     # Check if user is allowed
-#     repo = cast(Repository, await repos.get(repo_id, strict=True))
-#     gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
-#     return await repos.update(repo_id, RepoUpdate(is_active=False))
-
-
-# @router.put("/{repo_id}/enable", status_code=status.HTTP_200_OK, summary="Enable a specific repository")
-# async def enable_repo(
-#     payload: OptionalGHToken,
-#     repo_id: int = Path(..., gt=0),
-#     repos: RepositoryCRUD = Depends(get_repo_crud),
-#     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
-# ) -> Repository:
-#     telemetry_client.capture(user.id, event="repo-enable", properties={"repo_id": repo_id})
-#     # Check if user is allowed
-#     repo = cast(Repository, await repos.get(repo_id, strict=True))
-#     gh_client.check_user_permission(user, repo.full_name, repo.owner_id, payload.github_token, repo.installed_by)
-#     return await repos.update(repo_id, RepoUpdate(is_active=True))
-
-
 @router.delete("/{repo_id}", status_code=status.HTTP_200_OK, summary="Delete a specific repository")
 async def delete_repo(
     repo_id: int = Path(..., gt=0),
@@ -163,18 +101,6 @@ async def delete_repo(
 ) -> None:
     telemetry_client.capture(user.id, event="repo-delete", properties={"repo_id": repo_id})
     await repos.delete(repo_id)
-
-
-# @router.get("/{repo_id}/guidelines", status_code=status.HTTP_200_OK, summary="Fetch the guidelines of a repository")
-# async def fetch_guidelines_from_repo(
-#     repo_id: int = Path(..., gt=0),
-#     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-#     repos: RepositoryCRUD = Depends(get_repo_crud),
-#     user: User = Security(get_current_user, scopes=[UserScope.ADMIN, UserScope.USER]),
-# ) -> List[Guideline]:
-#     telemetry_client.capture(user.id, event="repo-fetch-guidelines", properties={"repo_id": repo_id})
-#     await repos.get(repo_id, strict=True)
-#     return [elt for elt in await guidelines.fetch_all(("repo_id", repo_id))]
 
 
 # @router.post(
