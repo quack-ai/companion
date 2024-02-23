@@ -84,9 +84,7 @@ async def login_with_github_token(
     user = await users.get_by("provider_user_id", f"{Provider.GITHUB}|{gh_user['id']}", strict=False)
     # Register if non existing
     if user is None:
-        user = await _create_user(
-            UserCreate(provider=Provider.GITHUB, provider_user_id=gh_user["id"], scope=UserScope.USER), users
-        )
+        user = await _create_user(UserCreate(provider_user_id=gh_user["id"], scope=UserScope.USER), users)
     # If user is created, it needs to be identified & aliased before capture
     telemetry_client.capture(user.id, event="user-login", properties={"method": "provider|github"})
 
