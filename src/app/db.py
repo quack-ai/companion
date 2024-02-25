@@ -3,6 +3,8 @@
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
+import logging
+
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel, create_engine, select
@@ -15,7 +17,7 @@ from app.services.github import gh_client
 
 __all__ = ["get_session", "init_db"]
 
-
+logger = logging.getLogger("uvicorn.error")
 engine = AsyncEngine(create_engine(settings.POSTGRES_URL, echo=False))
 
 
@@ -35,6 +37,7 @@ async def init_db() -> None:
         results = await session.execute(statement=statement)
         user = results.scalar_one_or_none()
         if not user:
+            logger.info("Initializing PostgreSQL database...")
             # Fetch authenticated GitHub User
             gh_user = gh_client.get_my_user(settings.SUPERADMIN_GH_PAT)
             pwd = await hash_password(settings.SUPERADMIN_PWD)
