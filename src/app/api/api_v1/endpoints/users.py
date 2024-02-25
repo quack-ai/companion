@@ -21,7 +21,6 @@ router = APIRouter()
 
 async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[User, None] = None) -> User:
     valid_creds = False
-    provider_user_id = None
     user_props = {"login": payload.login, "provider_login": None, "name": None, "twitter_username": None}
     notif_info = []
     # Provider check
@@ -57,7 +56,10 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
 
     # Creds check
     hashed_password = None
-    if payload.login is not None and payload.password is not None:
+    if payload.login is not None or payload.password is not None:
+        # Check both are filled
+        if payload.login is None or payload.password is None:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Login or password need to be specified together")
         # Check for unicity
         if (await users.get_by_login(payload.login, strict=False)) is not None:
             raise HTTPException(status.HTTP_409_CONFLICT, "Login already taken")
@@ -76,7 +78,7 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
             login=payload.login,
             hashed_password=hashed_password,
             scope=payload.scope,
-            provider_user_id=provider_user_id,
+            provider_user_id=payload.provider_user_id,
         )
     )
 
