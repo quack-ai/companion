@@ -3,6 +3,7 @@ from typing import Any, Dict, Union
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
+from sqlmodel import text
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.api_v1.endpoints import users
@@ -30,28 +31,37 @@ USER_TABLE = [
 
 @pytest_asyncio.fixture(scope="function")
 async def user_session(async_session: AsyncSession, monkeypatch):
+    monkeypatch.setattr(users, "hash_password", pytest.mock_hash_password)
     for entry in USER_TABLE:
         async_session.add(User(**entry))
     await async_session.commit()
-    monkeypatch.setattr(users, "hash_password", pytest.mock_hash_password)
+    await async_session.execute(
+        text(f"ALTER SEQUENCE user_id_seq RESTART WITH {max(entry['id'] for entry in USER_TABLE) + 1}")
+    )
+    await async_session.commit()
     yield async_session
 
 
 @pytest.mark.parametrize(
     ("user_idx", "payload", "status_code", "status_detail"),
     [
-        (None, {"id": 241138, "password": "bar", "scope": "user"}, 401, "Not authenticated"),
+        (
+            None,
+            {"provider_user_id": 241138, "login": "karpathy", "password": "bar", "scope": "user"},
+            401,
+            "Not authenticated",
+        ),
         (
             0,
-            {"id": 26927750, "password": "bar", "scope": "user"},
+            {"provider_user_id": 26927750, "login": "karpathy", "password": "bar", "scope": "user"},
             409,
-            "An entry with the same index already exists.",
+            "User already registered",
         ),
-        (0, {"id": 241138, "password": "bar", "scope": "user"}, 201, None),
-        (0, {"id": 241138, "scope": "user"}, 422, None),
+        (0, {"provider_user_id": 241138, "login": "karpathy", "password": "bar", "scope": "user"}, 201, None),
+        (0, {"provider_user_id": 241138, "login": "karpathy", "scope": "user"}, 422, None),
         (
             1,
-            {"id": 241138, "password": "bar", "scope": "user"},
+            {"provider_user_id": 241138, "login": "karpathy", "password": "bar", "scope": "user"},
             401,
             "Your user scope is not compatible with this operation.",
         ),
@@ -75,22 +85,23 @@ async def test_create_user(
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
-        assert response.json() == {
-            "id": payload["id"],
-            "login": "karpathy",
+        assert {k: v for k, v in response.json().items() if k != "created_at"} == {
+            "provider_user_id": payload["provider_user_id"],
+            "login": payload["login"],
             "hashed_password": f"hashed_{payload['password']}",
             "scope": payload["scope"],
+            "id": max(entry["id"] for entry in USER_TABLE) + 1,
         }
 
 
 @pytest.mark.parametrize(
     ("user_idx", "user_id", "status_code", "status_detail", "expected_idx"),
     [
-        (None, 26927750, 401, "Not authenticated", None),
+        (None, 1, 401, "Not authenticated", None),
         (0, 0, 422, None, None),
         (0, 400, 404, "Table User has no corresponding entry.", None),
-        (1, 26927750, 401, "Your user scope is not compatible with this operation.", None),
-        (0, 26927750, 200, None, 0),
+        (1, 1, 401, "Your user scope is not compatible with this operation.", None),
+        (0, 1, 200, None, 0),
         (0, 2, 200, None, 1),
     ],
 )
@@ -147,10 +158,10 @@ async def test_fetch_users(
 @pytest.mark.parametrize(
     ("user_idx", "user_id", "status_code", "status_detail"),
     [
-        (None, 26927750, 401, "Not authenticated"),
-        (0, 26927750, 200, None),
+        (None, 1, 401, "Not authenticated"),
+        (0, 1, 200, None),
         (0, 2, 200, None),
-        (1, 26927750, 401, "Your user scope is not compatible with this operation."),
+        (1, 1, 401, "Your user scope is not compatible with this operation."),
         (1, 2, 401, "Your user scope is not compatible with this operation."),
     ],
 )
@@ -178,11 +189,11 @@ async def test_delete_user(
 @pytest.mark.parametrize(
     ("user_idx", "user_id", "payload", "status_code", "status_detail", "expected_idx"),
     [
-        (None, 26927750, {"password": "HeyQuack!"}, 401, "Not authenticated", None),
-        (0, 26927750, {"login": "HeyQuack!"}, 422, None, None),
-        (0, 26927750, {"password": "HeyQuack!"}, 200, None, 0),
+        (None, 1, {"password": "HeyQuack!"}, 401, "Not authenticated", None),
+        (0, 1, {"login": "HeyQuack!"}, 422, None, None),
+        (0, 1, {"password": "HeyQuack!"}, 200, None, 0),
         (0, 2, {"password": "HeyQuack!"}, 200, None, 1),
-        (1, 26927750, {"password": "HeyQuack!"}, 401, "Your user scope is not compatible with this operation.", None),
+        (1, 1, {"password": "HeyQuack!"}, 401, "Your user scope is not compatible with this operation.", None),
         (1, 2, {"password": "HeyQuack!"}, 401, "Your user scope is not compatible with this operation.", None),
     ],
 )

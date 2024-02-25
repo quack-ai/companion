@@ -31,21 +31,20 @@ async def async_client() -> AsyncGenerator[AsyncClient, None]:
 
 @pytest_asyncio.fixture(scope="function")
 async def async_session() -> AsyncSession:
-    session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-
-    async with session() as s:
-        async with engine.begin() as conn:
-            await conn.run_sync(SQLModel.metadata.create_all)
-            for table in reversed(SQLModel.metadata.sorted_tables):
-                conn.execute(table.delete())
-                conn.execute(f"ALTER SEQUENCE {table}_id_seq RESTART WITH 1")
-
-        yield s
-
     async with engine.begin() as conn:
-        await conn.run_sync(SQLModel.metadata.drop_all)
+        await conn.run_sync(SQLModel.metadata.create_all)
 
-    await engine.dispose()
+    async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    async with async_session_maker() as session:
+        async with session.begin():
+            for table in reversed(SQLModel.metadata.sorted_tables):
+                await session.execute(table.delete())
+                if hasattr(table.c, "id"):
+                    await session.execute(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1")
+
+        yield session
+        await session.rollback()
 
 
 async def mock_verify_password(plain_password, hashed_password):
