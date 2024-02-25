@@ -157,8 +157,6 @@ async def get_token(access_id: int, scopes: str) -> Dict[str, str]:
 
 def pytest_configure():
     # api.security patching
-    pytest.mock_verify_password = mock_verify_password
-    pytest.mock_hash_password = mock_hash_password
     pytest.get_token = get_token
     # Table
     pytest.user_table = USER_TABLE

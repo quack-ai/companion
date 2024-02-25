@@ -20,8 +20,21 @@ from sqlmodel.ext.asyncio.session import AsyncSession
             409,
             "User already registered",
         ),
+        (
+            0,
+            {"provider_user_id": 241138, "login": "first_login", "password": "bar", "scope": "user"},
+            409,
+            "Login alredy taken",
+        ),
+        (
+            0,
+            {"provider_user_id": 118990213, "login": "karpathy", "password": "bar", "scope": "user"},
+            403,
+            "GitHub account is expected to be a user.",
+        ),
         (0, {"provider_user_id": 241138, "login": "karpathy", "password": "bar", "scope": "user"}, 201, None),
         (0, {"provider_user_id": 241138, "login": "karpathy", "scope": "user"}, 422, None),
+        (0, {"scope": "user"}, 422, None),
         (
             1,
             {"provider_user_id": 241138, "login": "karpathy", "password": "bar", "scope": "user"},
