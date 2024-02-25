@@ -24,7 +24,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
             0,
             {"provider_user_id": 241138, "login": "first_login", "password": "bar", "scope": "user"},
             409,
-            "Login alredy taken",
+            "Login already taken",
         ),
         (
             0,
