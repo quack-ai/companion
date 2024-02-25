@@ -40,6 +40,7 @@ async def user_session(async_session: AsyncSession, monkeypatch):
     )
     await async_session.commit()
     yield async_session
+    await async_session.rollback()
 
 
 @pytest.mark.parametrize(
@@ -62,8 +63,8 @@ async def user_session(async_session: AsyncSession, monkeypatch):
         (
             1,
             {"provider_user_id": 241138, "login": "karpathy", "password": "bar", "scope": "user"},
-            401,
-            "Your user scope is not compatible with this operation.",
+            403,
+            "Incompatible token scope.",
         ),
     ],
 )
@@ -100,7 +101,7 @@ async def test_create_user(
         (None, 1, 401, "Not authenticated", None),
         (0, 0, 422, None, None),
         (0, 400, 404, "Table User has no corresponding entry.", None),
-        (1, 1, 401, "Your user scope is not compatible with this operation.", None),
+        (1, 1, 403, "Incompatible token scope.", None),
         (0, 1, 200, None, 0),
         (0, 2, 200, None, 1),
     ],
@@ -132,7 +133,7 @@ async def test_get_user(
     [
         (None, 401, "Not authenticated"),
         (0, 200, None),
-        (1, 401, "Your user scope is not compatible with this operation."),
+        (1, 403, "Incompatible token scope."),
     ],
 )
 @pytest.mark.asyncio()
@@ -161,8 +162,8 @@ async def test_fetch_users(
         (None, 1, 401, "Not authenticated"),
         (0, 1, 200, None),
         (0, 2, 200, None),
-        (1, 1, 401, "Your user scope is not compatible with this operation."),
-        (1, 2, 401, "Your user scope is not compatible with this operation."),
+        (1, 1, 403, "Incompatible token scope."),
+        (1, 2, 403, "Incompatible token scope."),
     ],
 )
 @pytest.mark.asyncio()
@@ -193,8 +194,8 @@ async def test_delete_user(
         (0, 1, {"login": "HeyQuack!"}, 422, None, None),
         (0, 1, {"password": "HeyQuack!"}, 200, None, 0),
         (0, 2, {"password": "HeyQuack!"}, 200, None, 1),
-        (1, 1, {"password": "HeyQuack!"}, 401, "Your user scope is not compatible with this operation.", None),
-        (1, 2, {"password": "HeyQuack!"}, 401, "Your user scope is not compatible with this operation.", None),
+        (1, 1, {"password": "HeyQuack!"}, 403, "Incompatible token scope.", None),
+        (1, 2, {"password": "HeyQuack!"}, 403, "Incompatible token scope.", None),
     ],
 )
 @pytest.mark.asyncio()
