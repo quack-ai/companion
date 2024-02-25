@@ -28,7 +28,7 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
         # Check that user exists on GitHub
         gh_user = gh_client.get_user(payload.provider_user_id)
         if gh_user["type"] != "User":
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user.")
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "GitHub account is expected to be a user.")
         # Unicity check
         if (await users.get_by("provider_user_id", payload.provider_user_id, strict=False)) is not None:
             raise HTTPException(status.HTTP_409_CONFLICT, "User already registered")
