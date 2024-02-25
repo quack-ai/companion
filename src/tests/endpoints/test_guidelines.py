@@ -1,84 +1,8 @@
 from typing import Any, Dict, Union
 
 import pytest
-import pytest_asyncio
 from httpx import AsyncClient
-from sqlmodel import text
 from sqlmodel.ext.asyncio.session import AsyncSession
-
-from app.models import Guideline, Repository, User
-
-USER_TABLE = [
-    {
-        "id": 1,
-        "provider_user_id": 123,
-        "login": "first_login",
-        "hashed_password": "hashed_first_pwd",
-        "scope": "admin",
-        "created_at": "2024-02-23T08:18:45.447773",
-    },
-    {
-        "id": 2,
-        "provider_user_id": 456,
-        "login": "second_login",
-        "hashed_password": "hashed_second_pwd",
-        "scope": "user",
-        "created_at": "2024-02-23T08:18:45.447774",
-    },
-]
-
-REPO_TABLE = [
-    {
-        "id": 1,
-        "provider_repo_id": 12345,
-        "name": "quack-ai/dummy-repo",
-        "created_at": "2023-11-07T15:07:19.226673",
-    },
-    {
-        "id": 2,
-        "provider_repo_id": 123456,
-        "name": "quack-ai/another-repo",
-        "created_at": "2023-11-07T15:07:19.226673",
-    },
-]
-
-
-GUIDELINE_TABLE = [
-    {
-        "id": 1,
-        "content": "Ensure function and class/instance methods have a meaningful & informative name",
-        "creator_id": 1,
-        "created_at": "2023-11-07T15:08:19.226673",
-        "updated_at": "2023-11-07T15:08:19.226673",
-    },
-    {
-        "id": 2,
-        "title": "Docstrings",
-        "content": "All functions and methods need to have a docstring",
-        "creator_id": 2,
-        "created_at": "2023-11-07T15:08:20.226673",
-        "updated_at": "2023-11-07T15:08:20.226673",
-    },
-]
-
-
-@pytest_asyncio.fixture(scope="function")
-async def guideline_session(async_session: AsyncSession, monkeypatch):
-    for entry in USER_TABLE:
-        async_session.add(User(**entry))
-    await async_session.commit()
-    for entry in REPO_TABLE:
-        async_session.add(Repository(**entry))
-    await async_session.commit()
-    for entry in GUIDELINE_TABLE:
-        async_session.add(Guideline(**entry))
-    await async_session.commit()
-    # Update the guideline index count
-    await async_session.execute(
-        text(f"ALTER SEQUENCE guideline_id_seq RESTART WITH {max(entry['id'] for entry in GUIDELINE_TABLE) + 1}")
-    )
-    await async_session.commit()
-    yield async_session
 
 
 @pytest.mark.parametrize(
@@ -101,15 +25,17 @@ async def test_create_guideline(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.post("/guidelines", json=payload, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
-        assert {k: v for k, v in response.json().items() if k not in {"created_at", "updated_at", "id"}} == payload
-        assert response.json()["id"] == max(entry["id"] for entry in GUIDELINE_TABLE) + 1
+        assert {
+            k: v for k, v in response.json().items() if k not in {"created_at", "updated_at", "id", "creator_id"}
+        } == payload
+        assert response.json()["id"] == max(entry["id"] for entry in pytest.guideline_table) + 1
 
 
 @pytest.mark.parametrize(
@@ -136,14 +62,14 @@ async def test_get_guideline(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.get(f"/guidelines/{guideline_id}", headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
-        assert response.json() == GUIDELINE_TABLE[expected_idx]
+        assert response.json() == pytest.guideline_table[expected_idx]
 
 
 @pytest.mark.parametrize(
@@ -151,7 +77,7 @@ async def test_get_guideline(
     [
         (None, 401, "Not authenticated"),
         (0, 200, None),
-        (1, 401, "Your user scope is not compatible with this operation."),
+        (1, 403, "Incompatible token scope."),
     ],
 )
 @pytest.mark.asyncio()
@@ -164,14 +90,14 @@ async def test_fetch_guidelines(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.get("/guidelines", headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
-        assert response.json() == GUIDELINE_TABLE
+        assert response.json() == pytest.guideline_table
 
 
 @pytest.mark.parametrize(
@@ -182,8 +108,8 @@ async def test_fetch_guidelines(
         (0, 100, 404, "Table Guideline has no corresponding entry."),
         (0, 1, 200, None),
         (0, 2, 200, None),
-        (1, 1, 422, None),
-        (1, 2, 422, None),
+        (1, 1, 403, None),
+        (1, 2, 200, None),
     ],
 )
 @pytest.mark.asyncio()
@@ -197,7 +123,7 @@ async def test_delete_guideline(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.request("DELETE", f"/guidelines/{guideline_id}", json={}, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -215,8 +141,8 @@ async def test_delete_guideline(
         (0, 1, {"title": "New guideline title"}, 422, None, None),
         (0, 1, {"content": "New guideline details"}, 200, None, 0),
         (0, 2, {"content": "New guideline details"}, 200, None, 1),
-        (1, 1, {"content": "New guideline details"}, 422, None, 0),
-        (1, 2, {"content": "New guideline details"}, 422, None, 1),
+        (1, 1, {"content": "New guideline details"}, 403, None, 0),
+        (1, 2, {"content": "New guideline details"}, 200, None, 1),
     ],
 )
 @pytest.mark.asyncio()
@@ -232,7 +158,7 @@ async def test_update_guideline_content(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.patch(f"/guidelines/{guideline_id}", json=payload, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -240,6 +166,10 @@ async def test_update_guideline_content(
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
         assert {k: v for k, v in response.json().items() if k != "updated_at"} == {
-            **{k: v for k, v in GUIDELINE_TABLE[expected_idx].items() if k not in {"title", "details", "updated_at"}},
+            **{
+                k: v
+                for k, v in pytest.guideline_table[expected_idx].items()
+                if k not in {"title", "details", "updated_at"}
+            },
             **payload,
         }

@@ -1,46 +1,8 @@
 from typing import Any, Dict, Union
 
 import pytest
-import pytest_asyncio
 from httpx import AsyncClient
-from sqlmodel import text
 from sqlmodel.ext.asyncio.session import AsyncSession
-
-from app.api.api_v1.endpoints import users
-from app.models import User
-
-USER_TABLE = [
-    {
-        "id": 1,
-        "provider_user_id": 26927750,
-        "login": "first_login",
-        "hashed_password": "hashed_first_pwd",
-        "scope": "admin",
-        "created_at": "2024-02-23T08:18:45.447773",
-    },
-    {
-        "id": 2,
-        "provider_user_id": 456,
-        "login": "second_login",
-        "hashed_password": "hashed_second_pwd",
-        "scope": "user",
-        "created_at": "2024-02-23T08:18:45.447774",
-    },
-]
-
-
-@pytest_asyncio.fixture(scope="function")
-async def user_session(async_session: AsyncSession, monkeypatch):
-    monkeypatch.setattr(users, "hash_password", pytest.mock_hash_password)
-    for entry in USER_TABLE:
-        async_session.add(User(**entry))
-    await async_session.commit()
-    await async_session.execute(
-        text(f"ALTER SEQUENCE user_id_seq RESTART WITH {max(entry['id'] for entry in USER_TABLE) + 1}")
-    )
-    await async_session.commit()
-    yield async_session
-    await async_session.rollback()
 
 
 @pytest.mark.parametrize(
@@ -54,7 +16,7 @@ async def user_session(async_session: AsyncSession, monkeypatch):
         ),
         (
             0,
-            {"provider_user_id": 26927750, "login": "karpathy", "password": "bar", "scope": "user"},
+            {"provider_user_id": 123, "login": "karpathy", "password": "bar", "scope": "user"},
             409,
             "User already registered",
         ),
@@ -79,7 +41,7 @@ async def test_create_user(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.post("/users", json=payload, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -91,7 +53,7 @@ async def test_create_user(
             "login": payload["login"],
             "hashed_password": f"hashed_{payload['password']}",
             "scope": payload["scope"],
-            "id": max(entry["id"] for entry in USER_TABLE) + 1,
+            "id": max(entry["id"] for entry in pytest.user_table) + 1,
         }
 
 
@@ -118,14 +80,14 @@ async def test_get_user(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.get(f"/users/{user_id}", headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
-        assert response.json() == USER_TABLE[expected_idx]
+        assert response.json() == pytest.user_table[expected_idx]
 
 
 @pytest.mark.parametrize(
@@ -146,14 +108,14 @@ async def test_fetch_users(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.get("/users/", headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
-        assert response.json() == USER_TABLE
+        assert response.json() == pytest.user_table
 
 
 @pytest.mark.parametrize(
@@ -177,7 +139,7 @@ async def test_delete_user(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.delete(f"/users/{user_id}", headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -211,7 +173,7 @@ async def test_update_user_password(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(USER_TABLE[user_idx]["id"], USER_TABLE[user_idx]["scope"].split())
+        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.patch(f"/users/{user_id}", json=payload, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -219,10 +181,10 @@ async def test_update_user_password(
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
         assert response.json() == {
-            "id": USER_TABLE[expected_idx]["id"],
-            "provider_user_id": USER_TABLE[expected_idx]["provider_user_id"],
-            "created_at": USER_TABLE[expected_idx]["created_at"],
-            "login": USER_TABLE[expected_idx]["login"],
+            "id": pytest.user_table[expected_idx]["id"],
+            "provider_user_id": pytest.user_table[expected_idx]["provider_user_id"],
+            "created_at": pytest.user_table[expected_idx]["created_at"],
+            "login": pytest.user_table[expected_idx]["login"],
             "hashed_password": f"hashed_{payload['password']}",
-            "scope": USER_TABLE[expected_idx]["scope"],
+            "scope": pytest.user_table[expected_idx]["scope"],
         }
