@@ -56,7 +56,7 @@ async def update_guideline_content(
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
     telemetry_client.capture(user.id, event="guideline-update-content", properties={"guideline_id": guideline_id})
-    guideline = await guidelines.get(guideline_id, strict=True)
+    guideline = cast(Guideline, await guidelines.get(guideline_id, strict=True))
     if user.scope != UserScope.ADMIN and user.id != guideline.creator_id:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Insufficient permissions.")
     return await guidelines.update(guideline_id, ContentUpdate(**payload.dict()))
@@ -69,7 +69,7 @@ async def delete_guideline(
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> None:
     telemetry_client.capture(user.id, event="guideline-deletion", properties={"guideline_id": guideline_id})
-    guideline = await guidelines.get(guideline_id, strict=True)
+    guideline = cast(Guideline, await guidelines.get(guideline_id, strict=True))
     if user.scope != UserScope.ADMIN and user.id != guideline.creator_id:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Insufficient permissions.")
     await guidelines.delete(guideline_id)

@@ -224,7 +224,7 @@ class OpenAIClient:
         **kwargs,
     ) -> List[ComplianceResult]:
         # Check args before sending a request
-        if len(code) == 0 or len(guidelines) == 0 or any(len(guideline.details) == 0 for guideline in guidelines):
+        if len(code) == 0 or len(guidelines) == 0 or any(len(guideline.content) == 0 for guideline in guidelines):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="No code or guideline provided for analysis.",
@@ -233,7 +233,7 @@ class OpenAIClient:
         if mode == ExecutionMode.SINGLE:
             parsed_response = self._analyze(
                 MULTI_PROMPT,
-                {"code": code, "guidelines": [guideline.details for guideline in guidelines]},
+                {"code": code, "guidelines": [guideline.content for guideline in guidelines]},
                 MULTI_SCHEMA,
                 **kwargs,
             )["result"]
@@ -245,7 +245,7 @@ class OpenAIClient:
                     executor.submit(
                         self._analyze,
                         MONO_PROMPT,
-                        {"code": code, "guideline": guideline.details},
+                        {"code": code, "guideline": guideline.content},
                         MONO_SCHEMA,
                         **kwargs,
                     )
@@ -265,12 +265,12 @@ class OpenAIClient:
 
     def check_code(self, code: str, guideline: Guideline, **kwargs) -> ComplianceResult:
         # Check args before sending a request
-        if len(code) == 0 or len(guideline.details) == 0:
+        if len(code) == 0 or len(guideline.content) == 0:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="No code or guideline provided for analysis.",
             )
-        res = self._analyze(MONO_PROMPT, {"code": code, "guideline": guideline.details}, MONO_SCHEMA, **kwargs)
+        res = self._analyze(MONO_PROMPT, {"code": code, "guideline": guideline.content}, MONO_SCHEMA, **kwargs)
         # Return with pydantic validation
         return ComplianceResult(guideline_id=guideline.id, **res)
 
