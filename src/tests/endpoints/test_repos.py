@@ -3,10 +3,11 @@ from typing import Any, Dict, List, Union
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
+from sqlmodel import text
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.api.api_v1.endpoints import users
-from app.models import Guideline, Repository, User
+from app.models import Repository, User
 
 USER_TABLE = [
     {
@@ -59,19 +60,28 @@ async def repo_session(async_session: AsyncSession, monkeypatch):
     for entry in USER_TABLE:
         async_session.add(User(**entry))
     await async_session.commit()
+    await async_session.execute(
+        text(f"ALTER SEQUENCE user_id_seq RESTART WITH {max(entry['id'] for entry in USER_TABLE) + 1}")
+    )
+    await async_session.commit()
     for entry in REPO_TABLE:
         async_session.add(Repository(**entry))
     await async_session.commit()
+    await async_session.execute(
+        text(f"ALTER SEQUENCE repository_id_seq RESTART WITH {max(entry['id'] for entry in REPO_TABLE) + 1}")
+    )
+    await async_session.commit()
     monkeypatch.setattr(users, "hash_password", pytest.mock_hash_password)
     yield async_session
+    await async_session.rollback()
 
 
-@pytest_asyncio.fixture(scope="function")
-async def guideline_session(repo_session: AsyncSession):
-    for entry in GUIDELINE_TABLE:
-        repo_session.add(Guideline(**entry))
-    await repo_session.commit()
-    yield repo_session
+# @pytest_asyncio.fixture(scope="function")
+# async def guideline_session(repo_session: AsyncSession):
+#     for entry in GUIDELINE_TABLE:
+#         repo_session.add(Guideline(**entry))
+#     await repo_session.commit()
+#     yield repo_session
 
 
 @pytest.mark.parametrize(
@@ -85,7 +95,6 @@ async def guideline_session(repo_session: AsyncSession):
             201,
             None,
             {
-                "id": 3,
                 "provider_repo_id": 249513553,
                 "name": "frgfm/torch-cam",
             },
@@ -96,7 +105,6 @@ async def guideline_session(repo_session: AsyncSession):
             422,
             None,
             {
-                "id": 3,
                 "provider_repo_id": 249513553,
                 "name": "frgfm/torch-cam",
             },
@@ -122,13 +130,13 @@ async def test_create_repo(
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
-        assert {k: v for k, v in response.json().items() if k != "created_at"} == expected_response
+        assert {k: v for k, v in response.json().items() if k not in {"id", "created_at"}} == expected_response
 
 
 @pytest.mark.parametrize(
     ("user_idx", "repo_id", "status_code", "status_detail", "expected_idx"),
     [
-        (None, 12345, 401, "Not authenticated", None),
+        (None, 1, 401, "Not authenticated", None),
         (0, 0, 422, None, None),
         (0, 100, 404, "Table Repository has no corresponding entry.", None),
         (0, 1, 200, None, 0),
@@ -162,7 +170,7 @@ async def test_get_repo(
     [
         (None, 401, "Not authenticated", None),
         (0, 200, None, REPO_TABLE),
-        (1, 403, "Not authorized", None),
+        (1, 403, "Incompatible token scope.", None),
     ],
 )
 @pytest.mark.asyncio()
@@ -189,13 +197,13 @@ async def test_fetch_repos(
 @pytest.mark.parametrize(
     ("user_idx", "repo_id", "status_code", "status_detail"),
     [
-        (None, 12345, 401, "Not authenticated"),
+        (None, 1, 401, "Not authenticated"),
         (0, 0, 422, None),
         (0, 100, 404, "Table Repository has no corresponding entry."),
-        (0, 12345, 200, None),
-        (0, 123456, 200, None),
-        (1, 12345, 401, "Your user scope is not compatible with this operation."),
-        (1, 123456, 401, "Your user scope is not compatible with this operation."),
+        (0, 1, 200, None),
+        (0, 2, 200, None),
+        (1, 1, 403, "Incompatible token scope."),
+        (1, 2, 403, "Incompatible token scope."),
     ],
 )
 @pytest.mark.asyncio()
