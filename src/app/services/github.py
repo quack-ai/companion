@@ -95,7 +95,7 @@ class GitHubClient:
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                     detail="Expected `github_token` to check access.",
                 )
-            if self.get_permission(repo_full_name, user.login, github_token) not in ("maintain", "admin"):
+            if self.get_permission(repo_full_name, user.login, github_token) not in ("maintain", "admin"):  # type: ignore[arg-type]
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Insufficient access (requires maintain or admin).",
