@@ -64,6 +64,7 @@ jobs:
           GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
         run: |
+          docker compose -f docker-compose.test.yml exec -T backend alembic stamp head
           docker compose -f docker-compose.test.yml exec -T backend alembic history --verbose
           docker compose -f docker-compose.test.yml exec -T backend alembic downgrade -1
           docker compose -f docker-compose.test.yml exec -T backend alembic upgrade +1
