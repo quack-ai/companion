@@ -32,6 +32,7 @@ jobs:
           POSTGRES_DB: postgres
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: pg_pwd
+          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q4_0
         run: docker-compose up -d --build
       - name: Docker sanity check
         run: sleep 20 && nc -vz localhost 8050
