@@ -35,7 +35,7 @@ jobs:
           OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q4_0
         run: docker-compose up -d --build
       - name: Debug
-        run: sleep 20 && docker-compose logs
+        run: sleep 20 && docker-compose logs backend
       - name: Docker sanity check
         run: nc -vz localhost 8050
       - name: Debug
