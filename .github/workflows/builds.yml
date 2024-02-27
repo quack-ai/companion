@@ -25,16 +25,19 @@ jobs:
       - name: Build & run docker
         env:
           SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
+          SUPERADMIN_LOGIN: dummy_login
           SUPERADMIN_PWD: dummy_pwd
           GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
           POSTGRES_DB: postgres
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: pg_pwd
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: docker-compose -f docker-compose.test.yml up -d --build
+          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q4_0
+        run: docker-compose up -d --build
+      - name: Debug
+        run: sleep 20 && docker-compose logs backend
       - name: Docker sanity check
-        run: sleep 20 && nc -vz localhost 8050
+        run: nc -vz localhost 8050
       - name: Debug
         run: docker-compose logs
       - name: Ping server

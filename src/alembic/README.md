@@ -11,7 +11,7 @@ make run
 Alembic allows you to record migration operation using DB operations. Let's create a revision file:
 
 ```shell
-make add-revision
+docker compose exec backend alembic revision --autogenerate
 ```
 
 Once generated, you should edit the revision file in src/alembic/versions that was created. See example [here](https://github.com/jonra1993/fastapi-alembic-sqlmodel-async/blob/main/fastapi-alembic-sqlmodel-async/alembic/versions/2022-09-25-19-46_60d49bf413b8.py).
@@ -21,5 +21,5 @@ Once generated, you should edit the revision file in src/alembic/versions that w
 Now apply all the revisions
 
 ```shell
-make apply-revision
+docker compose exec backend alembic upgrade head
 ```

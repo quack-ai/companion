@@ -30,5 +30,9 @@ class TelemetryClient:
         if self.is_enabled:
             self.ph_client.identify(*args, **kwargs)
 
+    def alias(self, *args, **kwargs) -> None:
+        if self.is_enabled:
+            self.ph_client.alias(*args, **kwargs)
+
 
 telemetry_client = TelemetryClient(api_key=settings.POSTHOG_KEY)

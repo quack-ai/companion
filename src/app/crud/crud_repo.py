@@ -8,11 +8,11 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.crud.base import BaseCRUD
 from app.models import Repository
-from app.schemas.repos import RepoCreation, RepoUpdate
+from app.schemas.repos import RepoUpdate
 
 __all__ = ["RepositoryCRUD"]
 
 
-class RepositoryCRUD(BaseCRUD[Repository, RepoCreation, RepoUpdate]):
+class RepositoryCRUD(BaseCRUD[Repository, Repository, RepoUpdate]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, Repository)

@@ -14,6 +14,7 @@ services:
       - OLLAMA_MODEL=${OLLAMA_MODEL}
       - SECRET_KEY=${SECRET_KEY}
       - SUPERADMIN_GH_PAT=${SUPERADMIN_GH_PAT}
+      - SUPERADMIN_LOGIN=${SUPERADMIN_LOGIN}
       - SUPERADMIN_PWD=${SUPERADMIN_PWD}
       - GH_OAUTH_ID=${GH_OAUTH_ID}
       - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
@@ -37,13 +38,13 @@ services:
       interval: 5s
       timeout: 1m
       retries: 3
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
 
   db:
     image: postgres:15-alpine

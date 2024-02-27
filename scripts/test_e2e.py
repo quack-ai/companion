@@ -4,12 +4,10 @@
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 import argparse
-import os
 import time
 from typing import Any, Dict, Optional
 
 import requests
-from dotenv import load_dotenv
 
 
 def get_token(api_url: str, login: str, pwd: str, timeout: int = 5) -> str:
@@ -38,11 +36,9 @@ def api_request(
 
 
 def main(args):
-    load_dotenv()
-
     # Log as superuser
-    superuser_login = str(os.environ.get("SUPERUSER_LOGIN", ""))
-    superuser_pwd = str(os.environ.get("SUPERUSER_PWD", ""))
+    superuser_login = "superadmin_login"
+    superuser_pwd = "superadmin_pwd"  # noqa S105
 
     start_ts = time.time()
     # Retrieve superuser token
@@ -53,15 +49,18 @@ def main(args):
 
     # Hardcoded info
     user_login = "karpathy"
-    user_id = 241138
+    provider_id = 241138
     user_pwd = "my_pwd"  # noqa S105
-    repo_id = 582822129
+    provider_repo_id = 582822129
     # repo_name = "karpathy/nanoGPT"
 
     # create an access
-    api_request(
-        "post", f"{args.endpoint}/users/", superuser_auth, {"id": user_id, "password": user_pwd, "scope": "user"}
-    )
+    user_id = api_request(
+        "post",
+        f"{args.endpoint}/users/",
+        superuser_auth,
+        {"login": user_login, "password": user_pwd, "provider_user_id": provider_id, "scope": "user"},
+    )["id"]
     user_auth = {
         "Authorization": f"Bearer {get_token(args.endpoint, user_login, user_pwd)}",
         "Content-Type": "application/json",
@@ -70,51 +69,29 @@ def main(args):
     api_request("get", f"{args.endpoint}/users/{user_id}/", superuser_auth)
     api_request("get", f"{args.endpoint}/users/", superuser_auth)
     # Modify access
-    new_pwd = "my_new_pwd"  # nosec B105  # noqa S105
-    api_request("put", f"{args.endpoint}/users/{user_id}/", superuser_auth, {"password": new_pwd})
+    new_pwd = "my_new_pwd"  # noqa S105
+    api_request("patch", f"{args.endpoint}/users/{user_id}/", superuser_auth, {"password": new_pwd})
 
     # Repos
-    api_request("post", f"{args.endpoint}/repos/", user_auth, {"id": repo_id})
+    repo_id = api_request("post", f"{args.endpoint}/repos/", superuser_auth, {"provider_repo_id": provider_repo_id})[
+        "id"
+    ]
     api_request("get", f"{args.endpoint}/repos/{repo_id}/", user_auth)
-    api_request("get", f"{args.endpoint}/repos/", user_auth)
-    api_request("put", f"{args.endpoint}/repos/{repo_id}/disable", user_auth, {})
-    api_request("put", f"{args.endpoint}/repos/{repo_id}/enable", user_auth, {})
+    api_request("get", f"{args.endpoint}/repos/", superuser_auth)
 
     # Guidelines
-    payload = {
-        "title": "My custom guideline",
-        "details": "Don't mispell any word",
-        "repo_id": repo_id,
-        "order": 0,
-    }
+    payload = {"content": "Don't mispell any word"}
     guideline_id = api_request("post", f"{args.endpoint}/guidelines/", user_auth, payload)["id"]
-    payload = {
-        "title": "My second guideline",
-        "details": "Always document public interface",
-        "repo_id": repo_id,
-        "order": 1,
-    }
-    guideline_2 = api_request("post", f"{args.endpoint}/guidelines/", user_auth, payload)["id"]
+    payload = {"content": "Always document public interface"}
+    api_request("post", f"{args.endpoint}/guidelines/", user_auth, payload)["id"]
     guideline = api_request("get", f"{args.endpoint}/guidelines/{guideline_id}/", user_auth)
     api_request("get", f"{args.endpoint}/guidelines/", superuser_auth)
-    api_request("get", f"{args.endpoint}/repos/{repo_id}/guidelines", user_auth)
+    # api_request("get", f"{args.endpoint}/repos/{repo_id}/guidelines", user_auth)
     api_request(
-        "put",
+        "patch",
         f"{args.endpoint}/guidelines/{guideline_id}",
         user_auth,
-        {"title": "Updated title", "details": "Updated details"},
-    )
-    api_request(
-        "put",
-        f"{args.endpoint}/guidelines/{guideline_2}/order/2",
-        user_auth,
-        {},
-    )
-    api_request(
-        "put",
-        f"{args.endpoint}/repos/{repo_id}/guidelines/order",
-        user_auth,
-        {"guideline_ids": [guideline_2, guideline_id]},
+        {"content": "Updated details"},
     )
 
     # Delete

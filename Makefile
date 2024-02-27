@@ -41,13 +41,6 @@ test:
 	docker compose exec -T backend pytest --cov=app
 	docker compose -f docker-compose.test.yml down
 
-add-revision:
-	docker compose exec backend alembic revision --autogenerate
-
-apply-revision:
-	docker compose exec backend alembic upgrade head
-
-
 # Run tests for the library
 e2e:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
