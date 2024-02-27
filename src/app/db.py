@@ -12,7 +12,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import settings
 from app.core.security import hash_password
-from app.models import Provider, User, UserScope
+from app.models import User, UserScope
 from app.services.github import gh_client
 
 __all__ = ["get_session", "init_db"]
@@ -43,7 +43,7 @@ async def init_db() -> None:
             pwd = await hash_password(settings.SUPERADMIN_PWD)
             session.add(
                 User(
-                    provider_user_id=f"{Provider.GITHUB}|{gh_user['id']}",
+                    provider_user_id=gh_user["id"],
                     login=settings.SUPERADMIN_LOGIN,
                     hashed_password=pwd,
                     scope=UserScope.ADMIN,
