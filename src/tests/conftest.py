@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 from typing import AsyncGenerator, Dict, Generator
 
 import pytest
@@ -15,6 +16,8 @@ from app.db import engine
 from app.main import app
 from app.models import Guideline, Repository, User
 
+dt_format = "%Y-%m-%dT%H:%M:%S.%f"
+
 USER_TABLE = [
     {
         "id": 1,
@@ -22,7 +25,7 @@ USER_TABLE = [
         "login": "first_login",
         "hashed_password": "hashed_first_pwd",
         "scope": "admin",
-        "created_at": "2024-02-23T08:18:45.447773",
+        "created_at": datetime.strptime("2024-02-23T08:18:45.447773", dt_format),
     },
     {
         "id": 2,
@@ -30,7 +33,7 @@ USER_TABLE = [
         "login": "second_login",
         "hashed_password": "hashed_second_pwd",
         "scope": "user",
-        "created_at": "2024-02-23T08:18:45.447774",
+        "created_at": datetime.strptime("2024-02-23T08:18:45.447774", dt_format),
     },
 ]
 
@@ -39,13 +42,13 @@ REPO_TABLE = [
         "id": 1,
         "provider_repo_id": 12345,
         "name": "quack-ai/dummy-repo",
-        "created_at": "2023-11-07T15:07:19.226673",
+        "created_at": datetime.strptime("2023-11-07T15:07:19.226673", dt_format),
     },
     {
         "id": 2,
         "provider_repo_id": 123456,
         "name": "quack-ai/another-repo",
-        "created_at": "2023-11-07T15:07:19.226673",
+        "created_at": datetime.strptime("2023-11-07T15:07:19.226673", dt_format),
     },
 ]
 
@@ -54,15 +57,15 @@ GUIDELINE_TABLE = [
         "id": 1,
         "content": "Ensure function and class/instance methods have a meaningful & informative name",
         "creator_id": 1,
-        "created_at": "2023-11-07T15:08:19.226673",
-        "updated_at": "2023-11-07T15:08:19.226673",
+        "created_at": datetime.strptime("2023-11-07T15:08:19.226673", dt_format),
+        "updated_at": datetime.strptime("2023-11-07T15:08:19.226673", dt_format),
     },
     {
         "id": 2,
         "content": "All functions and methods need to have a docstring",
         "creator_id": 2,
-        "created_at": "2023-11-07T15:08:20.226673",
-        "updated_at": "2023-11-07T15:08:20.226673",
+        "created_at": datetime.strptime("2023-11-07T15:08:20.226673", dt_format),
+        "updated_at": datetime.strptime("2023-11-07T15:08:20.226673", dt_format),
     },
 ]
 
@@ -159,6 +162,15 @@ def pytest_configure():
     # api.security patching
     pytest.get_token = get_token
     # Table
-    pytest.user_table = USER_TABLE
-    pytest.repo_table = REPO_TABLE
-    pytest.guideline_table = GUIDELINE_TABLE
+    pytest.user_table = [
+        {k: datetime.strftime(v, dt_format) if isinstance(v, datetime) else v for k, v in entry.items()}
+        for entry in USER_TABLE
+    ]
+    pytest.repo_table = [
+        {k: datetime.strftime(v, dt_format) if isinstance(v, datetime) else v for k, v in entry.items()}
+        for entry in REPO_TABLE
+    ]
+    pytest.guideline_table = [
+        {k: datetime.strftime(v, dt_format) if isinstance(v, datetime) else v for k, v in entry.items()}
+        for entry in GUIDELINE_TABLE
+    ]
