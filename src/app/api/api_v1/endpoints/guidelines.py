@@ -26,7 +26,7 @@ async def create_guideline(
     user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> Guideline:
     telemetry_client.capture(user.id, event="guideline-creation")
-    return await guidelines.create(Guideline(creator_id=user.id, **payload.dict()))
+    return await guidelines.create(Guideline(creator_id=user.id, **payload.model_dump()))
 
 
 @router.get("/{guideline_id}", status_code=status.HTTP_200_OK, summary="Read a specific guideline")
@@ -59,7 +59,7 @@ async def update_guideline_content(
     guideline = cast(Guideline, await guidelines.get(guideline_id, strict=True))
     if user.scope != UserScope.ADMIN and user.id != guideline.creator_id:
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Insufficient permissions.")
-    return await guidelines.update(guideline_id, ContentUpdate(**payload.dict()))
+    return await guidelines.update(guideline_id, ContentUpdate(**payload.model_dump()))
 
 
 @router.delete("/{guideline_id}", status_code=status.HTTP_200_OK, summary="Delete a guideline")

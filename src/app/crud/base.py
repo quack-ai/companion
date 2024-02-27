@@ -24,7 +24,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.model = model
 
     async def create(self, payload: CreateSchemaType) -> ModelType:
-        entry = self.model(**payload.dict())
+        entry = self.model(**payload.model_dump())
         try:
             self.session.add(entry)
             await self.session.commit()
@@ -49,7 +49,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     async def get_by(self, field_name: str, val: Union[str, int], strict: bool = False) -> Union[ModelType, None]:
         statement = select(self.model).where(getattr(self.model, field_name) == val)
-        results = await self.session.execute(statement=statement)
+        results = await self.session.exec(statement=statement)
         entry = results.scalar_one_or_none()
         if strict and entry is None:
             raise HTTPException(
@@ -62,12 +62,12 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         statement = select(self.model)
         if isinstance(filter_pair, tuple):
             statement = statement.where(getattr(self.model, filter_pair[0]) == filter_pair[1])
-        results = await self.session.execute(statement=statement)
+        results = await self.session.exec(statement=statement)
         return results.scalars()  # type: ignore[return-value]
 
     async def update(self, entry_id: int, payload: UpdateSchemaType) -> ModelType:
         access = cast(ModelType, await self.get(entry_id, strict=True))
-        values = payload.dict(exclude_unset=True)
+        values = payload.model_dump(exclude_unset=True)
 
         for k, v in values.items():
             setattr(access, k, v)
