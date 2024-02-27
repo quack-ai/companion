@@ -34,8 +34,8 @@ async def init_db() -> None:
     async with AsyncSession(engine) as session:
         # Check if admin exists
         statement = select(User).where(User.login == settings.SUPERADMIN_LOGIN)
-        results = await session.execute(statement=statement)
-        user = results.scalar_one_or_none()
+        results = await session.exec(statement=statement)
+        user = results.one_or_none()
         if not user:
             logger.info("Initializing PostgreSQL database...")
             # Fetch authenticated GitHub User
