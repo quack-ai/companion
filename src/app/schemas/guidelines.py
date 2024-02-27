@@ -28,8 +28,8 @@ class GuidelineExample(BaseModel):
 
 
 class GuidelineContent(BaseModel):
-    content: str = Field(..., min_length=6, max_length=1000, nullable=False)
+    content: str = Field(..., min_length=6, max_length=1000)
 
 
 class ContentUpdate(GuidelineContent):
-    updated_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)

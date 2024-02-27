@@ -14,11 +14,11 @@ __all__ = ["Cred", "CredHash", "UserCreate", "UserCreation"]
 
 # Accesses
 class Login(BaseModel):
-    login: str = Field(..., min_length=3, max_length=50, example="JohnDoe")
+    login: str = Field(..., min_length=3, max_length=50, examples=["JohnDoe"])
 
 
 class Cred(BaseModel):
-    password: str = Field(..., min_length=3, example="PickARobustOne")
+    password: str = Field(..., min_length=3, examples=["PickARobustOne"])
 
 
 class CredHash(BaseModel):
@@ -26,16 +26,16 @@ class CredHash(BaseModel):
 
 
 class Scope(BaseModel):
-    scope: UserScope = Field(UserScope.USER, nullable=False)
+    scope: UserScope = Field(UserScope.USER)
 
 
 class UserCreate(Scope):
     provider_user_id: Union[int, None] = Field(None, gt=0)
-    login: Union[str, None] = Field(None, min_length=3, max_length=50, example="JohnDoe")
-    password: Union[str, None] = Field(None, min_length=3, example="PickARobustOne")
+    login: Union[str, None] = Field(None, min_length=3, max_length=50, examples=["JohnDoe"])
+    password: Union[str, None] = Field(None, min_length=3, examples=["PickARobustOne"])
 
 
 class UserCreation(Scope):
     provider_user_id: Union[str, None] = Field(None, min_length=9, max_length=30)
-    login: Union[str, None] = Field(None, min_length=3, max_length=50, example="JohnDoe")
-    hashed_password: Union[str, None] = Field(None, min_length=3, example="PickARobustOne")
+    login: Union[str, None] = Field(None, min_length=3, max_length=50, examples=["JohnDoe"])
+    hashed_password: Union[str, None] = Field(None, min_length=3, examples=["PickARobustOne"])

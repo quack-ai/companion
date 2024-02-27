@@ -19,7 +19,7 @@ class RepoCreate(_Id, OptionalGHToken):
 class RepoCreation(_Id):
     installed_by: int = Field(..., gt=0)
     owner_id: int = Field(..., gt=0)
-    full_name: str = Field(..., example="frgfm/torch-cam")
+    full_name: str = Field(..., examples=["frgfm/torch-cam"])
 
 
 class RepoUpdate(BaseModel):
