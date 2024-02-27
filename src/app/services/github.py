@@ -110,7 +110,7 @@ class GitHubClient:
         )
         response = requests.post(
             self.OAUTH_ENDPOINT,
-            json=gh_payload.dict(),
+            json=gh_payload.model_dump_json(),
             headers={"Accept": "application/json"},
             timeout=timeout,
         )
