@@ -24,6 +24,6 @@ async def chat(
     telemetry_client.capture(user.id, event="compute-chat")
     # Run analysis
     return StreamingResponse(
-        ollama_client.chat(payload.dict()["messages"]).iter_content(chunk_size=8192),
+        ollama_client.chat(payload.model_dump()["messages"]).iter_content(chunk_size=8192),
         media_type="text/event-stream",
     )

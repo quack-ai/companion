@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 
 # Template classes
 class _CreatedAt(BaseModel):
-    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class _Id(BaseModel):

@@ -167,7 +167,7 @@ async def delete_repo(
 #         num_threads=len(sources),
 #     )
 #     guidelines = [
-#         ParsedGuideline(**guideline.dict(), repo_id=repo_id, source=source)
+#         ParsedGuideline(**guideline.model_dump(), repo_id=repo_id, source=source)
 #         for (source, _), response in zip(sources, responses)
 #         for guideline in response
 #     ]

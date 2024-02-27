@@ -13,12 +13,14 @@ __all__ = ["GHAccessToken", "Token"]
 
 
 class GHAccessToken(BaseModel):
-    github_token: str = Field(..., example="ghp_eyJhbGciOiJIUzI1NiIsInR5cCI")
+    github_token: str = Field(..., examples=["ghp_eyJhbGciOiJIUzI1NiIsInR5cCI"])
 
 
 class Token(BaseModel):
-    access_token: str = Field(..., example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.423fgFGTfttrvU6D1k7vF92hH5vaJHCGFYd8E")
-    token_type: str = Field(..., example="bearer")
+    access_token: str = Field(
+        ..., examples=["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.423fgFGTfttrvU6D1k7vF92hH5vaJHCGFYd8E"]
+    )
+    token_type: str = Field(..., examples=["bearer"])
 
 
 class TokenPayload(BaseModel):

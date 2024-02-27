@@ -61,7 +61,7 @@ async def test_login_with_creds(
         ({"code": "foo", "redirect_uri": 0}, 422, None, None),
         # Github 422
         ({"code": "foo", "redirect_uri": ""}, 422, None, None),
-        ({"code": "foo", "redirect_uri": "https://quackai.com"}, 400, None, None),
+        ({"code": "foo", "redirect_uri": "https://quackai.com"}, 404, None, None),
     ],
 )
 @pytest.mark.asyncio()

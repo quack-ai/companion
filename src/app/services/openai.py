@@ -303,7 +303,7 @@ class OpenAIClient:
             user=user_id,
         )
         # Send the request
-        response = requests.post(self.ENDPOINT, json=_payload.dict(), headers=self.headers, timeout=timeout)
+        response = requests.post(self.ENDPOINT, json=_payload.model_dump(), headers=self.headers, timeout=timeout)
 
         # Check status
         if response.status_code != 200:

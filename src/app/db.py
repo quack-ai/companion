@@ -12,7 +12,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import settings
 from app.core.security import hash_password
-from app.models import Provider, User, UserScope
+from app.models import User, UserScope
 from app.services.github import gh_client
 
 __all__ = ["get_session", "init_db"]
@@ -22,7 +22,7 @@ engine = AsyncEngine(create_engine(settings.POSTGRES_URL, echo=False))
 
 
 async def get_session() -> AsyncSession:  # type: ignore[misc]
-    async_session = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+    async_session = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)  # type: ignore[call-overload]
     async with async_session() as session:
         yield session
 
@@ -43,7 +43,7 @@ async def init_db() -> None:
             pwd = await hash_password(settings.SUPERADMIN_PWD)
             session.add(
                 User(
-                    provider_user_id=f"{Provider.GITHUB}|{gh_user['id']}",
+                    provider_user_id=gh_user["id"],
                     login=settings.SUPERADMIN_LOGIN,
                     hashed_password=pwd,
                     scope=UserScope.ADMIN,

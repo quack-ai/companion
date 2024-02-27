@@ -28,7 +28,7 @@ class ChatRole(str, Enum):
 
 
 class ChatMessage(BaseModel):
-    role: ChatRole = Field(ChatRole.USER, example=ChatRole.USER)
+    role: ChatRole = Field(ChatRole.USER, examples=[ChatRole.USER])
     content: str = Field(..., min_length=1)
 
 
