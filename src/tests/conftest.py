@@ -92,9 +92,9 @@ async def async_session() -> AsyncSession:
     async with async_session_maker() as session:
         async with session.begin():
             for table in reversed(SQLModel.metadata.sorted_tables):
-                await session.execute(table.delete())
+                await session.exec(table.delete())
                 if hasattr(table.c, "id"):
-                    await session.execute(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1")
+                    await session.exec(text(f"ALTER SEQUENCE {table.name}_id_seq RESTART WITH 1"))
 
         yield session
         await session.rollback()
@@ -115,7 +115,7 @@ async def user_session(async_session: AsyncSession, monkeypatch):
     for entry in USER_TABLE:
         async_session.add(User(**entry))
     await async_session.commit()
-    await async_session.execute(
+    await async_session.exec(
         text(f"ALTER SEQUENCE user_id_seq RESTART WITH {max(entry['id'] for entry in USER_TABLE) + 1}")
     )
     await async_session.commit()
@@ -128,7 +128,7 @@ async def repo_session(user_session: AsyncSession, monkeypatch):
     for entry in REPO_TABLE:
         user_session.add(Repository(**entry))
     await user_session.commit()
-    await user_session.execute(
+    await user_session.exec(
         text(f"ALTER SEQUENCE repository_id_seq RESTART WITH {max(entry['id'] for entry in REPO_TABLE) + 1}")
     )
     await user_session.commit()
@@ -142,7 +142,7 @@ async def guideline_session(user_session: AsyncSession, monkeypatch):
         user_session.add(Guideline(**entry))
     await user_session.commit()
     # Update the guideline index count
-    await user_session.execute(
+    await user_session.exec(
         text(f"ALTER SEQUENCE guideline_id_seq RESTART WITH {max(entry['id'] for entry in GUIDELINE_TABLE) + 1}")
     )
     await user_session.commit()
