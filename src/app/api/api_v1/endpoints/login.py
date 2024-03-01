@@ -14,7 +14,7 @@ from app.api.dependencies import get_user_crud
 from app.core.config import settings
 from app.core.security import create_access_token, verify_password
 from app.crud import UserCRUD
-from app.models import Provider, UserScope
+from app.models import UserScope
 from app.schemas.login import GHAccessToken, Token, TokenRequest
 from app.schemas.services import GHToken
 from app.schemas.users import UserCreate
@@ -85,7 +85,7 @@ async def login_with_github_token(
     if gh_user["type"] != "User":
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "GitHub account is expected to be a user")
     # Verify credentials
-    user = await users.get_by("provider_user_id", f"{Provider.GITHUB}|{gh_user['id']}", strict=False)
+    user = await users.get_by("provider_user_id", gh_user["id"], strict=False)
     # Register if non existing
     if user is None:
         user = await _create_user(UserCreate(provider_user_id=gh_user["id"], scope=UserScope.USER), users)  # type: ignore[call-arg]
