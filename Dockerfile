@@ -14,7 +14,7 @@ COPY requirements.txt /app/requirements.txt
 RUN set -eux \
     && pip install --no-cache-dir uv \
     && uv pip install --no-cache --system -r /app/requirements.txt \
-    && rm -rf /root/.cache/pip
+    && rm -rf /root/.cache
 
 # copy project
 COPY src/app /app/app
