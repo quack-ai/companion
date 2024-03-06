@@ -4,18 +4,18 @@
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import HttpUrl
 
 from app.api.api_v1.endpoints.users import _create_user
-from app.api.dependencies import get_user_crud
+from app.api.dependencies import get_token_payload, get_user_crud
 from app.core.config import settings
 from app.core.security import create_access_token, verify_password
 from app.crud import UserCRUD
 from app.models import UserScope
-from app.schemas.login import GHAccessToken, Token, TokenRequest
+from app.schemas.login import GHAccessToken, Token, TokenPayload, TokenRequest
 from app.schemas.services import GHToken
 from app.schemas.users import UserCreate
 from app.services.github import gh_client
@@ -97,3 +97,10 @@ async def login_with_github_token(
     token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
 
     return Token(access_token=token, token_type="bearer")  # noqa S106
+
+
+@router.get("/validate", status_code=status.HTTP_200_OK, summary="Check token validity")
+async def check_token_validity(
+    payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.USER, UserScope.ADMIN]),
+) -> TokenPayload:
+    return payload

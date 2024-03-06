@@ -7,10 +7,11 @@ from typing import List, Union, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
-from app.api.dependencies import get_current_user, get_user_crud
+from app.api.dependencies import get_token_payload, get_user_crud
 from app.core.security import hash_password
 from app.crud import UserCRUD
 from app.models import Provider, User, UserScope
+from app.schemas.login import TokenPayload
 from app.schemas.users import Cred, CredHash, UserCreate
 from app.services.github import gh_client
 from app.services.slack import slack_client
@@ -19,7 +20,7 @@ from app.services.telemetry import telemetry_client
 router = APIRouter()
 
 
-async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[User, None] = None) -> User:
+async def _create_user(payload: UserCreate, users: UserCRUD, requester_id: Union[int, None] = None) -> User:
     valid_creds = False
     user_props = {"login": payload.login, "provider_login": None, "name": None, "twitter_username": None}
     notif_info = []
@@ -89,7 +90,7 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
 
     # Assume the requester is the new user if none was specified
     telemetry_client.capture(
-        requester.id if isinstance(requester, User) else user.id,
+        requester_id if isinstance(requester_id, int) else user.id,
         event="user-creation",
         properties={"created_user_id": user.id},
     )
@@ -102,27 +103,27 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester: Union[Us
 async def create_user(
     payload: UserCreate,
     users: UserCRUD = Depends(get_user_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
 ) -> User:
-    return await _create_user(payload, users, user)
+    return await _create_user(payload, users, token_payload.user_id)
 
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK, summary="Fetch the information of a specific user")
 async def get_user(
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
 ) -> User:
-    telemetry_client.capture(user.id, event="user-get", properties={"user_id": user_id})
+    telemetry_client.capture(token_payload.user_id, event="user-get", properties={"user_id": user_id})
     return cast(User, await users.get(user_id, strict=True))
 
 
 @router.get("/", status_code=status.HTTP_200_OK, summary="Fetch all the users")
 async def fetch_users(
     users: UserCRUD = Depends(get_user_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
 ) -> List[User]:
-    telemetry_client.capture(user.id, event="user-fetch")
+    telemetry_client.capture(token_payload.user_id, event="user-fetch")
     return [elt for elt in await users.fetch_all()]
 
 
@@ -131,9 +132,9 @@ async def update_user_password(
     payload: Cred,
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
 ) -> User:
-    telemetry_client.capture(user.id, event="user-pwd", properties={"user_id": user_id})
+    telemetry_client.capture(token_payload.user_id, event="user-pwd", properties={"user_id": user_id})
     pwd = await hash_password(payload.password)
     return await users.update(user_id, CredHash(hashed_password=pwd))
 
@@ -142,7 +143,7 @@ async def update_user_password(
 async def delete_user(
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
-    _: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
 ) -> None:
-    telemetry_client.capture(user_id, event="user-deletion", properties={"user_id": user_id})
+    telemetry_client.capture(token_payload.user_id, event="user-deletion", properties={"user_id": user_id})
     await users.delete(user_id)

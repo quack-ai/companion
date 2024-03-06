@@ -8,9 +8,10 @@ from typing import List, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
-from app.api.dependencies import get_current_user, get_repo_crud
+from app.api.dependencies import get_current_user, get_repo_crud, get_token_payload
 from app.crud import RepositoryCRUD
 from app.models import Provider, Repository, User, UserScope
+from app.schemas.login import TokenPayload
 from app.schemas.repos import RepoRegistration
 from app.services.github import gh_client
 from app.services.slack import slack_client
@@ -39,7 +40,8 @@ async def register_repo(
                 detail="Expected `github_token` to check access.",
             )
         # Check provider link
-        if not isinstance(user.provider_user_id, str) or user.provider_user_id.partition("|")[0] != Provider.GITHUB:
+        # if not isinstance(user.provider_user_id, str) or user.provider_user_id.partition("|")[0] != Provider.GITHUB:
+        if not isinstance(user.provider_user_id, int):
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, "No GitHub profile linked to your account.")
         # Finally, check GH permission
         gh_user = gh_client.get_my_user(payload.github_token)
@@ -78,18 +80,18 @@ async def register_repo(
 async def get_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> Repository:
-    telemetry_client.capture(user.id, event="repo-get", properties={"repo_id": repo_id})
+    telemetry_client.capture(token_payload.user_id, event="repo-get", properties={"repo_id": repo_id})
     return cast(Repository, await repos.get(repo_id, strict=True))
 
 
 @router.get("/", status_code=status.HTTP_200_OK, summary="Fetch all repositories")
 async def fetch_repos(
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
 ) -> List[Repository]:
-    telemetry_client.capture(user.id, event="repo-fetch")
+    telemetry_client.capture(token_payload.user_id, event="repo-fetch")
     return [elt for elt in await repos.fetch_all()]
 
 
@@ -97,9 +99,9 @@ async def fetch_repos(
 async def delete_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
 ) -> None:
-    telemetry_client.capture(user.id, event="repo-delete", properties={"repo_id": repo_id})
+    telemetry_client.capture(token_payload.user_id, event="repo-delete", properties={"repo_id": repo_id})
     await repos.delete(repo_id)
 
 
