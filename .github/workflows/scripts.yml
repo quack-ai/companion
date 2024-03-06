@@ -32,8 +32,8 @@ jobs:
         run: sleep 20 && nc -vz localhost 8050
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install "requests>=2.31.0,<3.0.0" python-dotenv
+          python -m pip install --upgrade uv
+          uv pip install --system "requests>=2.31.0,<3.0.0" python-dotenv
       - name: Run integration test
         env:
           SUPERUSER_LOGIN: ${{ secrets.SUPERUSER_LOGIN }}
