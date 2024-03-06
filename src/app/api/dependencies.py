@@ -18,7 +18,7 @@ from app.db import get_session
 from app.models import User, UserScope
 from app.schemas.login import TokenPayload
 
-__all__ = ["get_current_user", "get_guideline_crud", "get_repo_crud", "get_user_crud"]
+__all__ = ["get_current_user", "get_guideline_crud", "get_repo_crud", "get_token_payload", "get_user_crud"]
 
 # Scope definition
 oauth2_scheme = OAuth2PasswordBearer(
@@ -42,17 +42,11 @@ async def get_guideline_crud(session: AsyncSession = Depends(get_session)) -> Gu
     return GuidelineCRUD(session=session)
 
 
-async def get_current_user(
+async def get_token_payload(
     security_scopes: SecurityScopes,
     token: str = Depends(oauth2_scheme),
-    users: UserCRUD = Depends(get_user_crud),
-) -> User:
-    """Dependency to use as fastapi.security.Security with scopes.
-
-    >>> @app.get("/users/me")
-    >>> async def read_users_me(current_user: User = Security(get_current_user, scopes=["me"])):
-    >>>     return current_user
-    """
+) -> TokenPayload:
+    """Dependency to use as fastapi.security.Security with scopes."""
     authenticate_value = f'Bearer scope="{security_scopes.scope_str}"' if security_scopes.scopes else "Bearer"
 
     try:
@@ -82,4 +76,14 @@ async def get_current_user(
             headers={"WWW-Authenticate": authenticate_value},
         )
 
-    return cast(User, await users.get(user_id, strict=True))
+    return token_data
+
+
+async def get_current_user(
+    security_scopes: SecurityScopes,
+    token: str = Depends(oauth2_scheme),
+    users: UserCRUD = Depends(get_user_crud),
+) -> User:
+    """Dependency to use as fastapi.security.Security with scopes"""
+    token_payload = await get_token_payload(security_scopes, token)
+    return cast(User, await users.get(token_payload.user_id, strict=True))
