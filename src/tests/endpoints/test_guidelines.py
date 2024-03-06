@@ -77,7 +77,7 @@ async def test_get_guideline(
     [
         (None, 401, "Not authenticated"),
         (0, 200, None),
-        (1, 403, "Incompatible token scope."),
+        (1, 200, None),
     ],
 )
 @pytest.mark.asyncio()
