@@ -12,7 +12,8 @@ COPY requirements.txt /app/requirements.txt
 
 # install dependencies
 RUN set -eux \
-    && pip install -r /app/requirements.txt \
+    && pip install --no-cache-dir uv \
+    && uv pip install --no-cache --system -r /app/requirements.txt \
     && rm -rf /root/.cache/pip
 
 # copy project
