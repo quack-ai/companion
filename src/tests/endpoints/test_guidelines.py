@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict, List, Union
 
 import pytest
 from httpx import AsyncClient
@@ -73,11 +73,11 @@ async def test_get_guideline(
 
 
 @pytest.mark.parametrize(
-    ("user_idx", "status_code", "status_detail"),
+    ("user_idx", "status_code", "status_detail", "expected_result"),
     [
-        (None, 401, "Not authenticated"),
-        (0, 200, None),
-        (1, 403, "Incompatible token scope."),
+        (None, 401, "Not authenticated", None),
+        (0, 200, None, pytest.guideline_table),
+        (1, 200, None, pytest.guideline_table[1:]),
     ],
 )
 @pytest.mark.asyncio()
@@ -87,6 +87,7 @@ async def test_fetch_guidelines(
     user_idx: Union[int, None],
     status_code: int,
     status_detail: Union[str, None],
+    expected_result: Union[List[Dict[str, Any]], None],
 ):
     auth = None
     if isinstance(user_idx, int):
@@ -97,7 +98,7 @@ async def test_fetch_guidelines(
     if isinstance(status_detail, str):
         assert response.json()["detail"] == status_detail
     if response.status_code // 100 == 2:
-        assert response.json() == pytest.guideline_table
+        assert response.json() == expected_result
 
 
 @pytest.mark.parametrize(
