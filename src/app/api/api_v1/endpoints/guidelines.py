@@ -42,10 +42,11 @@ async def get_guideline(
 @router.get("/", status_code=status.HTTP_200_OK, summary="Fetch all the guidelines")
 async def fetch_guidelines(
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    user: User = Security(get_current_user, scopes=[UserScope.ADMIN]),
+    user: User = Security(get_current_user, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> List[Guideline]:
     telemetry_client.capture(user.id, event="guideline-fetch")
-    return [elt for elt in await guidelines.fetch_all()]
+    filter_pair = ("creator_id", user.id) if user.scope != UserScope.ADMIN else None
+    return [elt for elt in await guidelines.fetch_all(filter_pair=filter_pair)]
 
 
 @router.patch("/{guideline_id}", status_code=status.HTTP_200_OK, summary="Update a guideline content")
