@@ -17,6 +17,6 @@ RUN set -eux \
     && rm -rf /root/.cache
 
 # copy project
-COPY src/app /app/app
-COPY src/alembic /app/alembic
 COPY src/alembic.ini /app/alembic.ini
+COPY src/alembic /app/alembic
+COPY src/app /app/app
