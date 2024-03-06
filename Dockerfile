@@ -12,10 +12,11 @@ COPY requirements.txt /app/requirements.txt
 
 # install dependencies
 RUN set -eux \
-    && pip install -r /app/requirements.txt \
-    && rm -rf /root/.cache/pip
+    && pip install --no-cache-dir uv \
+    && uv pip install --no-cache --system -r /app/requirements.txt \
+    && rm -rf /root/.cache
 
 # copy project
-COPY src/app /app/app
-COPY src/alembic /app/alembic
 COPY src/alembic.ini /app/alembic.ini
+COPY src/alembic /app/alembic
+COPY src/app /app/app
