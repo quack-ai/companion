@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.9-alpine3.14
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11-slim
 
 WORKDIR /app
 
@@ -11,8 +11,7 @@ ENV PYTHONPATH "${PYTHONPATH}:/app"
 COPY requirements.txt /app/requirements.txt
 
 # install dependencies
-RUN set -eux \
-    && pip install --no-cache-dir uv \
+RUN pip install --no-cache-dir uv \
     && uv pip install --no-cache --system -r /app/requirements.txt \
     && rm -rf /root/.cache
 
