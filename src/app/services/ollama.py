@@ -61,6 +61,8 @@ CHAT_PROMPT = (
     "(refuse to answer for the rest)."
 )
 
+GUIDELINE_PROMPT = "When answering user requests, you should at all times keep in mind the following software development guidelines:\n"
+
 
 def validate_parsing_response(response: str) -> List[Dict[str, str]]:
     guideline_list = json.loads(response.strip())
@@ -122,15 +124,18 @@ class OllamaClient:
         self,
         system_prompt: str,
         messages: List[Dict[str, str]],
+        guidelines: List[str],
         timeout: int = 20,
     ) -> requests.Response:
+        _guideline_str = "\n-".join(guidelines)
+        _system = system_prompt if len(guidelines) == 0 else f"{system_prompt} {GUIDELINE_PROMPT}-{_guideline_str}"
         return requests.post(
             f"{self.endpoint}/api/chat",
             json={
                 "model": self.model_name,
                 "stream": True,
                 "options": {"temperature": self.temperature},
-                "messages": [{"role": "system", "content": system_prompt}, *messages],
+                "messages": [{"role": "system", "content": _system}, *messages],
                 "keep_alive": "30s",
             },
             stream=True,
@@ -140,9 +145,10 @@ class OllamaClient:
     def chat(
         self,
         messages: List[Dict[str, str]],
+        guidelines: List[str],
         **kwargs,
     ) -> requests.Response:
-        return self._chat(CHAT_PROMPT, messages, **kwargs)
+        return self._chat(CHAT_PROMPT, messages, guidelines, **kwargs)
 
     def parse_guidelines_from_text(
         self,
