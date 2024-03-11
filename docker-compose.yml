@@ -27,7 +27,7 @@ services:
         condition: service_healthy
 
   ollama:
-    image: ollama/ollama:0.1.25
+    image: ollama/ollama:0.1.29
     command: serve
     volumes:
       - "$HOME/.ollama:/root/.ollama"
