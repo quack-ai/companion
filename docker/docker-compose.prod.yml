@@ -2,10 +2,8 @@ version: '3.7'
 
 services:
   backend:
-    build: .
+    image: quackai/contribution-api:latest
     command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8050 --proxy-headers
-    volumes:
-      - ./src/:/app/
     ports:
       - "8050:8050"
     environment:
@@ -19,7 +17,7 @@ services:
       - GH_OAUTH_ID=${GH_OAUTH_ID}
       - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
       - SUPPORT_EMAIL=${SUPPORT_EMAIL}
-      - DEBUG=true
+      - DEBUG=false
     depends_on:
       db:
         condition: service_healthy
