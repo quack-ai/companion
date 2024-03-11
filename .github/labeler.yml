@@ -8,7 +8,7 @@
 
 'ext: apm':
 - changed-files:
-  - any-glob-to-any-file: apm/*
+  - any-glob-to-any-file: docker/apm/*
 
 'module: core':
 - changed-files:
@@ -79,10 +79,10 @@
 'topic: docker':
 - changed-files:
   - any-glob-to-any-file:
-    - docker-compose.yml
-    - docker-compose.test.yml
-    - Dockerfile
-    - traefik/*
+    - docker/docker-compose.yml
+    - docker/docker-compose.test.yml
+    - docker/Dockerfile
+    - docker/.env.example
 
 'topic: docs':
 - changed-files:
