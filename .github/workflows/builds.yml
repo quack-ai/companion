@@ -33,7 +33,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: pg_pwd
           OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q4_0
-        run: docker compose up -d --build
+        run: docker compose -f docker/docker-compose.yml up -d --build
       - name: Docker sanity check
         env:
           SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
@@ -46,7 +46,7 @@ jobs:
           POSTGRES_PASSWORD: pg_pwd
           OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q4_0
         run: |
-          sleep 20 && docker compose logs backend
+          sleep 20 && docker compose -f docker/docker-compose.yml logs backend
           nc -vz localhost 8050
-          docker compose logs
+          docker compose -f docker/docker-compose.yml logs
           curl http://localhost:8050/docs

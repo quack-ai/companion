@@ -112,6 +112,11 @@ The project was designed so that everything runs with Docker orchestration (stan
 ### Configuration
 
 In order to run the project, you will need to specific some information, which can be done using a `.env` file.
+Copy the default environement variables from [`.env.example`](./docker/.env.example):
+```shell
+cp docker/.env.example .env
+```
+
 This file will have to hold the following information:
 - `POSTGRES_DB`*: a name for the [PostgreSQL](https://www.postgresql.org/) database that will be created
 - `POSTGRES_USER`*: a login for the PostgreSQL database
@@ -133,12 +138,7 @@ Optionally, the following information can be added:
 - `SLACK_CHANNEL`: the Slack channel where your bot will post events (defaults to `#general`, you have to invite the App to your channel).
 - `SUPPORT_EMAIL`: the email used for support of your API.
 - `DEBUG`: if set to false, silence debug logs.
-- `OPENAI_API_KEY`**: your API key for Open AI (Create new secret key on [OpenAI](https://platform.openai.com/api-keys))
 
-_** marks the deprecated values._
-
-So your `.env` file should look like something similar to [`.env.example`](.env.example)
-The file should be placed in the folder of your `./docker-compose.yml`.
 
 ## Contributing
 

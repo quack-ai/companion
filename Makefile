@@ -16,35 +16,35 @@ lock:
 # Build the docker
 build:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
-	docker build . -t quackai/contribution-api:python3.9-alpine3.14
+	docker build -f docker/Dockerfile . -t quackai/contribution-api:latest
 
 # Run the docker
 run:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
-	docker compose up -d --build
+	docker compose -f docker/docker-compose.yml up -d --build
 
 # Run the docker
 stop:
-	docker compose down
+	docker compose -f docker/docker-compose.yml down
 
 run-dev:
 	poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
-	docker compose -f docker-compose.test.yml up -d --build
+	docker compose -f docker/docker-compose.test.yml up -d --build
 
 stop-dev:
-	docker compose -f docker-compose.test.yml down
+	docker compose -f docker/docker-compose.test.yml down
 
 # Run tests for the library
 test:
 	poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
-	docker compose -f docker-compose.test.yml up -d --build
-	docker compose exec -T backend pytest --cov=app
-	docker compose -f docker-compose.test.yml down
+	docker compose -f docker/docker-compose.test.yml up -d --build
+	docker compose -f docker/docker-compose.test.yml exec -T backend pytest --cov=app
+	docker compose -f docker/docker-compose.test.yml down
 
 # Run tests for the library
 e2e:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
-	docker compose -f docker-compose.test.yml up -d --build
+	docker compose -f docker/docker-compose.test.yml up -d --build
 	sleep 5
 	python scripts/test_e2e.py
-	docker compose -f docker-compose.test.yml down
+	docker compose -f docker/docker-compose.test.yml down

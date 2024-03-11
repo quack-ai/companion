@@ -11,6 +11,7 @@ Whatever the way you wish to contribute to the project, please respect the [code
 - [`src/app`](https://github.com/quack-ai/contribution-api/blob/main/src/app) - The actual API codebase
 - [`src/tests`](https://github.com/quack-ai/contribution-api/blob/main/src/tests) - The API unit tests
 - [`.github`](https://github.com/quack-ai/contribution-api/blob/main/.github) - Configuration for CI (GitHub Workflows)
+- [`docker`](https://github.com/quack-ai/contribution-api/blob/main/docker) - Docker-related configurations
 - [`docs`](https://github.com/quack-ai/contribution-api/blob/main/docs) - Everything related to documentation
 - [`scripts`](https://github.com/quack-ai/contribution-api/blob/main/scripts) - Custom scripts
 
