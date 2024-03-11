@@ -2,10 +2,12 @@ version: '3.7'
 
 services:
   backend:
-    build: .
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
     command: uvicorn app.main:app --host 0.0.0.0 --port 8050
     volumes:
-      - ./src/:/app/
+      - ../src/:/app/
     ports:
       - "8050:8050"
     environment:
@@ -50,13 +52,13 @@ services:
       interval: 5s
       timeout: 1m
       retries: 3
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
 
 volumes:
   ollama:

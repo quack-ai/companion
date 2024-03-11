@@ -16,7 +16,7 @@ lock:
 # Build the docker
 build:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
-	docker build -f docker/Dockerfile . -t quackai/contribution-api:python3.9-alpine3.14
+	docker build -f docker/Dockerfile . -t quackai/contribution-api:latest
 
 # Run the docker
 run:
@@ -38,7 +38,7 @@ stop-dev:
 test:
 	poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
 	docker compose -f docker/docker-compose.test.yml up -d --build
-	docker compose exec -T backend pytest --cov=app
+	docker compose -f docker/docker-compose.test.yml exec -T backend pytest --cov=app
 	docker compose -f docker/docker-compose.test.yml down
 
 # Run tests for the library
