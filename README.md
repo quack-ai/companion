@@ -137,7 +137,7 @@ Optionally, the following information can be added:
 
 _** marks the deprecated values._
 
-So your `.env` file should look like something similar to [`.env.example`](.env.example)
+So your `.env` file should look like something similar to [`.env.example`](./docker/.env.example)
 The file should be placed in the folder of your `./docker-compose.yml`.
 
 ## Contributing
