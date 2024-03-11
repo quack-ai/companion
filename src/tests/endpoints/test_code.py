@@ -53,7 +53,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 @pytest.mark.asyncio()
 async def test_chat(
     async_client: AsyncClient,
-    user_session: AsyncSession,
+    guideline_session: AsyncSession,
     user_idx: Union[int, None],
     payload: Dict[str, Any],
     status_code: int,
