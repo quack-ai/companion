@@ -101,6 +101,7 @@ The back-end core feature is to interact with the metadata tables. For the servi
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker compose](https://docs.docker.com/compose/)
 - [GitHub user Personal Access Token](https://github.com/settings/tokens?type=beta) with no extra permissions (= read-only)
+- [Poetry](https://python-poetry.org/docs/) (optional if you run the prod version)
 - [Make](https://www.gnu.org/software/make/) (optional)
 
 If you want to run the LLM on GPU, you'll also need:
