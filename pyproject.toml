@@ -39,6 +39,15 @@ types-requests = ">=2.0.0"
 types-passlib = ">=1.7.0"
 pre-commit = "^3.6.0"
 
+[tool.poetry.group.demo]
+optional = true
+
+[tool.poetry.group.demo.dependencies]
+gradio = "^4.21.0"
+requests = "^2.20.0"
+python-dotenv = "^1.0.0"
+
+
 [tool.poetry.group.test]
 optional = true
 

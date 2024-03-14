@@ -1,0 +1,35 @@
+name: demo
+
+on:
+  push:
+    branches: main
+  pull_request:
+    branches: main
+
+jobs:
+  gradio:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: "1.7.1"
+      - name: Resolve dependencies
+        run: poetry export -f requirements.txt --without-hashes --only demo --output demo/requirements.txt
+      - name: Install demo dependencies
+        run: |
+          python -m pip install --upgrade uv
+          uv pip install --system -r demo/requirements.txt
+      - name: Run & check demo
+        env:
+          SUPERADMIN_LOGIN: dummy_login
+          SUPERADMIN_PWD: dummy_pwd
+        run: |
+          sleep 10 && screen -dm python demo/main.py --auth --port 8080
+          sleep 5 && nc -vz localhost 8080

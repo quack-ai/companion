@@ -10,6 +10,10 @@
 - changed-files:
   - any-glob-to-any-file: docker/apm/*
 
+'ext: demo':
+- changed-files:
+  - any-glob-to-any-file: demo/*
+
 'module: core':
 - changed-files:
   - any-glob-to-any-file:

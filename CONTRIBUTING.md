@@ -14,6 +14,7 @@ Whatever the way you wish to contribute to the project, please respect the [code
 - [`docker`](https://github.com/quack-ai/contribution-api/blob/main/docker) - Docker-related configurations
 - [`docs`](https://github.com/quack-ai/contribution-api/blob/main/docs) - Everything related to documentation
 - [`scripts`](https://github.com/quack-ai/contribution-api/blob/main/scripts) - Custom scripts
+- [`demo`](https://github.com/quack-ai/contribution-api/blob/main/demo) - Code for the Gradio demo
 
 
 ## Continuous Integration
