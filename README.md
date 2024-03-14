@@ -45,22 +45,17 @@
 
 ## Quick Tour
 
-### Running/stopping the service
+### Code chat endpoint
 
-You can run the API containers using this command:
+![Code chat demo](https://github.com/quack-ai/platform/releases/download/v0.0.1/companion_demo.gif)
 
-```shell
-make run
-```
+The backend API is the gatekeeper for your LLM inference container (powered by our friend at [Ollama](https://github.com/ollama/ollama)). With your services up and running, you can use the code chat endpoint as coding-specific LLM chat.
 
-You can now navigate to [`http://localhost:8050/docs`](http://localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
+### REST API for guideline management & LLM inference
+
+With the service running, you can navigate to [`http://localhost:8050/docs`](http://localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
 
 ![API Swagger screenshot](docs/quack_api_swagger.png)
-
-In order to stop the service, run:
-```shell
-make stop
-```
 
 ### Latency benchmark
 
@@ -105,7 +100,12 @@ The back-end core feature is to interact with the metadata tables. For the servi
 
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker compose](https://docs.docker.com/compose/)
+- [GitHub user Personal Access Token](https://github.com/settings/tokens?type=beta) with no extra permissions (= read-only)
 - [Make](https://www.gnu.org/software/make/) (optional)
+
+If you want to run the LLM on GPU, you'll also need:
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+- 1 NVidia GPU (at least 6Gb VRAM recommended for a good performance/latency balance)
 
 The project was designed so that everything runs with Docker orchestration (standalone virtual environment), so you won't need to install any additional libraries.
 
@@ -121,8 +121,8 @@ This file will have to hold the following information:
 - `POSTGRES_DB`*: a name for the [PostgreSQL](https://www.postgresql.org/) database that will be created
 - `POSTGRES_USER`*: a login for the PostgreSQL database
 - `POSTGRES_PASSWORD`*: a password for the PostgreSQL database
-- `SUPERADMIN_GH_PAT`: the GitHub token of the initial admin access (Generate a new token on [GitHub](https://github.com/settings/tokens?type=beta), with no extra permissions = read-only)
-- `SUPERADMIN_PWD`*: the password of the initial admin access
+- `SUPERADMIN_GH_PAT`: the GitHub personal access token of the initial admin user
+- `SUPERADMIN_PWD`*: the password of the initial admin user
 - `GH_OAUTH_ID`: the Client ID of the GitHub Oauth app (Create an OAuth app on [GitHub](https://github.com/settings/applications/new), pointing to your Quack dashboard w/ callback URL)
 - `GH_OAUTH_SECRET`: the secret of the GitHub Oauth app (Generate a new client secret on the created OAuth app)
 
@@ -138,6 +138,23 @@ Optionally, the following information can be added:
 - `SLACK_CHANNEL`: the Slack channel where your bot will post events (defaults to `#general`, you have to invite the App to your channel).
 - `SUPPORT_EMAIL`: the email used for support of your API.
 - `DEBUG`: if set to false, silence debug logs.
+
+### Running the service
+
+You can start the API containers using this command:
+
+```shell
+make run
+```
+
+You can now navigate to [`http://localhost:8050/docs`](http://localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
+
+![API Swagger screenshot](docs/quack_api_swagger.png)
+
+In order to stop the service, run:
+```shell
+make stop
+```
 
 
 ## Contributing
