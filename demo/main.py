@@ -103,7 +103,14 @@ def main(args: argparse.Namespace) -> None:
         retry_btn=None,
         undo_btn=None,
         css="./demo/styles/custom.css",
-        examples=["Write a Python function to compute the n-th Fibonacci number"],
+        examples=[
+            # Build
+            "Write a Python function to compute the n-th Fibonacci number",
+            "Write a single-file FastAPI app using SQLModel with a table of users with the fields login, hashed_password and age",
+            "I need a minimal Next JS app to display generated images in a responsive way (mobile included)",
+            "I'm using GitHub Workflow, write the YAML file to lint my src/ folder using ruff",
+            # Fix/improve
+        ],
         theme=gr.themes.Default(
             text_size="sm",
             font=[
