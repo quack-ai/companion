@@ -35,7 +35,10 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: pg_pwd
           OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q4_0
-        run: docker compose -f docker/docker-compose.yml up -d --build
+        run: |
+          docker compose -f docker/docker-compose.yml up -d --build
+          sleep 20 && docker compose -f docker/docker-compose.yml logs backend
+          nc -vz localhost 8050
       - name: Install demo dependencies
         run: |
           python -m pip install --upgrade uv
