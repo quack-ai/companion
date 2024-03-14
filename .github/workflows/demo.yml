@@ -49,5 +49,5 @@ jobs:
           SUPERADMIN_PWD: dummy_pwd
           API_URL: 'http://localhost:8050/api/v1'
         run: |
-          sleep 10 && screen -dm python demo/main.py --port 8080
+          sleep 10 && python demo/main.py --port 8080
           sleep 5 && nc -vz localhost 8080
