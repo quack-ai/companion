@@ -31,7 +31,7 @@ jobs:
           GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
         run: |
-          docker compose -f docker/docker-compose.test.yml exec -T backend pytest --cov=app --cov-report xml tests/
+          docker compose -f docker/docker-compose.test.yml exec -T backend pytest -v --cov=app --cov-report xml tests/
           docker compose -f docker/docker-compose.test.yml cp backend:/app/coverage.xml ./coverage-src.xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
