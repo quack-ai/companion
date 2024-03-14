@@ -7,7 +7,7 @@ from typing import cast
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
-from jwt import ExpiredSignatureError, InvalidSignatureError
+from jwt import DecodeError, ExpiredSignatureError, InvalidSignatureError
 from jwt import decode as jwt_decode
 from pydantic import ValidationError
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -55,6 +55,12 @@ async def get_token_payload(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired.",
+            headers={"WWW-Authenticate": authenticate_value},
+        )
+    except DecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="Invalid token.",
             headers={"WWW-Authenticate": authenticate_value},
         )
 
