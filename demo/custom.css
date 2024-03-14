@@ -1,0 +1,29 @@
+footer {
+    visibility: hidden
+}
+
+[class *= "message"] {
+    border-radius: var(--radius-xl) !important;
+    border: none;
+}
+.contain { display: flex; flex-direction: column; }
+.gradio-container { height: 100vh !important; }
+#component-0 { height: 100%; }
+#chatbot { flex-grow: 1; overflow: auto; }
+#component-6 { border: none; }
+
+::-webkit-scrollbar {
+    width: 20px;
+}
+::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #adadad;
+    border-radius: 20px;
+    border: 6px solid transparent;
+    background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: #d6dee1;
+}
