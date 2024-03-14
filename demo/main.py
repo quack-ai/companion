@@ -86,13 +86,14 @@ def chat_response(message: str, history: List[List[str]]) -> str:
 def main(args: argparse.Namespace) -> None:
     session_manager.set_url(args.api)
     # Run the interface
+    folder = Path(__file__).resolve().parent
     interface = gr.ChatInterface(
         chat_response,
         chatbot=gr.Chatbot(
             elem_id="chatbot",
             label="Quack Companion",
             avatar_images=(
-                "./demo/assets/profile-user.png",
+                folder.joinpath("assets", "profile-user.png"),
                 "https://www.quackai.com/_next/image?url=%2Fquack.png&w=64&q=75",
             ),
             likeable=True,
@@ -102,7 +103,7 @@ def main(args: argparse.Namespace) -> None:
         title="Quack AI: type smarter, ship faster",
         retry_btn=None,
         undo_btn=None,
-        css="./demo/styles/custom.css",
+        css=folder.joinpath("styles", "custom.css"),
         examples=[
             # Build
             "Write a Python function to compute the n-th Fibonacci number",
@@ -124,8 +125,8 @@ def main(args: argparse.Namespace) -> None:
             secondary_hue="purple",
         ),
         fill_height=True,
-        submit_btn=gr.Button("", variant="primary", size="sm", icon="./demo/assets/paper-plane.png"),
-        stop_btn=gr.Button("", variant="stop", size="sm", icon="./demo/assets/stop-button.png"),
+        submit_btn=gr.Button("", variant="primary", size="sm", icon=folder.joinpath("assets", "paper-plane.png")),
+        stop_btn=gr.Button("", variant="stop", size="sm", icon=folder.joinpath("assets", "stop-button.png")),
     )
     if not args.auth:
         session_manager.set_token(
@@ -134,7 +135,7 @@ def main(args: argparse.Namespace) -> None:
     interface.launch(
         server_port=args.port,
         show_error=True,
-        favicon_path=Path(__file__).resolve().parent.joinpath("favicon.ico"),
+        favicon_path=folder.joinpath("assets", "favicon.ico"),
         auth=auth_gradio if args.auth else None,
         show_api=False,
     )
