@@ -6,9 +6,8 @@
 import argparse
 import json
 import os
-from functools import partial
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 
 import gradio as gr
 import requests
@@ -16,25 +15,52 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-API_URL = "http://localhost:8050/api/v1"
+API_URL: str = os.getenv("API_URL", "http://localhost:8050/api/v1")
 LOGIN_ENDPOINT = f"{API_URL}/login/creds"
 CHAT_ENDPOINT = f"{API_URL}/code/chat"
 API_LOGIN: str = os.environ["SUPERADMIN_LOGIN"]
 API_PWD: str = os.environ["SUPERADMIN_PWD"]
 
 
-def get_token(endpoint: str, login: str, pwd: str, timeout: int = 5) -> str:
+class SessionManager:
+    def __init__(self) -> None:
+        self._token = ""
+
+    def set(self, token: str) -> None:
+        self._token = token
+
+    @property
+    def auth(self) -> str:
+        return {
+            "Authorization": f"Bearer {self._token}",
+            "Content-Type": "application/json",
+        }
+
+
+session_manager = SessionManager()
+
+
+def get_token(endpoint: str, login: str, pwd: str) -> str:
     response = requests.post(
         endpoint,
         data={"username": login, "password": pwd},
-        timeout=timeout,
+        timeout=2,
     )
     if response.status_code != 200:
         raise ValueError(response.json()["detail"])
     return response.json()["access_token"]
 
 
-def chat_response(message: str, history: List[List[str]], headers: Dict[str, str]) -> str:
+def auth_gradio(username: str, password: str) -> bool:
+    try:
+        session_manager.set(get_token(LOGIN_ENDPOINT, username, password))
+        return True
+    except ValueError:
+        return False
+    return False
+
+
+def chat_response(message: str, history: List[List[str]]) -> str:
     session = requests.Session()
     _history = [
         {"role": "user" if idx % 2 == 0 else "assistant", "content": msg}
@@ -44,7 +70,7 @@ def chat_response(message: str, history: List[List[str]], headers: Dict[str, str
     with session.post(
         CHAT_ENDPOINT,
         json={"messages": [*_history, {"role": "user", "content": message}]},
-        headers=headers,
+        headers=session_manager.auth,
         stream=True,
     ) as response:
         reply = ""
@@ -54,18 +80,16 @@ def chat_response(message: str, history: List[List[str]], headers: Dict[str, str
 
 
 def main(args: argparse.Namespace) -> None:
-    # Retrieve a token
-    superuser_auth = {
-        "Authorization": f"Bearer {get_token(LOGIN_ENDPOINT, API_LOGIN, API_PWD)}",
-        "Content-Type": "application/json",
-    }
     # Run the interface
     interface = gr.ChatInterface(
-        partial(chat_response, headers=superuser_auth),
+        chat_response,
         chatbot=gr.Chatbot(
             elem_id="chatbot",
             label="Quack Companion",
-            avatar_images=("./demo/profile-user.png", "https://www.quackai.com/_next/image?url=%2Fquack.png&w=64&q=75"),
+            avatar_images=(
+                "./demo/assets/profile-user.png",
+                "https://www.quackai.com/_next/image?url=%2Fquack.png&w=64&q=75",
+            ),
             likeable=True,
             bubble_full_width=False,
         ),
@@ -73,8 +97,7 @@ def main(args: argparse.Namespace) -> None:
         title="Quack AI: type smarter, ship faster",
         retry_btn=None,
         undo_btn=None,
-        # css="#htext span {white-space: pre}footer {visibility: hidden}",
-        css="./demo/custom.css",
+        css="./demo/styles/custom.css",
         examples=["Write a Python function to compute the n-th Fibonacci number"],
         theme=gr.themes.Default(
             text_size="sm",
@@ -89,14 +112,15 @@ def main(args: argparse.Namespace) -> None:
             secondary_hue="purple",
         ),
         fill_height=True,
-        submit_btn=gr.Button("", variant="primary", size="sm", icon="./demo/paper-plane.png"),
-        stop_btn=gr.Button("", variant="stop", size="sm", icon="./demo/stop-button.png"),
+        submit_btn=gr.Button("", variant="primary", size="sm", icon="./demo/assets/paper-plane.png"),
+        stop_btn=gr.Button("", variant="stop", size="sm", icon="./demo/assets/stop-button.png"),
     )
-
     interface.launch(
         server_port=args.port,
         show_error=True,
         favicon_path=Path(__file__).resolve().parent.joinpath("favicon.ico"),
+        auth=auth_gradio,
+        show_api=False,
     )
 
 
