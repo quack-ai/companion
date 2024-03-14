@@ -89,8 +89,10 @@ def main(args: argparse.Namespace) -> None:
             secondary_hue="purple",
         ),
         fill_height=True,
-        submit_btn="Send",
+        submit_btn=gr.Button("", variant="primary", size="sm", icon="./demo/paper-plane.png"),
+        stop_btn=gr.Button("", variant="stop", size="sm", icon="./demo/stop-button.png"),
     )
+
     interface.launch(
         server_port=args.port,
         show_error=True,
