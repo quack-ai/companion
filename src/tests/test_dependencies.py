@@ -16,6 +16,7 @@ from app.core.security import create_access_token
         (["admin"], {"sub": "123", "scopes": ["user"]}, None, 403, None),
     ],
 )
+@pytest.mark.timeout(5)
 @pytest.mark.asyncio()
 async def test_get_token_payload(scopes, token, expires_minutes, error_code, expected_payload):
     _token = await create_access_token(token, expires_minutes) if isinstance(token, dict) else token
