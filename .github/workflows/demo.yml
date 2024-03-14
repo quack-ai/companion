@@ -21,24 +21,7 @@ jobs:
         with:
           poetry-version: "1.7.1"
       - name: Resolve dependencies
-        run: |
-          poetry export -f requirements.txt --without-hashes --output requirements.txt
-          poetry export -f requirements.txt --without-hashes --only demo --output demo/requirements.txt
-      - name: Build & run docker
-        env:
-          SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
-          SUPERADMIN_LOGIN: dummy_login
-          SUPERADMIN_PWD: dummy_pwd
-          GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
-          GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
-          POSTGRES_DB: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: pg_pwd
-          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q4_0
-        run: |
-          docker compose -f docker/docker-compose.yml up -d --build
-          sleep 20 && docker compose -f docker/docker-compose.yml logs backend
-          nc -vz localhost 8050
+        run: poetry export -f requirements.txt --without-hashes --only demo --output demo/requirements.txt
       - name: Install demo dependencies
         run: |
           python -m pip install --upgrade uv
@@ -47,7 +30,6 @@ jobs:
         env:
           SUPERADMIN_LOGIN: dummy_login
           SUPERADMIN_PWD: dummy_pwd
-          API_URL: 'http://localhost:8050/api/v1'
         run: |
-          sleep 10 && python demo/main.py --port 8080
+          sleep 10 && screen -dm python demo/main.py --auth --port 8080
           sleep 5 && nc -vz localhost 8080
