@@ -50,7 +50,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
         ),
     ],
 )
-@pytest.mark.timeout(60)
+@pytest.mark.timeout(60, method="signal")
 @pytest.mark.asyncio()
 async def test_chat(
     async_client: AsyncClient,
