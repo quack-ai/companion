@@ -82,6 +82,11 @@ services:
     volumes:
       - ./demo/:/app/
     command: python main.py --server-name 0.0.0.0
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz localhost 7860"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
   prometheus:
     image: prom/prometheus:latest
@@ -113,6 +118,11 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - ./apm/grafana:/etc/grafana/provisioning
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz localhost 3000"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 volumes:
   postgres_data:
