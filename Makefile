@@ -32,17 +32,17 @@ stop:
 
 run-dev:
 	poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
-	docker compose -f docker-compose.dev.yml up -d --build
+	docker compose -f docker-compose.dev.yml -f docker-compose.override.yml up -d --build
 
 stop-dev:
-	docker compose -f docker-compose.dev.yml down
+	docker compose -f docker-compose.dev.yml -f docker-compose.override.yml down
 
 # Run tests for the library
 test:
 	poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
-	docker compose -f docker-compose.dev.yml up -d --build
-	docker compose -f docker-compose.dev.yml exec -T backend pytest --cov=app
-	docker compose -f docker-compose.dev.yml down
+	docker compose -f docker-compose.dev.yml -f docker-compose.override.yml up -d --build
+	docker compose -f docker-compose.dev.yml -f docker-compose.override.yml exec -T backend pytest --cov=app
+	docker compose -f docker-compose.dev.yml -f docker-compose.override.yml down
 
 # Run tests for the library
 e2e:
