@@ -7,7 +7,7 @@ import logging
 import time
 
 import sentry_sdk
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
@@ -17,6 +17,7 @@ from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 from app.api.api_v1.router import api_router
 from app.core.config import settings
 from app.db import init_db
+from app.schemas.base import Status
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -45,6 +46,12 @@ app = FastAPI(
 @app.on_event("startup")
 async def startup() -> None:
     await init_db()
+
+
+# Healthcheck
+@app.get("/status", status_code=status.HTTP_200_OK, summary="Healthcheck for the API")
+def get_status() -> Status:
+    return Status(status="ok")
 
 
 # Routing
@@ -110,6 +117,7 @@ def custom_openapi():
 
 
 app.openapi = custom_openapi  # type: ignore[method-assign]
-Instrumentator(
-    excluded_handlers=["/metrics", "/docs", ".*openapi.json"],
-).instrument(app).expose(app, include_in_schema=False)
+if settings.PROMETHEUS_ENABLED:
+    Instrumentator(
+        excluded_handlers=["/metrics", "/docs", ".*openapi.json"],
+    ).instrument(app).expose(app, include_in_schema=False)
