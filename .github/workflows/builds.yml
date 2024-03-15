@@ -70,7 +70,7 @@ jobs:
           SUPERADMIN_PWD: dummy_pwd
           GF_ADMIN_USER: dummy_login
           GF_ADMIN_PWD: dummy_pwd
-        run: docker compose up -d --build ollama db backend prometheus grafana
+        run: docker compose -f docker-compose.yml up -d --build ollama db backend prometheus grafana
       - name: Docker sanity check
         run: |
           docker compose logs
@@ -106,7 +106,7 @@ jobs:
           SUPERADMIN_PWD: dummy_pwd
           GF_ADMIN_USER: dummy_login
           GF_ADMIN_PWD: dummy_pwd
-        run: docker compose up -d --build ollama db backend gradio
+        run: docker compose -f docker-compose.yml up -d --build ollama db backend gradio
       - name: Docker sanity check
         run: |
           docker compose logs
