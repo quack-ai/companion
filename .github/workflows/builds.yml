@@ -73,7 +73,7 @@ jobs:
         run: docker compose -f docker-compose.yml up -d --build ollama db backend prometheus grafana
       - name: Docker sanity check
         run: |
-          docker compose logs
+          docker compose -f docker-compose.yml logs
           curl http://localhost:3000
 
   gradio:
@@ -109,5 +109,5 @@ jobs:
         run: docker compose -f docker-compose.yml up -d --build ollama db backend gradio
       - name: Docker sanity check
         run: |
-          docker compose logs
+          docker compose -f docker-compose.yml logs
           curl http://localhost:7860
