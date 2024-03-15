@@ -16,16 +16,22 @@ jobs:
         with:
           poetry-version: "1.7.1"
       - name: Resolve dependencies
-        run: poetry export -f requirements.txt --without-hashes --output requirements.txt
-      - name: Build docker
-        run: docker build -f docker/Dockerfile . -t quackai/contribution-api:latest
+        run: |
+          poetry export -f requirements.txt --without-hashes --output requirements.txt
+          poetry export -f requirements.txt --without-hashes --only demo --output demo/requirements.txt
+      - name: Build docker images
+        run: |
+          docker build -f src/Dockerfile . -t quackai/contribution-api:latest
+          docker build -f demo/Dockerfile . -t quackai/gradio:latest
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: quackai
           password: ${{ secrets.DOCKERHUB_PW }}
       - name: Push to hub
-        run: docker push quackai/contribution-api:latest
+        run: |
+          docker push quackai/contribution-api:latest
+          docker push quackai/gradio:latest
 
   deploy-dev:
     needs: dockerhub

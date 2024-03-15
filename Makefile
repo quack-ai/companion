@@ -16,35 +16,37 @@ lock:
 # Build the docker
 build:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
-	docker build -f docker/Dockerfile . -t quackai/contribution-api:latest
+	docker build -f src/Dockerfile . -t quackai/contribution-api:latest
+	poetry export -f requirements.txt --without-hashes --only demo --output demo/requirements.txt
+	docker build -f demo/Dockerfile . -t quackai/gradio:latest
 
 # Run the docker
 run:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
-	docker compose -f docker/docker-compose.yml up -d --build
+	poetry export -f requirements.txt --without-hashes --only demo --output demo/requirements.txt
+	docker compose up -d --build --wait
 
 # Run the docker
 stop:
-	docker compose -f docker/docker-compose.yml down
+	docker compose down
 
 run-dev:
 	poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
-	docker compose -f docker/docker-compose.test.yml up -d --build
+	docker compose -f docker-compose.dev.yml -f docker-compose.override.yml up -d --build --wait
 
 stop-dev:
-	docker compose -f docker/docker-compose.test.yml down
+	docker compose -f docker-compose.dev.yml -f docker-compose.override.yml down
 
 # Run tests for the library
 test:
 	poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
-	docker compose -f docker/docker-compose.test.yml up -d --build
-	docker compose -f docker/docker-compose.test.yml exec -T backend pytest --cov=app
-	docker compose -f docker/docker-compose.test.yml down
+	docker compose -f docker-compose.dev.yml -f docker-compose.override.yml up -d --build --wait
+	docker compose -f docker-compose.dev.yml -f docker-compose.override.yml exec -T backend pytest --cov=app
+	docker compose -f docker-compose.dev.yml -f docker-compose.override.yml down
 
 # Run tests for the library
 e2e:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
-	docker compose -f docker/docker-compose.test.yml up -d --build
-	sleep 5
+	docker compose -f docker-compose.dev.yml up -d --build --wait
 	python scripts/test_e2e.py
-	docker compose -f docker/docker-compose.test.yml down
+	docker compose -f docker-compose.dev.yml down

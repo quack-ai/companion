@@ -111,7 +111,7 @@ def parse_args():
         description="Quack API End-to-End test", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    parser.add_argument("--endpoint", type=str, default="http://localhost:8050/api/v1", help="the API endpoint")
+    parser.add_argument("--endpoint", type=str, default="http://localhost:5050/api/v1", help="the API endpoint")
 
     args = parser.parse_args()
 

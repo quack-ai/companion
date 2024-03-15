@@ -20,3 +20,7 @@ class _Id(BaseModel):
 
 class OptionalGHToken(BaseModel):
     github_token: Union[str, None] = None
+
+
+class Status(BaseModel):
+    status: str

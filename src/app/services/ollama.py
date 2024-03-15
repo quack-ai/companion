@@ -75,7 +75,7 @@ def validate_parsing_response(response: str) -> List[Dict[str, str]]:
 
 
 class OllamaClient:
-    def __init__(self, endpoint: str, model_name: str, temperature: float = 0.0) -> None:
+    def __init__(self, endpoint: str, model_name: str, temperature: float = 0.0, timeout: int = 60) -> None:
         self.endpoint = endpoint
         # Check endpoint
         response = requests.get(f"{self.endpoint}/api/tags", timeout=2)
@@ -83,14 +83,16 @@ class OllamaClient:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unavailable endpoint")
         # Pull model
         logger.info("Loading Ollama model...")
-        response = requests.post(f"{self.endpoint}/api/pull", json={"name": model_name, "stream": False}, timeout=10)
+        response = requests.post(
+            f"{self.endpoint}/api/pull", json={"name": model_name, "stream": False}, timeout=timeout
+        )
         if response.status_code != 200 or response.json()["status"] != "success":
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unavailable model")
         self.temperature = temperature
         self.model_name = model_name
         logger.info(f"Using Ollama model: {self.model_name}")
 
-    def _request(
+    def _generate(
         self,
         system_prompt: str,
         message: str,
@@ -163,7 +165,7 @@ class OllamaClient:
         if len(corpus) == 0:
             return []
 
-        response = self._request(
+        response = self._generate(
             PARSING_PROMPT,
             json.dumps(corpus),
             validate_parsing_response,
@@ -190,7 +192,7 @@ class OllamaClient:
             )
 
         return GuidelineExample(
-            **self._request(
+            **self._generate(
                 EXAMPLE_PROMPT,
                 json.dumps({"guideline": instruction, "language": language}),
                 validate_example_response,
@@ -199,4 +201,6 @@ class OllamaClient:
         )
 
 
-ollama_client = OllamaClient(settings.OLLAMA_ENDPOINT, settings.OLLAMA_MODEL)
+ollama_client = OllamaClient(
+    settings.OLLAMA_ENDPOINT, settings.OLLAMA_MODEL, settings.LLM_TEMPERATURE, settings.OLLAMA_TIMEOUT
+)

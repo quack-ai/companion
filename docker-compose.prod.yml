@@ -1,0 +1,160 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:0.1.29
+    expose:
+      - 11434
+    volumes:
+      - "$HOME/.ollama:/root/.ollama"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: serve
+    healthcheck:
+      test: ["CMD-SHELL", "ollama --help"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  backend:
+    image: quackai/contribution-api:latest
+    depends_on:
+      ollama:
+        condition: service_healthy
+    expose:
+      - 5050
+    environment:
+      - SUPERADMIN_GH_PAT=${SUPERADMIN_GH_PAT}
+      - GH_OAUTH_ID=${GH_OAUTH_ID}
+      - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
+      - POSTGRES_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - SUPERADMIN_LOGIN=${SUPERADMIN_LOGIN}
+      - SUPERADMIN_PWD=${SUPERADMIN_PWD}
+      - SECRET_KEY=${SECRET_KEY}
+      - OLLAMA_ENDPOINT=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-60}
+      - SUPPORT_EMAIL=${SUPPORT_EMAIL}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - SERVER_NAME=${SERVER_NAME}
+      - POSTHOG_KEY=${POSTHOG_KEY}
+      - SLACK_API_TOKEN=${SLACK_API_TOKEN}
+      - SLACK_CHANNEL=${SLACK_CHANNEL}
+      - DEBUG=false
+      - PROMETHEUS_ENABLED=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`${BACKEND_HOST}`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=quackresolver"
+      - "traefik.http.services.backend.loadbalancer.server.port=5050"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 5050 --proxy-headers
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz localhost 5050"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  gradio:
+    image: quackai/gradio:latest
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - 7860
+    environment:
+      - API_URL=http://backend:5050/api/v1
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`${GRADIO_HOST}`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls.certresolver=quackresolver"
+      - "traefik.http.services.grafana.loadbalancer.server.port=7860"
+    command: python main.py --server-name 0.0.0.0 --auth
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz localhost 7860"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  prometheus:
+    image: quackai/prometheus:latest
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - 9090
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz localhost 9090"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  grafana:
+    image: quackai/grafana:latest
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    expose:
+      - 3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`${GF_HOST}`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls.certresolver=quackresolver"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz localhost 3000"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  traefik:
+    image: traefik:v2.9.6
+    depends_on:
+      backend:
+        condition: service_healthy
+      gradio:
+        condition: service_healthy
+      grafana:
+        condition: service_healthy
+    ports:
+      # http(s) traffic
+      - "80:80"
+      - "443:443"
+    labels:
+      - "traefik.http.middlewares.strip-www.redirectregex.regex=^https?://(www\\.)(.+)"
+      - "traefik.http.middlewares.strip-www.redirectregex.replacement=https://$${2}"
+      - "traefik.http.middlewares.strip-www.redirectregex.permanent=true"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "$PWD/acme.json:/acme.json"
+    command:
+      # Enable the Traefik log, for configurations and errors
+      - "--log.level=INFO"
+      # Enable Docker in Traefik, so that it reads labels from Docker services
+      - "--providers.docker=true"
+      # Do not expose all Docker services, only the ones explicitly exposed
+      - "--providers.docker.exposedbydefault=false"
+      # HTTPS
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      # Certificate
+      - "--certificatesresolvers.quackresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.quackresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.default.acme.storage=/acme.json"
+    restart: always
+
+volumes:
+  ollama:

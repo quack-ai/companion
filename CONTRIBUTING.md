@@ -5,6 +5,21 @@ Everything you need to know to contribute efficiently to the project!
 Whatever the way you wish to contribute to the project, please respect the [code of conduct](CODE_OF_CONDUCT.md).
 
 
+## Data model
+
+The back-end core feature is to interact with the metadata tables. For the service to be useful for codebase analysis, multiple tables/object types are introduced and described as follows:
+
+#### Access-related tables
+
+- Users: stores the hashed credentials and access level for users & devices.
+
+#### Core worklow tables
+
+- Repository: metadata of installed repositories.
+- Guideline: metadata of curated guidelines.
+
+![UML diagram](https://github.com/quack-ai/contribution-api/assets/26927750/509dc855-547e-45c3-a545-a29e8ce3712c)
+
 
 ## Codebase structure
 
@@ -49,10 +64,19 @@ First, check whether the topic wasn't already covered in an open / closed issue.
 If you are wondering how to do something with Contribution API, or a more general question, you should consider checking out Github [discussions](https://github.com/quack-ai/contribution-api/discussions). See it as a Q&A forum, or the project-specific StackOverflow!
 
 
+## Developer setup
 
-## Submitting a Pull Request
+### Prerequisites
 
-### Preparing your local branch
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+- [Docker](https://docs.docker.com/engine/install/)
+- [Docker compose](https://docs.docker.com/compose/)
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and a GPU (>= 6 Gb VRAM for good performance/latency balance)
+- [Poetry](https://python-poetry.org/docs/)
+- [Make](https://www.gnu.org/software/make/) (optional)
+
+
+### Configure your fork
 
 1 - Fork this [repository](https://github.com/quack-ai/contribution-api) by clicking on the "Fork" button at the top right of the page. This will create a copy of the project under your GitHub account (cf. [Fork a repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo)).
 
@@ -63,14 +87,60 @@ cd contribution-api
 git remote add upstream https://github.com/quack-ai/contribution-api.git
 ```
 
-3 - You should not work on the `main` branch, so let's create a new one
+### Install the dependencies
+
+Let's install the different libraries:
 ```shell
-git checkout -b a-short-description
+poetry export -f requirements.txt --without-hashes --with quality --output requirements.txt
+pip install -r requirements.txt
 ```
 
-4 - You only have to set your development environment now:
+#### Pre-commit hooks
+Let's make your life easier by formatting & fixing lint on each commit:
 ```shell
 pre-commit install
+```
+
+### Environment configuration
+
+In order to run the project, you will need to specific some information, which can be done using a `.env` file.
+Copy the default environement variables from [`.env.example`](./.env.example):
+```shell
+cp .env.example .env
+```
+
+This file contains all the information to run the project.
+
+#### Values you have to replace
+- `SUPERADMIN_GH_PAT`: the [GitHub personal access token](https://github.com/settings/tokens?type=beta) of the initial admin user
+- `GH_OAUTH_ID`: the Client ID of the GitHub Oauth app (Create an OAuth app on [GitHub](https://github.com/settings/applications/new), pointing to your Quack dashboard w/ callback URL)
+- `GH_OAUTH_SECRET`: the secret of the GitHub Oauth app (Generate a new client secret on the created OAuth app)
+
+#### Values you can edit freely
+- `POSTGRES_DB`: a name for the [PostgreSQL](https://www.postgresql.org/) database that will be created
+- `POSTGRES_USER`: a login for the PostgreSQL database
+- `POSTGRES_PASSWORD`: a password for the PostgreSQL database
+- `SUPERADMIN_LOGIN`: the login of the initial admin user
+- `SUPERADMIN_PWD`: the password of the initial admin user
+
+#### Other optional values
+- `SECRET_KEY`: if set, tokens can be reused between sessions. All instances sharing the same secret key can use the same token.
+- `OLLAMA_MODEL`: the model tag in [Ollama library](https://ollama.com/library) that will be used for the API.
+- `SENTRY_DSN`: the DSN for your [Sentry](https://sentry.io/) project, which monitors back-end errors and report them back.
+- `SERVER_NAME`: the server tag that will be used to report events to Sentry.
+- `POSTHOG_KEY`: the project API key for PostHog [PostHog](https://eu.posthog.com/settings/project-details).
+- `SLACK_API_TOKEN`: the App key for your Slack bot (Create New App on [Slack](https://api.slack.com/apps), go to OAuth & Permissions and generate a bot User OAuth Token).
+- `SLACK_CHANNEL`: the Slack channel where your bot will post events (defaults to `#general`, you have to invite the App to your channel).
+- `SUPPORT_EMAIL`: the email used for support of your API.
+- `DEBUG`: if set to false, silence debug logs.
+
+## Submitting a Pull Request
+
+### Preparing your local branch
+
+You should not work on the `main` branch, so let's create a new one
+```shell
+git checkout -b a-short-description
 ```
 
 ### Developing your feature
@@ -80,9 +150,9 @@ pre-commit install
 - **Code**: ensure to provide docstrings to your Python code. In doing so, please follow [Google-style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html) so it can ease the process of documentation later.
 - **Commit message**: please follow [Angular commit format](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format)
 
-#### Unit tests
+#### Tests
 
-In order to run the same unit tests as the CI workflows, you can run unittests locally:
+In order to run the same tests as the CI workflows, you can run them locally:
 
 ```shell
 make test

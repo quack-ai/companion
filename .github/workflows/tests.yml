@@ -19,20 +19,16 @@ jobs:
           poetry-version: "1.7.1"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --with test --output requirements.txt
-      - name: Build & run docker
+      - name: Run the tests
         env:
           SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
           GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
-        run: docker compose -f docker/docker-compose.test.yml up -d --build
-      - name: Run docker test
-        env:
-          SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
-          GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
-          GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
+          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q3_K_M
         run: |
-          docker compose -f docker/docker-compose.test.yml exec -T backend pytest --cov=app --cov-report xml tests/
-          docker compose -f docker/docker-compose.test.yml cp backend:/app/coverage.xml ./coverage-src.xml
+          docker compose -f docker-compose.dev.yml up -d --build --wait
+          docker compose -f docker-compose.dev.yml exec -T backend pytest --cov=app --cov-report xml tests/
+          docker compose -f docker-compose.dev.yml cp backend:/app/coverage.xml ./coverage-src.xml
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
@@ -52,22 +48,21 @@ jobs:
           poetry-version: "1.7.1"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --output requirements.txt
-      - name: Build & run docker
+      - name: Build & run docker + run migrations
         env:
           SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
           GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
-        run: docker compose -f docker/docker-compose.test.yml up -d --build
-      - name: Debug
+          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q3_K_M
         run: |
-          docker compose -f docker/docker-compose.test.yml exec -T backend alembic current
-          docker compose -f docker/docker-compose.test.yml exec -T backend alembic history --verbose
-      - name: Run migrations
-        run: |
-          docker compose -f docker/docker-compose.test.yml exec -T backend alembic stamp head
-          docker compose -f docker/docker-compose.test.yml exec -T backend alembic history --verbose
-          docker compose -f docker/docker-compose.test.yml exec -T backend alembic downgrade -1
-          docker compose -f docker/docker-compose.test.yml exec -T backend alembic upgrade +1
+          docker compose -f docker-compose.dev.yml up -d --build --wait
+          # debug
+          docker compose -f docker-compose.dev.yml exec -T backend alembic current
+          docker compose -f docker-compose.dev.yml exec -T backend alembic history --verbose
+          docker compose -f docker-compose.dev.yml exec -T backend alembic stamp head
+          docker compose -f docker-compose.dev.yml exec -T backend alembic history --verbose
+          docker compose -f docker-compose.dev.yml exec -T backend alembic downgrade -1
+          docker compose -f docker-compose.dev.yml exec -T backend alembic upgrade +1
 
   headers:
     runs-on: ${{ matrix.os }}
