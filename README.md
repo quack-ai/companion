@@ -111,9 +111,11 @@ docker compose up
 
 #### Check how what your API
 
-You can now access your backend API at [http://localhost:8050/docs](http://localhost:8050/docs)
+You can now access:
+- your backend API at [http://localhost:8050/docs](http://localhost:8050/docs)
+- your APM dashboard at [http://localhost:3000](http://localhost:3000/d/_quackapi_dashboard/quack-api-dashboard)
+- your Gradio chat interface at [http://localhost:7860](http://localhost:7860)
 
-Additionally, you can run the Gradio demo
 
 ## Contributing
 
