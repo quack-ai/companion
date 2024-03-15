@@ -48,6 +48,8 @@ class Settings(BaseSettings):
     # LLM Compute
     OLLAMA_ENDPOINT: str = os.environ["OLLAMA_ENDPOINT"]
     OLLAMA_MODEL: str = os.environ.get("OLLAMA_MODEL", "dolphin-mistral:7b-v2.6-dpo-laser-q4_0")
+    OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", 60))
+    LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", 0.0))
 
     # Error monitoring
     SENTRY_DSN: Union[str, None] = os.environ.get("SENTRY_DSN")
