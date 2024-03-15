@@ -165,7 +165,7 @@ class OllamaClient:
         if len(corpus) == 0:
             return []
 
-        response = self._request(
+        response = self._generate(
             PARSING_PROMPT,
             json.dumps(corpus),
             validate_parsing_response,
@@ -192,7 +192,7 @@ class OllamaClient:
             )
 
         return GuidelineExample(
-            **self._request(
+            **self._generate(
                 EXAMPLE_PROMPT,
                 json.dumps({"guideline": instruction, "language": language}),
                 validate_example_response,
