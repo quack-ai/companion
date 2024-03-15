@@ -111,7 +111,7 @@ docker compose up
 
 #### Check how what your API
 
-You can now access your backend API at [http://localhost:5050/docs](http://localhost:5050/docs)
+You can now access your backend API at [http://localhost:8050/docs](http://localhost:8050/docs)
 
 Additionally, you can run the Gradio demo
 
