@@ -7,7 +7,7 @@ on:
     branches: main
 
 jobs:
-  docker:
+  backend:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -25,28 +25,89 @@ jobs:
       - name: Build & run docker
         env:
           SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
-          SUPERADMIN_LOGIN: dummy_login
-          SUPERADMIN_PWD: dummy_pwd
           GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
-          POSTGRES_DB: postgres
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: pg_pwd
-          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q4_0
-        run: docker compose -f docker/docker-compose.yml up -d --build
+          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q3_K_M
+        run: docker compose -f docker-compose.dev.yml up -d --build
       - name: Docker sanity check
         env:
           SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
-          SUPERADMIN_LOGIN: dummy_login
-          SUPERADMIN_PWD: dummy_pwd
           GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
+          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q3_K_M
+        run: |
+          docker compose -f docker-compose.dev.yml logs backend
+          nc -vz localhost 5050
+          docker compose -f docker-compose.dev.yml logs
+          curl http://localhost:5050/status
+
+  grafana:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: "1.7.1"
+      - name: Resolve dependencies
+        run: |
+          poetry export -f requirements.txt --without-hashes --output requirements.txt
+      - name: Build & run docker
+        env:
+          SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
+          GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
+          GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
+          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q3_K_M
           POSTGRES_DB: postgres
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: pg_pwd
-          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q4_0
+          SUPERADMIN_LOGIN: dummy_login
+          SUPERADMIN_PWD: dummy_pwd
+          GF_ADMIN_USER: dummy_login
+          GF_ADMIN_PWD: dummy_pwd
+        run: docker compose up -d --build ollama db backend prometheus grafana
+      - name: Docker sanity check
         run: |
-          sleep 20 && docker compose -f docker/docker-compose.yml logs backend
-          nc -vz localhost 8050
-          docker compose -f docker/docker-compose.yml logs
-          curl http://localhost:8050/docs
+          docker compose logs
+          curl http://localhost:3000
+
+  gradio:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: "1.7.1"
+      - name: Resolve dependencies
+        run: |
+          poetry export -f requirements.txt --without-hashes --output requirements.txt
+          poetry export -f requirements.txt --without-hashes --only demo --output demo/requirements.txt
+      - name: Build & run docker
+        env:
+          SUPERADMIN_GH_PAT: ${{ secrets.SUPERADMIN_GH_PAT }}
+          GH_OAUTH_ID: ${{ secrets.GH_OAUTH_ID }}
+          GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
+          OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q3_K_M
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: pg_pwd
+          SUPERADMIN_LOGIN: dummy_login
+          SUPERADMIN_PWD: dummy_pwd
+          GF_ADMIN_USER: dummy_login
+          GF_ADMIN_PWD: dummy_pwd
+        run: docker compose up -d --build ollama db backend gradio
+      - name: Docker sanity check
+        run: |
+          docker compose logs
+          curl http://localhost:7860
