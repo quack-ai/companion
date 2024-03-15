@@ -83,6 +83,7 @@ class Settings(BaseSettings):
 
     DEBUG: bool = os.environ.get("DEBUG", "").lower() != "false"
     LOGO_URL: str = ""
+    PROMETHEUS_ENABLED: bool = os.getenv("PROMETHEUS_ENABLED", "").lower() == "true"
 
     model_config = SettingsConfigDict(case_sensitive=True)
 
