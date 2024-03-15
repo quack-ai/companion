@@ -1,6 +1,35 @@
-version: '3.7'
+version: '3.8'
 
 services:
+  db:
+    image: postgres:15-alpine
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  ollama:
+    image: ollama/ollama:0.1.29
+    expose:
+      - 11434
+    volumes:
+      - "$HOME/.ollama:/root/.ollama"
+    command: serve
+    healthcheck:
+      test: ["CMD-SHELL", "ollama --help"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
   backend:
     image: quackai/contribution-api:latest
     build:
@@ -23,6 +52,7 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - OLLAMA_ENDPOINT=http://ollama:11434
       - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-60}
       - SUPPORT_EMAIL=${SUPPORT_EMAIL}
       - DEBUG=true
       - PROMETHEUS_ENABLED=true
@@ -34,67 +64,6 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
-
-  ollama:
-    image: ollama/ollama:0.1.29
-    expose:
-      - 11434
-    volumes:
-      - "$HOME/.ollama:/root/.ollama"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    command: serve
-    healthcheck:
-      test: ["CMD-SHELL", "ollama pull '${OLLAMA_MODEL}'"]
-      interval: 5s
-      timeout: 1m
-      retries: 3
-
-  db:
-    image: postgres:15-alpine
-    expose:
-      - 5432
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    healthcheck:
-      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-
-  prometheus:
-    image: prom/prometheus:latest
-    depends_on:
-      backend:
-        condition: service_healthy
-    expose:
-      - 9090
-    volumes:
-      - ./apm/prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-
-  grafana:
-    image: grafana/grafana:latest
-    depends_on:
-      - prometheus
-    ports:
-      - 3000:3000
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GF_ADMIN_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PWD}
-      - GF_USERS_ALLOW_SIGN_UP=false
-    volumes:
-      - ./apm/grafana:/etc/grafana/provisioning
 
   gradio:
     image: quackai/gradio:latest
@@ -113,6 +82,37 @@ services:
     volumes:
       - ./demo/:/app/
     command: python main.py --server-name 0.0.0.0
+
+  prometheus:
+    image: prom/prometheus:latest
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - 9090
+    volumes:
+      - ./apm/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz localhost 9090"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana:latest
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    ports:
+      - 3000:3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GF_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PWD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./apm/grafana:/etc/grafana/provisioning
 
 volumes:
   postgres_data:

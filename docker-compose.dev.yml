@@ -1,37 +1,6 @@
-version: '3.7'
+version: '3.8'
 
 services:
-  backend:
-    image: quackai/contribution-api:latest
-    build:
-      context: .
-      dockerfile: ./src/Dockerfile
-    depends_on:
-      test_db:
-        condition: service_healthy
-      ollama:
-        condition: service_healthy
-    ports:
-      - "5050:5050"
-    environment:
-      - SUPERADMIN_GH_PAT=${SUPERADMIN_GH_PAT}
-      - GH_OAUTH_ID=${GH_OAUTH_ID}
-      - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
-      - POSTGRES_URL=postgresql+asyncpg://dummy_login:dummy_pwd@db/dummy_db
-      - SUPERADMIN_LOGIN=superadmin_login
-      - SUPERADMIN_PWD=superadmin_pwd
-      - OLLAMA_ENDPOINT=http://ollama:11434
-      - OLLAMA_MODEL=tinydolphin:1.1b-v2.8-q3_K_M
-      - DEBUG=true
-    volumes:
-      - ./src/:/app/
-    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 5050
-    healthcheck:
-      test: ["CMD-SHELL", "nc -vz localhost 5050"]
-      interval: 10s
-      timeout: 3s
-      retries: 3
-
   test_db:
     image: postgres:15-alpine
     expose:
@@ -52,20 +21,44 @@ services:
       - 11434
     volumes:
       - "$HOME/.ollama:/root/.ollama"
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
     command: serve
     healthcheck:
-      test: ["CMD-SHELL", "ollama pull 'tinydolphin:1.1b-v2.8-q3_K_M'"]
-      interval: 5s
-      timeout: 1m
+      test: ["CMD-SHELL", "ollama --help"]
+      interval: 10s
+      timeout: 5s
       retries: 3
 
+  backend:
+    image: quackai/contribution-api:latest
+    build:
+      context: .
+      dockerfile: ./src/Dockerfile
+    depends_on:
+      test_db:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    ports:
+      - "5050:5050"
+    environment:
+      - SUPERADMIN_GH_PAT=${SUPERADMIN_GH_PAT}
+      - GH_OAUTH_ID=${GH_OAUTH_ID}
+      - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
+      - POSTGRES_URL=postgresql+asyncpg://dummy_login:dummy_pwd@test_db/dummy_db
+      - SUPERADMIN_LOGIN=superadmin_login
+      - SUPERADMIN_PWD=superadmin_pwd
+      - OLLAMA_ENDPOINT=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-60}
+      - DEBUG=true
+    volumes:
+      - ./src/:/app/
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 5050
+    healthcheck:
+      test: ["CMD-SHELL", "nc -vz localhost 5050"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 volumes:
   ollama:
