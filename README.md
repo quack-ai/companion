@@ -2,12 +2,11 @@
   <a href="https://quackai.com"><img src="https://uploads-ssl.webflow.com/64a6527708bc7f2ce5fd6b2a/64a654825ed3d444b47c4935_quack-logo%20(copy).png" width="75" height="75"></a>
 </p>
 <h1 align="center">
- Quack - API for contribution assistance
+ Quack - Type smarter, ship faster
 </h1>
 <p align="center">
   <a href="https://github.com/quack-ai/companion">VSCode extension</a> ・
   <a href="https://github.com/quack-ai/contribution-api">Backend API</a> ・
-  <a href="https://github.com/quack-ai/platform">Frontend dashboard</a> ・
   <a href="https://docs.quackai.com">Documentation</a>
 </p>
 <h2 align="center"></h2>
@@ -42,12 +41,14 @@
   </a>
 </p>
 
+Quack is the AI coding companion that helps software teams ship faster. See it as an instantly onboarded team member with full knowledge of your internal libraries and coding standards 🦆
+
 
 ## Quick Tour
 
 ### Code chat endpoint
 
-![Code chat demo](https://github.com/quack-ai/platform/releases/download/v0.0.1/companion_demo.gif)
+![Code chat demo](https://github.com/quack-ai/contribution-api/assets/26927750/dd705cfb-a964-4ca6-ad2e-8d15e7c314a7)
 
 The backend API is the gatekeeper for your LLM inference container (powered by our friend at [Ollama](https://github.com/ollama/ollama)). With your services up and running, you can use the code chat endpoint as coding-specific LLM chat.
 
@@ -55,7 +56,7 @@ The backend API is the gatekeeper for your LLM inference container (powered by o
 
 With the service running, you can navigate to [`http://localhost:8050/docs`](http://localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
 
-![API Swagger screenshot](docs/quack_api_swagger.png)
+![API Swagger screenshot](https://github.com/quack-ai/contribution-api/assets/26927750/725e8308-ace1-40ed-b742-242f8186fec0)
 
 ### Latency benchmark
 
@@ -79,84 +80,40 @@ python scripts/evaluate_ollama_latency.py dolphin-mistral:7b-v2.6-dpo-laser-q4_0
 *All script arguments can be checked using `python scripts/evaluate_ollama_latency.py --help`*
 
 
-### How is the database organized
-
-The back-end core feature is to interact with the metadata tables. For the service to be useful for codebase analysis, multiple tables/object types are introduced and described as follows:
-
-#### Access-related tables
-
-- Users: stores the hashed credentials and access level for users & devices.
-
-#### Core worklow tables
-
-- Repository: metadata of installed repositories.
-- Guideline: metadata of curated guidelines.
-
-![UML diagram](docs/db_uml.png)
-
-## Installation
+## Get started 🚀
 
 ### Prerequisites
 
+- [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker compose](https://docs.docker.com/compose/)
-- [GitHub user Personal Access Token](https://github.com/settings/tokens?type=beta) with no extra permissions (= read-only)
-- [Poetry](https://python-poetry.org/docs/) (optional if you run the prod version)
-- [Make](https://www.gnu.org/software/make/) (optional)
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and a GPU (>= 6 Gb VRAM for good performance/latency balance)
 
-If you want to run the LLM on GPU, you'll also need:
-- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
-- 1 NVidia GPU (at least 6Gb VRAM recommended for a good performance/latency balance)
+### 60 seconds setup
 
-The project was designed so that everything runs with Docker orchestration (standalone virtual environment), so you won't need to install any additional libraries.
-
-### Configuration
-
-In order to run the project, you will need to specific some information, which can be done using a `.env` file.
-Copy the default environement variables from [`.env.example`](./docker/.env.example):
+#### Clone the repository
 ```shell
-cp docker/.env.example .env
+git clone https://github.com/quack-ai/contribution-api.git && cd contribution-api
 ```
+#### Set your environment variables
+First copy the examples
+```shell
+cp .env.example .env
+```
+and then, in it, replace the value of SUPERADMIN_GH_PAT with your GitHub user Personal Access Token. You can create one [here](https://github.com/settings/tokens?type=beta) (no need for extra permissions i.e. read-only).
 
-This file will have to hold the following information:
-- `POSTGRES_DB`*: a name for the [PostgreSQL](https://www.postgresql.org/) database that will be created
-- `POSTGRES_USER`*: a login for the PostgreSQL database
-- `POSTGRES_PASSWORD`*: a password for the PostgreSQL database
-- `SUPERADMIN_GH_PAT`: the GitHub personal access token of the initial admin user
-- `SUPERADMIN_PWD`*: the password of the initial admin user
-- `GH_OAUTH_ID`: the Client ID of the GitHub Oauth app (Create an OAuth app on [GitHub](https://github.com/settings/applications/new), pointing to your Quack dashboard w/ callback URL)
-- `GH_OAUTH_SECRET`: the secret of the GitHub Oauth app (Generate a new client secret on the created OAuth app)
-
-_* marks the values where you can pick what you want._
-
-Optionally, the following information can be added:
-- `SECRET_KEY`*: if set, tokens can be reused between sessions. All instances sharing the same secret key can use the same token.
-- `OLLAMA_MODEL`: the model tag in [Ollama library](https://ollama.com/library) that will be used for the API.
-- `SENTRY_DSN`: the DSN for your [Sentry](https://sentry.io/) project, which monitors back-end errors and report them back.
-- `SERVER_NAME`*: the server tag that will be used to report events to Sentry.
-- `POSTHOG_KEY`: the project API key for PostHog [PostHog](https://eu.posthog.com/settings/project-details).
-- `SLACK_API_TOKEN`: the App key for your Slack bot (Create New App on [Slack](https://api.slack.com/apps), go to OAuth & Permissions and generate a bot User OAuth Token).
-- `SLACK_CHANNEL`: the Slack channel where your bot will post events (defaults to `#general`, you have to invite the App to your channel).
-- `SUPPORT_EMAIL`: the email used for support of your API.
-- `DEBUG`: if set to false, silence debug logs.
-
-### Running the service
-
-You can start the API containers using this command:
+#### Start the services
 
 ```shell
-make run
+docker compose pull
+docker compose up
 ```
 
-You can now navigate to [`http://localhost:8050/docs`](http://localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
+#### Check how what your API
 
-![API Swagger screenshot](docs/quack_api_swagger.png)
+You can now access your backend API at [http://localhost:5050/docs](http://localhost:5050/docs)
 
-In order to stop the service, run:
-```shell
-make stop
-```
-
+Additionally, you can run the Gradio demo
 
 ## Contributing
 
