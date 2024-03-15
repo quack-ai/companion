@@ -29,7 +29,7 @@ jobs:
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
           OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q3_K_M
         run: |
-          docker compose -f docker-compose.dev.yml up -d --build
+          docker compose -f docker-compose.dev.yml up -d --build --wait
           nc -vz localhost 5050
       - name: Install dependencies
         run: |
