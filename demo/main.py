@@ -134,6 +134,7 @@ def main(args: argparse.Namespace) -> None:
         )
     interface.launch(
         server_port=args.port,
+        server_name=args.server_name,
         show_error=True,
         favicon_path=folder.joinpath("assets", "favicon.ico"),
         auth=auth_gradio if args.auth else None,
@@ -147,13 +148,14 @@ if __name__ == "__main__":
         description="Quack API demo",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--port", type=int, default=8001, help="Port on which the webserver will be run")
+    parser.add_argument("--port", type=int, default=None, help="Port on which the webserver will be run")
     parser.add_argument(
         "--api",
         type=str,
         default=os.getenv("API_URL", "http://localhost:8050/api/v1"),
         help="URL of your Quack API instance",
     )
+    parser.add_argument("--server-name", type=str, default=None, help="Server name arg of gradio")
     parser.add_argument("--auth", action="store_true", help="Use the creds from Auth UI instead of env variables")
     args = parser.parse_args()
 
