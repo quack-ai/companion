@@ -112,10 +112,7 @@ def parse_args():
     )
 
     parser.add_argument("--endpoint", type=str, default="http://localhost:5050/api/v1", help="the API endpoint")
-
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
