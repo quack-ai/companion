@@ -74,10 +74,10 @@ This benchmark was performed over 20 iterations on the same input sequence, on a
 
 You can run this latency benchmark for any Ollama model on your hardware as follows:
 ```bash
-python scripts/evaluate_ollama_latency.py dolphin-mistral:7b-v2.6-dpo-laser-q4_0 --endpoint http://localhost:3000
+python scripts/ollama/evaluate_latency.py dolphin-mistral:7b-v2.6-dpo-laser-q4_0 --endpoint http://localhost:11434
 ```
 
-*All script arguments can be checked using `python scripts/evaluate_ollama_latency.py --help`*
+*All script arguments can be checked using `python scripts/ollama/evaluate_latency.py --help`*
 
 
 ## Get started 🚀
