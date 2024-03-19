@@ -1,0 +1,37 @@
+version: '3.7'
+
+services:
+  ollama:
+    image: ollama/ollama:0.1.29
+    ports:
+      - "11434:11434"
+    volumes:
+      - "$HOME/.ollama:/root/.ollama"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    command: serve
+    healthcheck:
+      test: ["CMD-SHELL", "ollama --help"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  evaluator:
+    image: quackai/evaluator:latest
+    build: .
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_ENDPOINT=http://ollama:11434
+    volumes:
+      - ./evaluate_latency.py:/app/evaluate.py
+    command: sleep infinity
+
+volumes:
+  ollama:
