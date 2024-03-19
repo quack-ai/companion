@@ -1,0 +1,22 @@
+model,hardware,ingestion_mean (tok/s),ingestion_std (tok/s),generation_mean (tok/s),generation_std (tok/s)
+deepseek-coder:6.7b-instruct-q5_K_M,NVIDIA RTX 3060 (laptop),35.43,3.46,23.68,0.74
+deepseek-coder:6.7b-instruct-q4_K_M,NVIDIA RTX 3060 (laptop),72.27,10.69,36.82,1.25
+deepseek-coder:6.7b-instruct-q3_K_M,NVIDIA RTX 3060 (laptop),90.1,32.43,50.34,1.28
+pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M,NVIDIA RTX 3060 (laptop),78.94,10.2,37.95,1.65
+dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M,NVIDIA RTX 3060 (laptop),126.75,31.5,50.05,0.84
+dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M,NVIDIA RTX 3060 (laptop),89.47,29.91,47.09,0.67
+deepseek-coder:6.7b-instruct-q4_K_M,NVIDIA RTX 3070 (Scaleway GPU-3070-S),266.98,95.63,75.53,1.56
+deepseek-coder:6.7b-instruct-q3_K_M,NVIDIA RTX 3070 (Scaleway GPU-3070-S),141.43,50.4,73.69,1.61
+pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M,NVIDIA RTX 3070 (Scaleway GPU-3070-S),285.81,73.55,75.14,3.13
+dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M,NVIDIA RTX 3070 (Scaleway GPU-3070-S),234.2,79.38,71.54,1
+dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M,NVIDIA RTX 3070 (Scaleway GPU-3070-S),114.54,38.24,69.29,0.98
+deepseek-coder:6.7b-instruct-q4_K_M,NVIDIA A10 (Lambda Cloud gpu_1x_a10),208.65,74.02,78.68,1.64
+deepseek-coder:6.7b-instruct-q3_K_M,NVIDIA A10 (Lambda Cloud gpu_1x_a10),111.84,39.9,71.66,1.75
+pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M,NVIDIA A10 (Lambda Cloud gpu_1x_a10),226.66,65.65,77.26,2.72
+dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M,NVIDIA A10 (Lambda Cloud gpu_1x_a10),202.43,69.55,73.9,0.87
+dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M,NVIDIA A10 (Lambda Cloud gpu_1x_a10),112.82,38.46,66.98,0.79
+deepseek-coder:6.7b-instruct-q4_K_M,A10G (AWS g5.xlarge),186.81,66.03,79.62,1.52
+deepseek-coder:6.7b-instruct-q3_K_M,A10G (AWS g5.xlarge),99.83,35.41,84.47,1.69
+pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M,A10G (AWS g5.xlarge),212.08,86.58,79.02,3.35
+dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M,A10G (AWS g5.xlarge),187.2,62.24,75.91,1
+dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M,A10G (AWS g5.xlarge),102.36,34.29,81.23,1.02
