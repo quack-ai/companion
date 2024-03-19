@@ -52,32 +52,13 @@ Quack is the AI coding companion that helps software teams ship faster. See it a
 
 The backend API is the gatekeeper for your LLM inference container (powered by our friend at [Ollama](https://github.com/ollama/ollama)). With your services up and running, you can use the code chat endpoint as coding-specific LLM chat.
 
+*Check our [LLM latency benchmark](scripts/ollama) on a few cloud providers if you want to run this in the cloud.*
+
 ### REST API for guideline management & LLM inference
 
 With the service running, you can navigate to [`http://localhost:8050/docs`](http://localhost:8050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
 
 ![API Swagger screenshot](https://github.com/quack-ai/contribution-api/assets/26927750/725e8308-ace1-40ed-b742-242f8186fec0)
-
-### Latency benchmark
-
-You crave for perfect codde suggestions, but you don't know whether it fits your needs in terms of latency?
-In the table below, you will find a latency benchmark for all tested LLMs from Ollama:
-
-| Model                                                        | Ingestion mean (std)   | Generation mean (std) |
-| ------------------------------------------------------------ | ---------------------- | --------------------- |
-| [tinyllama:1.1b-chat-v1-q4_0](https://ollama.com/library/tinyllama:1.1b-chat-v1-q4_0) | 2014.63 tok/s (±12.62) | 227.13 tok/s (±2.26)  |
-| [dolphin-phi:2.7b-v2.6-q4_0](https://ollama.com/library/dolphin-phi:2.7b-v2.6-q4_0) | 684.07 tok/s (±3.85)   | 122.25 toks/s (±0.87) |
-| [dolphin-mistral:7b-v2.6](https://ollama.com/library/dolphin-mistral:7b-v2.6) | 291.94 tok/s (±0.4)    | 60.56 tok/s (±0.15)   |
-
-
-This benchmark was performed over 20 iterations on the same input sequence, on a **laptop** to better reflect performances that can be expected by common users. The hardware setup includes an [Intel(R) Core(TM) i7-12700H](https://ark.intel.com/content/www/us/en/ark/products/132228/intel-core-i7-12700h-processor-24m-cache-up-to-4-70-ghz.html) for the CPU, and a [NVIDIA GeForce RTX 3060](https://www.nvidia.com/fr-fr/geforce/graphics-cards/30-series/rtx-3060-3060ti/) for the laptop GPU.
-
-You can run this latency benchmark for any Ollama model on your hardware as follows:
-```bash
-python scripts/ollama/evaluate_latency.py dolphin-mistral:7b-v2.6-dpo-laser-q4_0 --endpoint http://localhost:11434
-```
-
-*All script arguments can be checked using `python scripts/ollama/evaluate_latency.py --help`*
 
 
 ## Get started 🚀
