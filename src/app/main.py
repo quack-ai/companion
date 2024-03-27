@@ -13,6 +13,8 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from prometheus_fastapi_instrumentator import Instrumentator
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
+from sentry_sdk.integrations.fastapi import FastApiIntegration
+from sentry_sdk.integrations.starlette import StarletteIntegration
 
 from app.api.api_v1.router import api_router
 from app.core.config import settings
@@ -25,10 +27,16 @@ logger = logging.getLogger("uvicorn.error")
 if isinstance(settings.SENTRY_DSN, str):
     sentry_sdk.init(
         settings.SENTRY_DSN,
+        enable_tracing=False,
+        traces_sample_rate=0.0,
+        integrations=[
+            StarletteIntegration(transaction_style="url"),
+            FastApiIntegration(transaction_style="url"),
+        ],
         release=settings.VERSION,
         server_name=settings.SERVER_NAME,
-        environment="production" if isinstance(settings.SERVER_NAME, str) else None,
-        traces_sample_rate=0.0,
+        debug=settings.DEBUG,
+        environment=None if settings.DEBUG else "production",
     )
     logger.info(f"Sentry middleware enabled on server {settings.SERVER_NAME}")
 
@@ -121,3 +129,4 @@ if settings.PROMETHEUS_ENABLED:
     Instrumentator(
         excluded_handlers=["/metrics", "/docs", ".*openapi.json"],
     ).instrument(app).expose(app, include_in_schema=False)
+    logger.info("Collecting performance data with Prometheus")
