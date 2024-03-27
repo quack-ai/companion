@@ -54,7 +54,7 @@ jobs:
           docker push $IMAGE_ID:latest
 
   deploy-dev:
-    needs: dockerhub
+    needs: docker
     runs-on: ubuntu-latest
     steps:
       - uses: appleboy/ssh-action@v1.0.3
