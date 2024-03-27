@@ -38,6 +38,7 @@ SECONDARY_LABELS = {
     "ext: scripts",
     "ext: apm",
     "ext: demo",
+    "ext: docs",
     "module: core",
     "module: database",
     "module: services",

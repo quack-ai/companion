@@ -14,6 +14,10 @@
 - changed-files:
   - any-glob-to-any-file: demo/*
 
+'ext: docs':
+- changed-files:
+  - any-glob-to-any-file: docs/*
+
 'module: core':
 - changed-files:
   - any-glob-to-any-file:
