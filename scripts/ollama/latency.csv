@@ -20,3 +20,8 @@ deepseek-coder:6.7b-instruct-q3_K_M,A10G (AWS g5.xlarge),99.83,35.41,84.47,1.69
 pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M,A10G (AWS g5.xlarge),212.08,86.58,79.02,3.35
 dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M,A10G (AWS g5.xlarge),187.2,62.24,75.91,1
 dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M,A10G (AWS g5.xlarge),102.36,34.29,81.23,1.02
+deepseek-coder:6.7b-instruct-q4_K_M,NVIDIA L4 (Scaleway L4-1-24G),213.46,76.24,49.97,1.01
+deepseek-coder:6.7b-instruct-q3_K_M,NVIDIA L4 (Scaleway L4-1-24G),118.87,43.35,54.72,1.31
+pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M,NVIDIA L4 (Scaleway L4-1-24G),225.62,60.21,49.39,1.9
+dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M,NVIDIA L4 (Scaleway L4-1-24G),211.52,72.76,47.27,0.58
+dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M,NVIDIA L4 (Scaleway L4-1-24G),120.13,41.09,51.9,0.71
