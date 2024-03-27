@@ -22,7 +22,7 @@ services:
       retries: 3
 
   evaluator:
-    image: quackai/evaluator:latest
+    image: quackai/llm-evaluator:latest
     build: .
     depends_on:
       ollama:
