@@ -30,7 +30,7 @@ services:
     environment:
       - OLLAMA_ENDPOINT=http://ollama:11434
     volumes:
-      - ./evaluate_latency.py:/app/evaluate.py
+      - ./evaluate_perf.py:/app/evaluate.py
     command: sleep infinity
 
 volumes:
