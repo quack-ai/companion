@@ -81,7 +81,11 @@ First copy the examples
 ```shell
 cp .env.example .env
 ```
-and then, in it, replace the value of SUPERADMIN_GH_PAT with your GitHub user Personal Access Token. You can create one [here](https://github.com/settings/tokens?type=beta) (no need for extra permissions i.e. read-only).
+and then edit it:
+```shell
+nano .env
+```
+Replace the value of SUPERADMIN_GH_PAT with your GitHub user Personal Access Token. You can create one [here](https://github.com/settings/tokens?type=beta) (no need for extra permissions i.e. read-only).
 
 #### Start the services
 
@@ -93,7 +97,7 @@ docker compose up
 #### Check how what your API
 
 You can now access:
-- your backend API at [http://localhost:8050/docs](http://localhost:8050/docs)
+- your backend API at [http://localhost:5050/docs](http://localhost:5050/docs)
 - your APM dashboard at [http://localhost:3000](http://localhost:3000/d/_quackapi_dashboard/quack-api-dashboard)
 - your Gradio chat interface at [http://localhost:7860](http://localhost:7860)
 
