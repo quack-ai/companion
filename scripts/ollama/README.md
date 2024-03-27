@@ -22,7 +22,7 @@ with the following LLMs (cf. [Ollama hub](https://ollama.com/library)):
 
 and the following quantization formats: q3_K_M, q4_K_M, q5_K_M.
 
-This [benchmark](latency.csv) was performed over 5 iterations on 4 different sequences, including on a **laptop** to better reflect performances that can be expected by common users.
+This [benchmark](./benchmark_result.csv) was performed over 5 iterations on 4 different sequences, including on a **laptop** to better reflect performances that can be expected by common users.
 
 ## Run it on your hardware
 
@@ -39,7 +39,7 @@ docker compose exec -T ollama ollama pull MODEL
 
 And run the evaluation
 ```
-docker compose exec -T evaluator python scripts/ollama/evaluate_latency.py MODEL
+docker compose exec -T evaluator python evaluate.py MODEL
 ```
 
 ### Remote instance
@@ -50,10 +50,10 @@ docker compose up -d evaluator --wait
 ```
 And run the evaluation by targeting your remote instance:
 ```
-docker compose exec -T evaluator python scripts/ollama/evaluate_latency.py MODEL --endpoint http://HOST:PORT
+docker compose exec -T evaluator python evaluate.py MODEL --endpoint http://HOST:PORT
 ```
 
-*All script arguments can be checked using `python scripts/ollama/evaluate_latency.py --help`*
+*All script arguments can be checked using `python scripts/ollama/evaluate_perf.py --help`*
 
 ### Others
 
