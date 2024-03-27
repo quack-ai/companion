@@ -3,9 +3,17 @@ on:
   push:
     branches: main
 
+env:
+  BACKEND_IMAGE_NAME: contribution-api
+  DEMO_IMAGE_NAME: gradio
+  DOCKERHUB_USER: quackai
+
 jobs:
-  dockerhub:
+  docker:
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -21,17 +29,29 @@ jobs:
           poetry export -f requirements.txt --without-hashes --only demo --output demo/requirements.txt
       - name: Build docker images
         run: |
-          docker build -f src/Dockerfile . -t quackai/contribution-api:latest
-          docker build -f demo/Dockerfile . -t quackai/gradio:latest
+          docker build -f src/Dockerfile . -t $DOCKERHUB_USER/$BACKEND_IMAGE_NAME:latest
+          docker build -f demo/Dockerfile . -t $DOCKERHUB_USER/$DEMO_IMAGE_NAME:latest
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
-          username: quackai
+          username: $DOCKERHUB_USER
           password: ${{ secrets.DOCKERHUB_PW }}
       - name: Push to hub
         run: |
-          docker push quackai/contribution-api:latest
-          docker push quackai/gradio:latest
+          docker push $DOCKERHUB_USER/$BACKEND_IMAGE_NAME:latest
+          docker push $DOCKERHUB_USER/$DEMO_IMAGE_NAME:latest
+      - name: Log in to GitHub container registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+      - name: Push to container registry
+        run: |
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$BACKEND_IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          docker tag $DOCKERHUB_USER/$BACKEND_IMAGE_NAME:latest $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$DEMO_IMAGE_NAME
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          docker tag $DOCKERHUB_USER/$DEMO_IMAGE_NAME:latest $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
 
   deploy-dev:
     needs: dockerhub
