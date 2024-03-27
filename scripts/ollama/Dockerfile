@@ -14,4 +14,4 @@ RUN set -eux \
     && rm -rf /root/.cache
 
 # copy script
-COPY ./evaluate_latency.py /app/evaluate.py
+COPY ./evaluate_perf.py /app/evaluate.py
