@@ -12,7 +12,7 @@ from app.crud.crud_guideline import GuidelineCRUD
 from app.models import UserScope
 from app.schemas.code import ChatHistory
 from app.schemas.login import TokenPayload
-from app.services.ollama import ollama_client
+from app.services.llm.ollama import ollama_client
 from app.services.telemetry import telemetry_client
 
 router = APIRouter()
