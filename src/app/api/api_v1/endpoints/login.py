@@ -50,7 +50,7 @@ async def login_with_creds(
 
     If the credentials are valid, creates a new access token.
 
-    By default, the token expires after 1 hour.
+    By default, the token expires after 1 year.
     """
     # Verify credentials
     user = await users.get_by_login(form_data.username)
@@ -68,17 +68,11 @@ async def login_with_creds(
     return Token(access_token=token, token_type="bearer")  # noqa S106
 
 
-@router.post("/token", status_code=status.HTTP_200_OK, summary="Request an access token using GitHub token")
+@router.post("/token", status_code=status.HTTP_200_OK, summary="Request an access token using GitHub OAuth")
 async def login_with_github_token(
     payload: GHAccessToken,
     users: UserCRUD = Depends(get_user_crud),
 ) -> Token:
-    """This API follows the OAuth 2.0 specification.
-
-    If the credentials are valid, creates a new access token.
-
-    By default, the token expires after 1 hour.
-    """
     # Fetch GitHub
     gh_user = gh_client.get_my_user(payload.github_token)
     # Check that GH account is a user
