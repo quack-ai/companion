@@ -10,6 +10,7 @@ We ran our tests on the following hardware:
 - [NVIDIA GeForce RTX 3070](https://www.nvidia.com/fr-fr/geforce/graphics-cards/30-series/rtx-3070-3070ti/) ([Scaleway GPU-3070-S](https://www.scaleway.com/en/pricing/?tags=compute))
 - [NVIDIA A10](https://www.nvidia.com/en-us/data-center/products/a10-gpu/) ([Lambda Cloud gpu_1x_a10](https://lambdalabs.com/service/gpu-cloud#pricing))
 - [NVIDIA A10G](https://www.nvidia.com/en-us/data-center/products/a10-gpu/) ([AWS g5.xlarge](https://aws.amazon.com/ec2/instance-types/g5/))
+- [NVIDIA L4](https://www.nvidia.com/en-us/data-center/l4/) ([Scaleway L4-1-24G](https://www.scaleway.com/en/pricing/?tags=compute))
 
 *The laptop hardware setup includes an [Intel(R) Core(TM) i7-12700H](https://ark.intel.com/content/www/us/en/ark/products/132228/intel-core-i7-12700h-processor-24m-cache-up-to-4-70-ghz.html) for the CPU*
 
