@@ -1,0 +1,136 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Quack AI",
+  "logo": {
+    "dark": "/assets/dark.png",
+    "light": "/assets/light.png",
+    "href": "https://quackai.com"
+  },
+  "favicon": "/assets/favicon.png",
+  "colors": {
+    "primary": "#9038ff",
+    "light": "#AE87FF",
+    "dark": "#9038ff",
+    "background": {
+      "dark": "#090014"
+    },
+    "anchors": {
+      "from": "#dd57ff",
+      "to": "#9038ff"
+    }
+  },
+  "feedback": {
+    "suggestEdit": true,
+    "raiseIssue": true,
+    "thumbsRating": true
+  },
+  "topbarLinks": [
+    {
+      "name": "Contact us",
+      "url": "mailto:support@quackai.com"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "Try Quack",
+    "url": "https://marketplace.visualstudio.com/items?itemName=quackai.quack-companion"
+  },
+  "tabs": [
+    {
+      "name": "Developer Guide",
+      "url": "developers"
+    },
+    {
+      "name": "API Reference",
+      "url": "api-reference"
+    }
+  ],
+  "anchors": [
+    {
+      "name": "VSCode extension",
+      "icon": "laptop-code",
+      "url": "https://marketplace.visualstudio.com/items?itemName=quackai.quack-companion"
+    },
+    {
+      "name": "Community",
+      "icon": "discord",
+      "url": "https://discord.gg/E9rY3bVCWd"
+    },
+    {
+      "name": "Status page",
+      "icon": "heart-pulse",
+      "url": "https://status.quackai.com"
+    },
+    {
+      "name": "Blog",
+      "icon": "newspaper",
+      "url": "https://quackai.com/blog"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Home",
+      "pages": ["home/introduction", "home/quack"]
+    },
+    {
+      "group": "Getting started",
+      "pages": ["getting-started/quickstart", "developers/self-hosting"]
+    },
+    {
+      "group": "Community & support",
+      "pages": ["community/roadmap", "community/contributing", "community/faq", "community/changelog", "community/support"]
+    },
+    {
+      "group": "Login",
+      "pages": [
+        "api-reference/login/request-token-from-github",
+        "api-reference/login/request-token-from-creds",
+        "api-reference/login/validate-token"
+      ]
+    },
+    {
+      "group": "Repos",
+      "pages": [
+        "api-reference/repos/register-repo",
+        "api-reference/repos/get-repo",
+        "api-reference/repos/fetch-repos",
+        "api-reference/repos/delete-repo"
+      ]
+    },
+    {
+      "group": "Guidelines",
+      "pages": [
+        "api-reference/guidelines/create-guideline",
+        "api-reference/guidelines/get-guideline",
+        "api-reference/guidelines/fetch-guidelines",
+        "api-reference/guidelines/update-guideline",
+        "api-reference/guidelines/delete-guideline"
+      ]
+    },
+    {
+      "group": "Code",
+      "pages": [
+        "api-reference/code/chat"
+      ]
+    }
+  ],
+  "footerSocials": {
+    "discord": "https://discord.gg/E9rY3bVCWd",
+    "twitter": "https://twitter.com/quack_ai",
+    "github": "https://github.com/quack-ai/companion",
+    "linkedin": "https://www.linkedin.com/company/quackai"
+  },
+  "openapi": "https://api.quackai.com/api/v1/openapi.json",
+  "api": {
+    "baseUrl": "https://api.quackai.com"
+  },
+  "analytics": {
+    "posthog": {
+      "apiKey": "phc_mU5797H4W1GELY5wmpxxSK9EWZyW4Eev5WZOtuqXMPE",
+      "apiHost": "https://eu.posthog.com"
+    }
+  },
+  "metadata": {
+    "og:description": "Make collaborative software development scale efficiently.",
+    "og:logo": "https://www.quackai.com/quack.png"
+  }
+}

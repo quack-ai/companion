@@ -1,0 +1,139 @@
+---
+title: 'Self-Hosting'
+description: 'Host your Quack suite on your own'
+---
+
+## Prerequisites
+
+Before you start, please make sure you already have the following installed:
+1. [Docker](https://docs.docker.com/engine/install/) _(make sure you have docker compose as well)_
+2. [GitHub account](https://github.com/)
+3. [VS Code](https://code.visualstudio.com/)
+
+_Mainly for speed purposes, it's suggested to run this on hardware that has an NVIDIA GPU (with a minimum of 5Gb of VRAM)_
+
+## Installation with Docker
+
+First of all, create a `.env` file where we'll put all the information you need. For now, put this in:
+```
+POSTGRES_DB=postgres
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD='An0th3rDumm1PassW0rdz!'
+SUPERADMIN_GH_PAT=your-github-pat
+SUPERADMIN_LOGIN='JohnDoe'
+SUPERADMIN_PWD='Dumm1PassW0rdz!'
+GH_OAUTH_ID=your-github-oauth-app-id
+GH_OAUTH_SECRET=your-github-oauth-app-secret
+OLLAMA_MODEL='dolphin-mistral:7b-v2.6-dpo-laser-q4_0'
+```
+Pick secure passwords for `SUPERADMIN_PWD` and `POSTGRES_PASSWORD`.
+
+### Backend API
+
+<Steps>
+  <Step title="GitHub PAT">
+    As the future admin of your service, you are the first one who will need authentication.
+    Head over to your [Developer settings](https://github.com/settings/tokens?type=beta) on GitHub, and "Generate new token",
+    pick a name and an expiration and confirm with "Generate token". Save this so that we can put it in your `.env` File.
+  </Step>
+  <Step title="Environment variables">
+    Fill the value of `SUPERADMIN_GH_PAT` in your `.env` File.
+  </Step>
+  <Step title="Docker orchestration">
+    Let's create a a file named `docker-compose.yml` and put this in:
+```yaml
+version: '3.7'
+
+services:
+  ollama:
+    image: ollama/ollama:0.1.29
+    command: serve
+    volumes:
+      - "$HOME/.ollama:/root/.ollama"
+    expose:
+      - 11434
+    healthcheck:
+      test: ["CMD-SHELL", "ollama pull '${OLLAMA_MODEL}'"]
+      interval: 5s
+      timeout: 1m
+      retries: 3
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  backend:
+    image: quackai/contribution-api:latest
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8050 --proxy-headers
+    ports:
+      - "8050:8050"
+    environment:
+      - POSTGRES_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
+      - OLLAMA_ENDPOINT=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL}
+      - SUPERADMIN_GH_PAT=${SUPERADMIN_GH_PAT}
+      - SUPERADMIN_LOGIN=${SUPERADMIN_LOGIN}
+      - SUPERADMIN_PWD=${SUPERADMIN_PWD}
+      - GH_OAUTH_ID=${GH_OAUTH_ID}
+      - GH_OAUTH_SECRET=${GH_OAUTH_SECRET}
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  ollama:
+```
+  You can comment the `deploy` section of the ollama service if you wish to use your CPU to run the LLM instead.
+  </Step>
+  <Step title="Run the service">
+    Now simply run this snippet to start your service:
+    ```shell
+    docker compose up -d
+    ```
+  </Step>
+</Steps>
+
+## Running the service
+
+Bravo, you now have a full running service! You can now:
+- navigate to [http://localhost:8050/docs](http://localhost:8050/docs) to check your backend API;
+- start VSCode, open the command palette and look for "Quack Companion: Set API endpoint" where you'll need to paste the URL to the API endpoint.
+
+## Additional options
+There are additional options to customize your service, here are a few:
+
+<Card title="Database hosting">
+  Instead of hosting your PostgreSQL database locally, you can use hosting services like [Supabase](https://supabase.com/). You only need to replace the environment variable `POSTGRES_URL` in the backend service of your docker orchestration.
+</Card>
+
+<Card title="Model pipeline">
+  We use [Ollama](https://ollama.ai/) to serve LLMs. Edit `OLLAMA_ENDPOINT` if you host your LLM inference elsewhere and `OLLAMA_MODEL` to use other models from the [hub](https://ollama.com/library).
+  For a good performance/latency balance, we recommend you use one of the following models: `dolphin-mistral:7b-v2.6-dpo-laser-q4_0`, `deepseek-coder:6.7b-instruct-q4_0`.
+  Please don't pick oversized hardware or models for your needs, to preserve both your hardware life expectancy and your energy bills 💚
+</Card>
+
+<Card title="Application performance monitoring">
+  When you start running your service at high workload, you might want to monitor its performances. You'll find a docker compose [here](https://github.com/quack-ai/contribution-api/blob/main/docker/docker-compose.prod.yml) using [Prometheus](https://prometheus.io/) & [Grafana](https://grafana.com/) to give you a proper APM dashboard.
+</Card>
