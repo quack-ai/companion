@@ -4,7 +4,7 @@ on:
     branches: main
 
 env:
-  BACKEND_IMAGE_NAME: contribution-api
+  BACKEND_IMAGE_NAME: companion
   DEMO_IMAGE_NAME: gradio
   DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
 
@@ -67,7 +67,7 @@ jobs:
           username: ${{ secrets.SSH_DEV_USERNAME }}
           key: ${{ secrets.SSH_DEPLOY_DEV }}
           script: |
-            docker pull quackai/contribution-api:latest
+            docker pull quackai/companion:latest
             docker rmi -f $(docker images -f "dangling=true" -q)
             cd devops && docker compose stop backend && docker compose up -d --wait && docker compose exec backend alembic upgrade head
             docker inspect -f '{{ .Created }}' $(docker compose images -q backend)

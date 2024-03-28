@@ -152,7 +152,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--api",
         type=str,
-        default=os.getenv("API_URL", "http://localhost:8050/api/v1"),
+        default=os.getenv("API_URL", "http://localhost:5050/api/v1"),
         help="URL of your Quack API instance",
     )
     parser.add_argument("--server-name", type=str, default=None, help="Server name arg of gradio")

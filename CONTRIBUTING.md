@@ -1,8 +1,13 @@
-# Contributing to contribution-api
+# Contributing to Quack 🦆
 
-Everything you need to know to contribute efficiently to the project!
+Welcome 🤗
+The resources compiled here are meant to help developers contribute to the project. Please check the [code of conduct](CODE_OF_CONDUCT.md) before going further.
 
-Whatever the way you wish to contribute to the project, please respect the [code of conduct](CODE_OF_CONDUCT.md).
+If you're looking for ways to contribute, here are some ideas:
+- 🐛 Report bugs (open an [issue](https://github.com/quack-ai/companion/issues/new?labels=type%3A+bug&template=bug_report.yml) & fill the template)
+- 💡 Suggest improvements (open a [GitHub discussion](https://github.com/quack-ai/companion/discussions/new?category=ideas) or chat with us on [Discord](https://discord.gg/E9rY3bVCWd))
+- 👍👎 Provide feedback about our [roadmap](https://docs.quackai.com/community/roadmap) (easier to chat on [Discord](https://discord.gg/E9rY3bVCWd))
+- ⌨️ Update the codebase (check our guide for [setup](#developer-setup) & [PR submission](#submitting-a-pull-request))
 
 
 ## Data model
@@ -18,18 +23,18 @@ The back-end core feature is to interact with the metadata tables. For the servi
 - Repository: metadata of installed repositories.
 - Guideline: metadata of curated guidelines.
 
-![UML diagram](https://github.com/quack-ai/contribution-api/assets/26927750/509dc855-547e-45c3-a545-a29e8ce3712c)
+![UML diagram](https://github.com/quack-ai/companion/assets/26927750/509dc855-547e-45c3-a545-a29e8ce3712c)
 
 
 ## Codebase structure
 
-- [`src/app`](https://github.com/quack-ai/contribution-api/blob/main/src/app) - The actual API codebase
-- [`src/tests`](https://github.com/quack-ai/contribution-api/blob/main/src/tests) - The API unit tests
-- [`.github`](https://github.com/quack-ai/contribution-api/blob/main/.github) - Configuration for CI (GitHub Workflows)
-- [`docker`](https://github.com/quack-ai/contribution-api/blob/main/docker) - Docker-related configurations
-- [`docs`](https://github.com/quack-ai/contribution-api/blob/main/docs) - Everything related to documentation
-- [`scripts`](https://github.com/quack-ai/contribution-api/blob/main/scripts) - Custom scripts
-- [`demo`](https://github.com/quack-ai/contribution-api/blob/main/demo) - Code for the Gradio demo
+- [`src/app`](https://github.com/quack-ai/companion/blob/main/src/app) - The actual API codebase
+- [`src/tests`](https://github.com/quack-ai/companion/blob/main/src/tests) - The API unit tests
+- [`.github`](https://github.com/quack-ai/companion/blob/main/.github) - Configuration for CI (GitHub Workflows)
+- [`docker`](https://github.com/quack-ai/companion/blob/main/docker) - Docker-related configurations
+- [`docs`](https://github.com/quack-ai/companion/blob/main/docs) - Everything related to documentation
+- [`scripts`](https://github.com/quack-ai/companion/blob/main/scripts) - Custom scripts
+- [`demo`](https://github.com/quack-ai/companion/blob/main/demo) - Code for the Gradio demo
 
 
 ## Continuous Integration
@@ -55,13 +60,13 @@ As a contributor, you will only have to ensure coverage of your code by adding a
 
 ### Feature requests & bug report
 
-Whether you encountered a problem, or you have a feature suggestion, your input has value and can be used by contributors to reference it in their developments. For this purpose, we advise you to use Github [issues](https://github.com/quack-ai/contribution-api/issues).
+Whether you encountered a problem, or you have a feature suggestion, your input has value and can be used by contributors to reference it in their developments. For this purpose, we advise you to use Github [issues](https://github.com/quack-ai/companion/issues).
 
 First, check whether the topic wasn't already covered in an open / closed issue. If not, feel free to open a new one! When doing so, use issue templates whenever possible and provide enough information for other contributors to jump in.
 
 ### Questions
 
-If you are wondering how to do something with Contribution API, or a more general question, you should consider checking out Github [discussions](https://github.com/quack-ai/contribution-api/discussions). See it as a Q&A forum, or the project-specific StackOverflow!
+If you are wondering how to do something with Companion API, or a more general question, you should consider checking out Github [discussions](https://github.com/quack-ai/companion/discussions). See it as a Q&A forum, or the project-specific StackOverflow!
 
 
 ## Developer setup
@@ -78,13 +83,13 @@ If you are wondering how to do something with Contribution API, or a more genera
 
 ### Configure your fork
 
-1 - Fork this [repository](https://github.com/quack-ai/contribution-api) by clicking on the "Fork" button at the top right of the page. This will create a copy of the project under your GitHub account (cf. [Fork a repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo)).
+1 - Fork this [repository](https://github.com/quack-ai/companion) by clicking on the "Fork" button at the top right of the page. This will create a copy of the project under your GitHub account (cf. [Fork a repo](https://docs.github.com/en/get-started/quickstart/fork-a-repo)).
 
 2 - [Clone your fork](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) to your local disk and set the upstream to this repo
 ```shell
-git clone git@github.com:<YOUR_GITHUB_ACCOUNT>/contribution-api.git
-cd contribution-api
-git remote add upstream https://github.com/quack-ai/contribution-api.git
+git clone git@github.com:<YOUR_GITHUB_ACCOUNT>/companion.git
+cd companion
+git remote add upstream https://github.com/quack-ai/companion.git
 ```
 
 ### Install the dependencies

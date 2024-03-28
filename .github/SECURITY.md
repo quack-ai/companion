@@ -2,4 +2,4 @@
 
 If you believe you have found a security vulnerability in Quack API, we encourage you to let us know right away. We will investigate all legitimate reports and do our best to quickly fix the problem.
 
-Please report security issues using https://github.com/quack-ai/contribution-api/security/advisories/new
+Please report security issues using https://github.com/quack-ai/companion/security/advisories/new

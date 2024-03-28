@@ -3,14 +3,14 @@ requires = ["poetry>=1.0"]
 build-backend = "poetry.masonry.api"
 
 [tool.poetry]
-name = "contribution-api"
+name = "companion"
 version = "0.1.0.dev0"
-description = "Backend for contribution guideline curation"
+description = "Quack Companion API - type smarter, ship faster"
 license = "Apache-2.0"
 authors = ["François-Guillaume Fernandez <support@quackai.com>"]
 maintainers = ["François-Guillaume Fernandez <support@quackai.com>"]
 readme = "README.md"
-repository = "https://github.com/quack-ai/contribution-api"
+repository = "https://github.com/quack-ai/companion"
 keywords = ["backend", "api", "code contribution", "guidelines"]
 
 [tool.poetry.dependencies]

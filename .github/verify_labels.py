@@ -38,6 +38,7 @@ SECONDARY_LABELS = {
     "ext: scripts",
     "ext: apm",
     "ext: demo",
+    "ext: docs",
     "module: core",
     "module: database",
     "module: services",
@@ -53,7 +54,7 @@ SECONDARY_LABELS = {
 }
 
 GH_ORG = "quack-ai"
-GH_REPO = "contribution-api"
+GH_REPO = "companion"
 
 
 def query_repo(cmd: str, *, accept) -> Any:

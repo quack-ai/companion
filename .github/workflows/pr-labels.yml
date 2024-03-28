@@ -33,5 +33,5 @@ jobs:
               issue_number,
               owner,
               repo,
-              body: 'Hey ${{ steps.commit.outputs.merger }} 👋\nYou merged this PR, but it is not correctly labeled. The list of valid labels is available at https://github.com/quack-ai/contribution-api/blob/main/.github/verify_labels.py'
+              body: 'Hey ${{ steps.commit.outputs.merger }} 👋\nYou merged this PR, but it is not correctly labeled. The list of valid labels is available at https://github.com/quack-ai/companion/blob/main/.github/verify_labels.py'
             });
