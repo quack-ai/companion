@@ -58,7 +58,7 @@ The backend API is the gatekeeper for your LLM inference container (powered by o
 
 With the service running, you can navigate to [`http://localhost:5050/docs`](http://localhost:5050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
 
-![API Swagger screenshot](https://github.com/quack-ai/companion/assets/26927750/725e8308-ace1-40ed-b742-242f8186fec0)
+![API Swagger screenshot](https://github.com/quack-ai/companion/assets/26927750/b2701225-ce12-4e6a-bb43-6752683bd335)
 
 
 ## Get started 🚀
