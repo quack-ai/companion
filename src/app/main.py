@@ -116,7 +116,7 @@ def custom_openapi():
         contact={
             "name": "API support",
             "email": settings.SUPPORT_EMAIL,
-            "url": "https://github.com/quack-ai/contribution-api/issues",
+            "url": "https://github.com/quack-ai/companion/issues",
         },
     )
     openapi_schema["info"]["x-logo"] = {"url": "https://www.quackai.com/quack.png"}
