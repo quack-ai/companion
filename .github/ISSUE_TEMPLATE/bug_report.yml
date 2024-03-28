@@ -13,6 +13,7 @@ body:
       label: Bug description
       description: |
         A clear and concise description of what the bug is.
+
         Please explain the result you observed and the behavior you were expecting.
       placeholder: |
         A clear and concise description of what the bug is.
@@ -24,6 +25,7 @@ body:
       label: Code snippet to reproduce the bug
       description: |
         Sample code to reproduce the problem.
+
         Please wrap your code snippet with ```` ```triple quotes blocks``` ```` for readability.
       placeholder: |
         ```python
@@ -36,6 +38,7 @@ body:
       label: Error traceback
       description: |
         The error message you received running the code snippet, with the full traceback.
+
         Please wrap your error message with ```` ```triple quotes blocks``` ```` for readability.
       placeholder: |
         ```
