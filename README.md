@@ -5,31 +5,31 @@
  Quack Companion - Type smarter, ship faster
 </h1>
 <p align="center">
-  <a href="https://github.com/quack-ai/contribution-api">API</a> ・
-  <a href="https://github.com/quack-ai/companion">VSCode extension</a> ・
+  <a href="https://github.com/quack-ai/companion">API</a> ・
+  <a href="https://github.com/quack-ai/companion-vscode">VSCode extension</a> ・
   <a href="https://docs.quackai.com">Documentation</a>
 </p>
 <h2 align="center"></h2>
 
 <p align="center">
-  <a href="https://github.com/quack-ai/contribution-api/actions?query=workflow%3Abuilds">
-    <img alt="CI Status" src="https://img.shields.io/github/actions/workflow/status/quack-ai/contribution-api/builds.yml?branch=main&label=CI&logo=github&style=flat-square">
+  <a href="https://github.com/quack-ai/companion/actions?query=workflow%3Abuilds">
+    <img alt="CI Status" src="https://img.shields.io/github/actions/workflow/status/quack-ai/companion/builds.yml?branch=main&label=CI&logo=github&style=flat-square">
   </a>
   <a href="https://github.com/astral-sh/ruff">
     <img src="https://img.shields.io/badge/Linter-Ruff-FCC21B?style=flat-square&logo=ruff&logoColor=white" alt="ruff">
   </a>
-  <a href="https://www.codacy.com/gh/quack-ai/contribution-api/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quack-ai/contribution-api&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/b51832763a394255941b541b0813750c"/></a>
-  <a href="https://codecov.io/gh/quack-ai/contribution-api">
-    <img src="https://img.shields.io/codecov/c/github/quack-ai/contribution-api.svg?logo=codecov&style=flat-square&token=fkT0jQefhO" alt="Test coverage percentage">
+  <a href="https://www.codacy.com/gh/quack-ai/companion/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=quack-ai/companion&amp;utm_campaign=Badge_Grade"><img src="https://app.codacy.com/project/badge/Grade/b51832763a394255941b541b0813750c"/></a>
+  <a href="https://codecov.io/gh/quack-ai/companion">
+    <img src="https://img.shields.io/codecov/c/github/quack-ai/companion.svg?logo=codecov&style=flat-square&token=fkT0jQefhO" alt="Test coverage percentage">
   </a>
 </p>
 <p align="center">
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/quack-ai/contribution-api">
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/quack-ai/companion">
   <a href="https://hub.docker.com/repository/docker/quackai/contribution-api">
     <img src="https://img.shields.io/docker/v/quackai/contribution-api?style=flat-square&logo=Docker&logoColor=fff&label=Docker" alt="Docker image">
   </a>
-  <a href="https://github.com/quack-ai/contribution-api/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/quack-ai/contribution-api.svg?label=License&logoColor=fff&style=flat-square" alt="License">
+  <a href="https://github.com/quack-ai/companion/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/quack-ai/companion.svg?label=License&logoColor=fff&style=flat-square" alt="License">
   </a>
 </p>
 <p align="center">
@@ -48,7 +48,7 @@ Quack companion helps software teams ship faster. See it as an instantly onboard
 
 ### Code chat endpoint
 
-![Code chat demo](https://github.com/quack-ai/contribution-api/assets/26927750/dd705cfb-a964-4ca6-ad2e-8d15e7c314a7)
+![Code chat demo](https://github.com/quack-ai/companion/assets/26927750/dd705cfb-a964-4ca6-ad2e-8d15e7c314a7)
 
 The backend API is the gatekeeper for your LLM inference container (powered by our friend at [Ollama](https://github.com/ollama/ollama)). With your services up and running, you can use the code chat endpoint as coding-specific LLM chat.
 
@@ -58,7 +58,7 @@ The backend API is the gatekeeper for your LLM inference container (powered by o
 
 With the service running, you can navigate to [`http://localhost:5050/docs`](http://localhost:5050/docs) to interact with the API (or do it through HTTP requests) and explore the documentation.
 
-![API Swagger screenshot](https://github.com/quack-ai/contribution-api/assets/26927750/725e8308-ace1-40ed-b742-242f8186fec0)
+![API Swagger screenshot](https://github.com/quack-ai/companion/assets/26927750/725e8308-ace1-40ed-b742-242f8186fec0)
 
 
 ## Get started 🚀
@@ -74,7 +74,7 @@ With the service running, you can navigate to [`http://localhost:5050/docs`](htt
 
 #### 1 - Clone the repository
 ```shell
-git clone https://github.com/quack-ai/contribution-api.git && cd contribution-api
+git clone https://github.com/quack-ai/companion.git && cd contribution-api
 ```
 #### 2 - Set your environment variables
 First copy the examples
