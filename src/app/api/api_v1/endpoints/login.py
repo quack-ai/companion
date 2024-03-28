@@ -24,7 +24,7 @@ from app.services.telemetry import telemetry_client
 router = APIRouter()
 
 
-@router.get("/authorize", summary="Request authorization code through GitHub OAuth app")
+@router.get("/authorize", summary="Request authorization code through GitHub OAuth app", include_in_schema=False)
 async def authorize_github(
     scope: str,
     redirect_uri: HttpUrl,
@@ -34,7 +34,12 @@ async def authorize_github(
     )
 
 
-@router.post("/github", status_code=status.HTTP_200_OK, summary="Request a GitHub token from authorization code")
+@router.post(
+    "/github",
+    status_code=status.HTTP_200_OK,
+    summary="Request a GitHub token from authorization code",
+    include_in_schema=False,
+)
 async def request_github_token_from_code(
     payload: TokenRequest,
 ) -> GHToken:

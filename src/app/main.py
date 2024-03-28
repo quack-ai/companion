@@ -57,7 +57,7 @@ async def startup() -> None:
 
 
 # Healthcheck
-@app.get("/status", status_code=status.HTTP_200_OK, summary="Healthcheck for the API")
+@app.get("/status", status_code=status.HTTP_200_OK, summary="Healthcheck for the API", include_in_schema=False)
 def get_status() -> Status:
     return Status(status="ok")
 
