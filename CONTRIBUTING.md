@@ -66,7 +66,7 @@ First, check whether the topic wasn't already covered in an open / closed issue.
 
 ### Questions
 
-If you are wondering how to do something with Contribution API, or a more general question, you should consider checking out Github [discussions](https://github.com/quack-ai/companion/discussions). See it as a Q&A forum, or the project-specific StackOverflow!
+If you are wondering how to do something with Companion API, or a more general question, you should consider checking out Github [discussions](https://github.com/quack-ai/companion/discussions). See it as a Q&A forum, or the project-specific StackOverflow!
 
 
 ## Developer setup
@@ -87,8 +87,8 @@ If you are wondering how to do something with Contribution API, or a more genera
 
 2 - [Clone your fork](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) to your local disk and set the upstream to this repo
 ```shell
-git clone git@github.com:<YOUR_GITHUB_ACCOUNT>/contribution-api.git
-cd contribution-api
+git clone git@github.com:<YOUR_GITHUB_ACCOUNT>/companion.git
+cd companion
 git remote add upstream https://github.com/quack-ai/companion.git
 ```
 

@@ -54,7 +54,7 @@ SECONDARY_LABELS = {
 }
 
 GH_ORG = "quack-ai"
-GH_REPO = "contribution-api"
+GH_REPO = "companion"
 
 
 def query_repo(cmd: str, *, accept) -> Any:
