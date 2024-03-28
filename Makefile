@@ -16,7 +16,7 @@ lock:
 # Build the docker
 build:
 	poetry export -f requirements.txt --without-hashes --output requirements.txt
-	docker build -f src/Dockerfile . -t quackai/contribution-api:latest
+	docker build -f src/Dockerfile . -t quackai/companion:latest
 	poetry export -f requirements.txt --without-hashes --only demo --output demo/requirements.txt
 	docker build -f demo/Dockerfile . -t quackai/gradio:latest
 

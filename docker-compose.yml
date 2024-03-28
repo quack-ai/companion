@@ -31,7 +31,7 @@ services:
       retries: 3
 
   backend:
-    image: quackai/contribution-api:latest
+    image: quackai/companion:latest
     build:
       context: .
       dockerfile: ./src/Dockerfile

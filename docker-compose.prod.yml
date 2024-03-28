@@ -22,7 +22,7 @@ services:
       retries: 3
 
   backend:
-    image: quackai/contribution-api:latest
+    image: quackai/companion:latest
     depends_on:
       ollama:
         condition: service_healthy
