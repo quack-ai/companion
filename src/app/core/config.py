@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     JWT_ENCODING_ALGORITHM: str = "HS256"
     # LLM Compute
     OLLAMA_ENDPOINT: str = os.environ["OLLAMA_ENDPOINT"]
-    OLLAMA_MODEL: str = os.environ.get("OLLAMA_MODEL", "dolphin-mistral:7b-v2.6-dpo-laser-q4_0")
+    OLLAMA_MODEL: str = os.environ.get("OLLAMA_MODEL", "dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M")
     OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", 60))
     LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", 0.0))
 
