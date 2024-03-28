@@ -25,8 +25,8 @@
 </p>
 <p align="center">
   <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/quack-ai/companion">
-  <a href="https://hub.docker.com/repository/docker/quackai/contribution-api">
-    <img src="https://img.shields.io/docker/v/quackai/contribution-api?style=flat-square&logo=Docker&logoColor=fff&label=Docker" alt="Docker image">
+  <a href="https://hub.docker.com/repository/docker/quackai/companion">
+    <img src="https://img.shields.io/docker/v/quackai/companion?style=flat-square&logo=Docker&logoColor=fff&label=Docker" alt="Docker image">
   </a>
   <a href="https://github.com/quack-ai/companion/blob/main/LICENSE">
     <img src="https://img.shields.io/github/license/quack-ai/companion.svg?label=License&logoColor=fff&style=flat-square" alt="License">
@@ -74,7 +74,7 @@ With the service running, you can navigate to [`http://localhost:5050/docs`](htt
 
 #### 1 - Clone the repository
 ```shell
-git clone https://github.com/quack-ai/companion.git && cd contribution-api
+git clone https://github.com/quack-ai/companion.git && cd companion
 ```
 #### 2 - Set your environment variables
 First copy the examples
@@ -116,4 +116,4 @@ Copyright (C) 2023-2024, Quack AI.
 This program is licensed under the Apache License 2.0.
 See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fquack-ai%2Fcontribution-api.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fquack-ai%2Fcontribution-api?ref=badge_large&issueType=license)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fquack-ai%2Fcontribution-api.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fquack-ai%2Fcompanion?ref=badge_large&issueType=license)
