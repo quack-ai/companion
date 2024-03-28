@@ -31,10 +31,10 @@ The back-end core feature is to interact with the metadata tables. For the servi
 - [`src/app`](https://github.com/quack-ai/companion/blob/main/src/app) - The actual API codebase
 - [`src/tests`](https://github.com/quack-ai/companion/blob/main/src/tests) - The API unit tests
 - [`.github`](https://github.com/quack-ai/companion/blob/main/.github) - Configuration for CI (GitHub Workflows)
-- [`docker`](https://github.com/quack-ai/companion/blob/main/docker) - Docker-related configurations
-- [`docs`](https://github.com/quack-ai/companion/blob/main/docs) - Everything related to documentation
+- [`docs`](https://github.com/quack-ai/companion/blob/main/docs) - Source of our documentation
 - [`scripts`](https://github.com/quack-ai/companion/blob/main/scripts) - Custom scripts
 - [`demo`](https://github.com/quack-ai/companion/blob/main/demo) - Code for the Gradio demo
+- [`apm`](https://github.com/quack-ai/companion/blob/main/apm) - Configuration for Application Performance Monitoring
 
 
 ## Continuous Integration
