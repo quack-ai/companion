@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+type: software
+message: "If you use this software in your work, please cite it as below."
+authors:
+- family-names: "Fernandez"
+  given-names: "François-Guillaume"
+title: "Quack Companion"
+date-released: 2023-08-29
+url: "https://github.com/quack-ai/companion"
