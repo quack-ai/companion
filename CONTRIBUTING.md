@@ -1,8 +1,13 @@
-# Contributing to contribution-api
+# Contributing to Quack 🦆
 
-Everything you need to know to contribute efficiently to the project!
+Welcome 🤗
+The resources compiled here are meant to help developers contribute to the project. Please check the [code of conduct](CODE_OF_CONDUCT.md) before going further.
 
-Whatever the way you wish to contribute to the project, please respect the [code of conduct](CODE_OF_CONDUCT.md).
+If you're looking for ways to contribute, here are some ideas:
+- 🐛 Report bugs (open an [issue](https://github.com/quack-ai/contribution-api/issues/new?labels=type%3A+bug&template=bug_report.yml) & fill the template)
+- 💡 Suggest improvements (open a [GitHub discussion](https://github.com/quack-ai/contribution-api/discussions/new?category=ideas) or chat with us on [Discord](https://discord.gg/E9rY3bVCWd))
+- 👍👎 Provide feedback about our [roadmap](https://docs.quackai.com/community/roadmap) (easier to chat on [Discord](https://discord.gg/E9rY3bVCWd))
+- ⌨️ Update the codebase (check our guide for [setup](#developer-setup) & [PR submission](#submitting-a-pull-request))
 
 
 ## Data model
