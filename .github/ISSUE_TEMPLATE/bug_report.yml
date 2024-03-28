@@ -7,7 +7,7 @@ body:
   - type: markdown
     attributes:
       value: >
-        #### Before reporting a bug, please check that the issue hasn't already been addressed in [the existing and past issues](https://github.com/quack-ai/contribution-api/issues?q=is%3Aissue).
+        #### Before reporting a bug, please check that the issue hasn't already been addressed in [the existing and past issues](https://github.com/quack-ai/companion/issues?q=is%3Aissue).
   - type: textarea
     attributes:
       label: Bug description

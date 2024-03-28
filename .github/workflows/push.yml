@@ -4,7 +4,7 @@ on:
     branches: main
 
 env:
-  BACKEND_IMAGE_NAME: contribution-api
+  BACKEND_IMAGE_NAME: companion
   DEMO_IMAGE_NAME: gradio
   DOCKERHUB_USER: ${{ secrets.DOCKERHUB_USER }}
 
