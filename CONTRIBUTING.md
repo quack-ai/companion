@@ -139,6 +139,13 @@ This file contains all the information to run the project.
 - `SUPPORT_EMAIL`: the email used for support of your API.
 - `DEBUG`: if set to false, silence debug logs.
 
+#### Production-only values
+- `ACME_EMAIL`: the email linked to your certificate for HTTPS
+- `POSTGRES_HOST` & `POSTGRES_PORT`: the host and port of your remote PostgreSQL database service.
+- `BACKEND_HOST`: the subdomain where your users will access your API (e.g "api.mydomain.com")
+- `GRADIO_HOST`: the subdomain where your users will access your chat interface (e.g "chat.mydomain.com")
+- `GF_HOST`: the subdomain where you'll access your Grafana APM dashboard (e.g "apm.mydomain.com")
+
 ## Submitting a Pull Request
 
 ### Preparing your local branch
