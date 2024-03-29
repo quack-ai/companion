@@ -40,6 +40,13 @@ You'll need to own a domain name with the default configuration (e.g. "mydomain.
     Save this [docker compose configuration](https://raw.githubusercontent.com/quack-ai/companion/main/docker-compose.prod.yml) and name it `docker-compose.yml`.
     You can comment the `deploy` section of the ollama service if you wish to use your CPU to run the LLM instead.
   </Step>
+  <Step title="Setting the certificate access permission">
+    Before starting our docker setup, we need to make sure your ACME certificate will be readable:
+    ```shell
+    touch acme.json
+    sudo chmod 600 acme.json
+    ```
+  </Step>
   <Step title="Run the service">
     You should now have two files (`.env`, `docker-compose.yml`) in your folder. Time to start the services:
     ```shell
