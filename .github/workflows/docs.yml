@@ -20,4 +20,4 @@ jobs:
       - name: Install mintlify
         run: npm i -g mintlify
       - name: Run the docs
-        run: screen -dm mintlify dev && sleep 10 && curl http://localhost:3000
+        run: screen -dm mintlify dev && sleep 20 && curl http://localhost:3000
