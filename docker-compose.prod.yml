@@ -1,6 +1,42 @@
 version: '3.8'
 
 services:
+  traefik:
+    image: traefik:v2.9.6
+    depends_on:
+      backend:
+        condition: service_healthy
+      gradio:
+        condition: service_healthy
+      grafana:
+        condition: service_healthy
+    ports:
+      # http(s) traffic
+      - "80:80"
+      - "443:443"
+    labels:
+      - "traefik.http.middlewares.strip-www.redirectregex.regex=^https?://(www\\.)(.+)"
+      - "traefik.http.middlewares.strip-www.redirectregex.replacement=https://$${2}"
+      - "traefik.http.middlewares.strip-www.redirectregex.permanent=true"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "$PWD/acme.json:/acme.json"
+    command:
+      # Enable the Traefik log, for configurations and errors
+      - "--log.level=INFO"
+      # Enable Docker in Traefik, so that it reads labels from Docker services
+      - "--providers.docker=true"
+      # Do not expose all Docker services, only the ones explicitly exposed
+      - "--providers.docker.exposedbydefault=false"
+      # HTTPS
+      - "--entryPoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      # Certificate
+      - "--certificatesresolvers.quackresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.quackresolver.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.default.acme.storage=/acme.json"
+    restart: always
+
   ollama:
     image: ollama/ollama:0.1.29
     expose:
@@ -119,42 +155,6 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
-
-  traefik:
-    image: traefik:v2.9.6
-    depends_on:
-      backend:
-        condition: service_healthy
-      gradio:
-        condition: service_healthy
-      grafana:
-        condition: service_healthy
-    ports:
-      # http(s) traffic
-      - "80:80"
-      - "443:443"
-    labels:
-      - "traefik.http.middlewares.strip-www.redirectregex.regex=^https?://(www\\.)(.+)"
-      - "traefik.http.middlewares.strip-www.redirectregex.replacement=https://$${2}"
-      - "traefik.http.middlewares.strip-www.redirectregex.permanent=true"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "$PWD/acme.json:/acme.json"
-    command:
-      # Enable the Traefik log, for configurations and errors
-      - "--log.level=INFO"
-      # Enable Docker in Traefik, so that it reads labels from Docker services
-      - "--providers.docker=true"
-      # Do not expose all Docker services, only the ones explicitly exposed
-      - "--providers.docker.exposedbydefault=false"
-      # HTTPS
-      - "--entryPoints.web.address=:80"
-      - "--entryPoints.websecure.address=:443"
-      # Certificate
-      - "--certificatesresolvers.quackresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.quackresolver.acme.email=${ACME_EMAIL}"
-      - "--certificatesresolvers.default.acme.storage=/acme.json"
-    restart: always
 
 volumes:
   ollama:
