@@ -1,0 +1,82 @@
+---
+title: 'Cloud GPU selection'
+description: 'Find the appropriate instance type and cloud provider for your needs'
+---
+
+## Tested hardware & providers
+
+We ran our tests on the following hardware:
+
+- [NVIDIA GeForce RTX 3060 (mobile)](https://www.nvidia.com/fr-fr/geforce/graphics-cards/30-series/rtx-3060-3060ti/)
+- [NVIDIA GeForce RTX 3070](https://www.nvidia.com/fr-fr/geforce/graphics-cards/30-series/rtx-3070-3070ti/) ([Scaleway GPU-3070-S](https://www.scaleway.com/en/pricing/?tags=compute))
+- [NVIDIA A10](https://www.nvidia.com/en-us/data-center/products/a10-gpu/) ([Lambda Cloud gpu_1x_a10](https://lambdalabs.com/service/gpu-cloud#pricing))
+- [NVIDIA A10G](https://www.nvidia.com/en-us/data-center/products/a10-gpu/) ([AWS g5.xlarge](https://aws.amazon.com/ec2/instance-types/g5/))
+- [NVIDIA L4](https://www.nvidia.com/en-us/data-center/l4/) ([Scaleway L4-1-24G](https://www.scaleway.com/en/pricing/?tags=compute))
+
+*The laptop hardware setup includes an [Intel(R) Core(TM) i7-12700H](https://ark.intel.com/content/www/us/en/ark/products/132228/intel-core-i7-12700h-processor-24m-cache-up-to-4-70-ghz.html) for the CPU*
+
+## Tested LLMs
+
+The results are available for the following LLMs (cf. [Ollama hub](https://ollama.com/library)):
+- Deepseek Coder 6.7b - instruct ([Ollama](https://ollama.com/library/deepseek-coder), [HuggingFace](https://huggingface.co/deepseek-ai/deepseek-coder-6.7b-instruct))
+- OpenCodeInterpreter 6.7b ([Ollama](https://ollama.com/pxlksr/opencodeinterpreter-ds), [HuggingFace](https://huggingface.co/m-a-p/OpenCodeInterpreter-DS-6.7B), [paper](https://arxiv.org/abs/2402.14658))
+- Dolphin Mistral 7b ([Ollama](https://ollama.com/library/dolphin-mistral), [HuggingFace](https://huggingface.co/cognitivecomputations/dolphin-2.6-mistral-7b-dpo-laser), [paper](https://arxiv.org/abs/2310.06825))
+- Coming soon: StarChat v2 ([HuggingFace](https://huggingface.co/HuggingFaceH4/starchat2-15b-v0.1), [paper](https://arxiv.org/abs/2402.19173))
+
+and the following quantization formats: `q3_K_M`, `q4_K_M`, `q5_K_M`.
+
+## Throughput benchmark
+
+### NVIDIA GeForce RTX 3060 (mobile)
+
+| Model                                                        | Ingestion mean (std)   | Generation mean (std) |
+| ------------------------------------------------------------ | ---------------------- | --------------------- |
+| [deepseek-coder:6.7b-instruct-q5_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q5_K_M) | 35.43 tok/s (±3.46) | 23.68 tok/s (±0.74)  |
+| [deepseek-coder:6.7b-instruct-q4_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q4_K_M) | 72.27 tok/s (±10.69)   | 36.82 toks/s (±1.25) |
+| [deepseek-coder:6.7b-instruct-q3_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q3_K_M) | 90.1 tok/s (±32.43)   | 50.34 toks/s (±1.28) |
+| [pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M](https://ollama.com/library/pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M) | 78.94 tok/s (±10.2)   | 37.95 toks/s (±1.65) |
+| [dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M](https://ollama.com/library/dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M) | 126.75 tok/s (±31.5)   | 50.05 toks/s (±0.84) |
+| [dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M](https://ollama.com/library/dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M) | 89.47 tok/s (±29.91)   | 47.09 toks/s (±0.67) |
+
+### NVIDIA GeForce RTX 3070 (Scaleway GPU-3070-S)
+
+| Model                                                        | Ingestion mean (std)   | Generation mean (std) |
+| ------------------------------------------------------------ | ---------------------- | --------------------- |
+| [deepseek-coder:6.7b-instruct-q4_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q4_K_M) | 266.98 tok/s (±95.63)   | 75.53 toks/s (±1.56) |
+| [deepseek-coder:6.7b-instruct-q3_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q3_K_M) | 141.43 tok/s (±50.4)   | 73.69 toks/s (±1.61) |
+| [pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M](https://ollama.com/library/pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M) | 285.81 tok/s (±73.55)   | 75.14 toks/s (±3.13) |
+| [dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M](https://ollama.com/library/dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M) | 234.2 tok/s (±79.38)   | 71.54 toks/s (±1.0) |
+| [dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M](https://ollama.com/library/dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M) | 114.54 tok/s (±38.24)   | 69.29 toks/s (±0.98) |
+
+### NVIDIA A10 (Lambda Cloud gpu_1x_a10)
+
+| Model                                                        | Ingestion mean (std)   | Generation mean (std) |
+| ------------------------------------------------------------ | ---------------------- | --------------------- |
+| [deepseek-coder:6.7b-instruct-q4_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q4_K_M) | 208.65 tok/s (±74.02)   | 78.68 toks/s (±1.64) |
+| [deepseek-coder:6.7b-instruct-q3_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q3_K_M) | 111.84 tok/s (±39.9)   | 71.66 toks/s (±1.75) |
+| [pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M](https://ollama.com/library/pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M) | 226.66 tok/s (±65.65)   | 77.26 toks/s (±2.72) |
+| [dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M](https://ollama.com/library/dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M) | 202.43 tok/s (±69.55)   | 73.9 toks/s (±0.87) |
+| [dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M](https://ollama.com/library/dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M) | 112.82 tok/s (±38.46)   | 66.98 toks/s (±0.79) |
+
+### NVIDIA A10G (AWS g5.xlarge)
+
+| Model                                                        | Ingestion mean (std)   | Generation mean (std) |
+| ------------------------------------------------------------ | ---------------------- | --------------------- |
+| [deepseek-coder:6.7b-instruct-q4_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q4_K_M) | 186.61 tok/s (±66.03)   | 79.62 toks/s (±1.52) |
+| [deepseek-coder:6.7b-instruct-q3_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q3_K_M) | 99.83 tok/s (±35.41)   | 84.47 toks/s (±1.69) |
+| [pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M](https://ollama.com/library/pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M) | 212.08 tok/s (±86.58)   | 79.02 toks/s (±3.35) |
+| [dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M](https://ollama.com/library/dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M) | 187.2 tok/s (±62.24)   | 75.91 toks/s (±1.0) |
+| [dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M](https://ollama.com/library/dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M) | 102.36 tok/s (±34.29)   | 81.23 toks/s (±1.02) |
+
+### NVIDIA L4 (Scaleway L4-1-24G)
+
+| Model                                                        | Ingestion mean (std)   | Generation mean (std) |
+| ------------------------------------------------------------ | ---------------------- | --------------------- |
+| [deepseek-coder:6.7b-instruct-q4_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q4_K_M) | 213.46 tok/s (±76.24)   | 49.97 toks/s (±1.01) |
+| [deepseek-coder:6.7b-instruct-q3_K_M](https://ollama.com/library/deepseek-coder:6.7b-instruct-q3_K_M) | 118.87 tok/s (±43.35)   | 54.72 toks/s (±1.31) |
+| [pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M](https://ollama.com/library/pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M) | 225.62 tok/s (±60.21)   | 49.39 toks/s (±1.9) |
+| [dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M](https://ollama.com/library/dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M) | 211.52 tok/s (±72.76)   | 47.27 toks/s (±0.58) |
+| [dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M](https://ollama.com/library/dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M) | 120.13 tok/s (±41.09)   | 51.9 toks/s (±0.71) |
+
+
+_If you're looking for the latest benchmark results, head over [here](https://github.com/quack-ai/companion/tree/main/scripts/ollama)_

@@ -24,7 +24,13 @@
   </a>
 </p>
 <p align="center">
-  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/quack-ai/companion">
+  <a href="https://marketplace.visualstudio.com/items?itemName=quackai.quack-companion">
+    <img src="https://img.shields.io/visual-studio-marketplace/v/quackai.quack-companion?logo=visualstudiocode&logoColor=fff&style=flat-square&label=VS%20Marketplace" alt="VS Marketplace">
+  </a>
+  <a href="https://open-vsx.org/extension/quackai/quack-companion">
+    <img src="https://img.shields.io/open-vsx/v/quackai/quack-companion?logo=opensourceinitiative&logoColor=fff&style=flat-square&label=Open%20VSX" alt="Open VSX Registry">
+  </a>
+  <img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/quack-ai/companion?label=Release&logo=github">
   <a href="https://hub.docker.com/repository/docker/quackai/companion">
     <img src="https://img.shields.io/docker/v/quackai/companion?style=flat-square&logo=Docker&logoColor=fff&label=Docker" alt="Docker image">
   </a>
@@ -94,7 +100,7 @@ docker compose pull
 docker compose up
 ```
 
-#### Check how what your API
+#### 4 - Check how what you've deployed
 
 You can now access:
 - your backend API at [http://localhost:5050/docs](http://localhost:5050/docs)

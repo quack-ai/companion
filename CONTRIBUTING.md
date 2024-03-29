@@ -31,10 +31,10 @@ The back-end core feature is to interact with the metadata tables. For the servi
 - [`src/app`](https://github.com/quack-ai/companion/blob/main/src/app) - The actual API codebase
 - [`src/tests`](https://github.com/quack-ai/companion/blob/main/src/tests) - The API unit tests
 - [`.github`](https://github.com/quack-ai/companion/blob/main/.github) - Configuration for CI (GitHub Workflows)
-- [`docker`](https://github.com/quack-ai/companion/blob/main/docker) - Docker-related configurations
-- [`docs`](https://github.com/quack-ai/companion/blob/main/docs) - Everything related to documentation
+- [`docs`](https://github.com/quack-ai/companion/blob/main/docs) - Source of our documentation
 - [`scripts`](https://github.com/quack-ai/companion/blob/main/scripts) - Custom scripts
 - [`demo`](https://github.com/quack-ai/companion/blob/main/demo) - Code for the Gradio demo
+- [`apm`](https://github.com/quack-ai/companion/blob/main/apm) - Configuration for Application Performance Monitoring
 
 
 ## Continuous Integration
@@ -138,6 +138,13 @@ This file contains all the information to run the project.
 - `SLACK_CHANNEL`: the Slack channel where your bot will post events (defaults to `#general`, you have to invite the App to your channel).
 - `SUPPORT_EMAIL`: the email used for support of your API.
 - `DEBUG`: if set to false, silence debug logs.
+
+#### Production-only values
+- `ACME_EMAIL`: the email linked to your certificate for HTTPS
+- `POSTGRES_HOST` & `POSTGRES_PORT`: the host and port of your remote PostgreSQL database service.
+- `BACKEND_HOST`: the subdomain where your users will access your API (e.g "api.mydomain.com")
+- `GRADIO_HOST`: the subdomain where your users will access your chat interface (e.g "chat.mydomain.com")
+- `GF_HOST`: the subdomain where you'll access your Grafana APM dashboard (e.g "apm.mydomain.com")
 
 ## Submitting a Pull Request
 

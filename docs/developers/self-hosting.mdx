@@ -1,0 +1,71 @@
+---
+title: 'Self-Hosting'
+description: 'Host your Quack suite on your own'
+---
+
+## Backend API
+### Prerequisites
+
+Whatever your installation method, you'll need at least the following to be installed:
+1. [Docker](https://docs.docker.com/engine/install/) (and [Docker compose](https://docs.docker.com/compose/) if you're using an old version)
+2. [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and a GPU
+
+_We recommend min 5Gb of VRAM on your GPU for good performance/latency balance._
+
+### 60 seconds setup ⏱️
+
+This method is easier for you to try it out locally. Follow the instructions over [here](https://github.com/quack-ai/companion#get-started-).
+
+### Production setup
+
+This method is more adequate if you have an isolated/remote environment where you don't necessarily want Git to interfere.
+You'll need to own a domain name with the default configuration (e.g. "mydomain.nom")
+
+<Steps>
+  <Step title="Create a `.env` file">
+    Save this [example file](https://raw.githubusercontent.com/quack-ai/companion/main/.env.example) and name it `.env`.
+  </Step>
+  <Step title="Edit your environment variables">
+    Edit your `.env` and replace the following values:
+    - `SUPERADMIN_GH_PAT`: your Github user Personal Access Token to authenticate you as the admin. Head over to your [Developer settings](https://github.com/settings/tokens?type=beta) on GitHub, and "Generate new token",
+        pick a name and an expiration and confirm with "Generate token" _(no need for extra permissions i.e. read-only)_
+    - pick secure passwords for `POSTGRES_PASSWORD`, `SUPERADMIN_PWD`, `GF_ADMIN_PWD`
+    - `ACME_EMAIL`: the email linked to your certificate for HTTPS
+    - `POSTGRES_HOST` & `POSTGRES_PORT`: the host and port of your remote PostgreSQL database service.
+    - `BACKEND_HOST`: the subdomain where your users will access your API (e.g "api.mydomain.com")
+
+    If you want to edit other aspects, check the [env variable description](https://github.com/quack-ai/companion/blob/main/CONTRIBUTING.md#environment-configuration).
+  </Step>
+  <Step title="Define a Docker orchestration">
+    Save this [docker compose configuration](https://raw.githubusercontent.com/quack-ai/companion/main/docker-compose.prod.yml) and name it `docker-compose.yml`.
+    You can comment the `deploy` section of the ollama service if you wish to use your CPU to run the LLM instead.
+  </Step>
+  <Step title="Run the service">
+    You should now have two files (`.env`, `docker-compose.yml`) in your folder. Time to start the services:
+    ```shell
+    docker compose up -d --wait ollama backend traefik
+    ```
+  </Step>
+</Steps>
+
+## Using your API
+
+Bravo, you now have a full running service!
+You can now start your [VSCode extension](https://marketplace.visualstudio.com/items?itemName=quackai.quack-companion), open the command palette and look for "Quack Companion: Set API endpoint" where you'll need to paste the URL to the API endpoint.
+
+## Additional options
+There are additional options to customize your service, here are a few:
+
+<Card title="Database hosting" icon="database">
+  Instead of hosting your PostgreSQL database locally or self-hosted, you can use hosting services like [Supabase](https://supabase.com/). You only need to replace the values of `POSTGRES_HOST` & `POSTGRES_PORT` in your `.env` file.
+</Card>
+
+<Card title="LLM selection" icon="laptop-code">
+  We use [Ollama](https://ollama.ai/) to serve LLMs. Edit `OLLAMA_MODEL` to use other models from the [hub](https://ollama.com/library).
+  For a good performance/latency balance, we recommend you use one of the following models: `dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M`, `deepseek-coder:6.7b-instruct-q4_K_M`.
+  Please don't pick oversized hardware or models for your needs, to preserve both your hardware life expectancy and your energy bills 💚
+</Card>
+
+<Card title="Application performance monitoring" icon="chart-simple">
+  When you start running your service at high workload, you might want to monitor its performances. You'll find additional service in your docker compose using [Prometheus](https://prometheus.io/) & [Grafana](https://grafana.com/) to give you a proper APM dashboard.
+</Card>

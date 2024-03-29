@@ -12,7 +12,7 @@ changelog:
     - title: Dependencies
       labels: ["dependencies"]
     - title: Documentation 📖
-      labels: ["topic: docs"]
+      labels: ["topic: docs", "ext: docs"]
     - title: Improvements
       labels: ["type: improvement"]
     - title: Other changes
