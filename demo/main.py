@@ -12,15 +12,28 @@ from typing import Dict, List
 import gradio as gr
 import requests
 from dotenv import load_dotenv
+from posthog import Posthog
+
+ph_client = None
+if isinstance(os.getenv("POSTHOG_KEY"), str) and len(os.environ["POSTHOG_KEY"]) > 0:
+    ph_client = Posthog(
+        project_api_key=os.environ["POSTHOG_KEY"], host=os.getenv("POSTHOG_HOST", "https://eu.posthog.com")
+    )
 
 
 class SessionManager:
     def __init__(self) -> None:
         self._token = ""
         self._url = ""
+        self.user_id = None
 
     def set_token(self, token: str) -> None:
         self._token = token
+        if ph_client is not None:
+            # Retrieve the user ID
+            self.user_id = requests.post(f"{self._url}/login/validate", timeout=2, headers=self.auth).json()["user_id"]
+            # Analytics
+            ph_client.capture(self.user_id, event="gradio-auth")
 
     def set_url(self, url: str) -> None:
         self._url = url
@@ -71,6 +84,8 @@ def chat_response(message: str, history: List[List[str]]) -> str:
         for hist in history
         for idx, msg in enumerate(hist)
     ]
+    if ph_client is not None:
+        ph_client.capture(session_manager.user_id, event="gradio-chat")
     with session.post(
         session_manager.chat_endpoint,
         json={"messages": [*_history, {"role": "user", "content": message}]},
