@@ -9,48 +9,37 @@ Within a few minutes, you'll be ready to dynamically change your team coding gui
   If you wish to run the service on your own, check our [self-hosting section](/developers/self-hosting).
 </Note>
 
-## Curating team expectations
+## Add Quack Companion to VSCode
 
 ### Initial setup
 
 <Steps>
-  <Step title="Sign-up">
-    Head over to [app.quackai.com](https://app.quackai.com/), click on "Login with GitHub" and follow the instructions.
-    Once signed up, you'll be brought back to the platform.
+  <Step title="GitHub account">
+    For now, the extension authentication works using [GitHub](https://github.com/).
+    You'll need an account to use our services, check this [tutorial](https://docs.github.com/en/get-started/start-your-journey/creating-an-account-on-github) if you don't have one already.
   </Step>
-  <Step title="Repo selection">
-    Select one repo from the dropdown list (the public GitHub repositories on which you have maintainer access). Click on "Connect Repo"
+  <Step title="IDE setup">
+    Install [VSCode](https://code.visualstudio.com/download) on your computer (support of other IDEs will follow).
   </Step>
-  <Step title="Extracting guidelines automatically">
-    No guideline has been created yet, let's extract some from your repository by clicking on "Parse Repo".
+  <Step title="Install the extension">
+    Go to [VS Marketplace](https://marketplace.visualstudio.com/items?itemName=quackai.quack-companion), to [Open VSX Registry](https://open-vsx.org/extension/quackai/quack-companion) or look for "Quack Companion" in the [VSCode extension tab](https://code.visualstudio.com/docs/editor/extension-marketplace).
+    Once installed, follow the quick walkthrough to authenticate.
   </Step>
 </Steps>
 
 
-### Editing & validating guidelines
+### Using Quack Companion in your IDE
 
 <Steps>
-  <Step title="Discarding guidelines (optional)">
-    Discard the elements you don't want to include as your team's coding guidelines.
+  <Step title="Create guidelines (optional)" icon="pen-to-square">
+    Click on the "+" sign in the Coding guidelines webview to create one. Make it specific enough so that it looks like a linter rule.
   </Step>
-  <Step title="Edit your guidelines">
-    Click on any of the remaining guidelines. Edit the instruction so that it's specific & clear enough to be one of the checkboxes you'd like to see completed before a pull request.
-  </Step>
-  <Step title="Avoiding ambiguity">
-    Click on "Generate Examples" to check how the system interprets it, adjust the text if necessary.
-  </Step>
-  <Step title="Saving your work">
-    Click on "Save" to confirm it.
+  <Step title="Chat with Quack" icon="comments">
+    All your curated guidelines are embedded in the chat view. Quite a similar experience to [ChatGPT](https://chat.openai.com/) or [Copilot Chat](https://docs.github.com/en/copilot/github-copilot-chat/using-github-copilot-chat-in-your-ide)
   </Step>
 </Steps>
 
-## Try them out in your IDE
+## Share your feedback
 
-### Install the extension
-
-Go to [Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=quackai.quack-companion), [Open VSX registry](https://open-vsx.org/extension/quackai/quack-companion), or look for "Quack companion" in VSCode extension tab.
-Install it, and follow the quick walkthrough to authenticate.
-
-### Start coding
-
-Open the folder corresponding to the repository for which you've edited guidelines. And start coding!
+What would you like to see in the next version of Quack Companion? What isn't working for you in its current version?
+All your insights are valuable to our team, see our [contributing section](/community/contributing) to help!

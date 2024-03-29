@@ -59,11 +59,6 @@
       "name": "Status page",
       "icon": "heart-pulse",
       "url": "https://status.quackai.com"
-    },
-    {
-      "name": "Blog",
-      "icon": "newspaper",
-      "url": "https://quackai.com/blog"
     }
   ],
   "navigation": [
@@ -73,7 +68,7 @@
     },
     {
       "group": "Getting started",
-      "pages": ["getting-started/quickstart", "developers/self-hosting"]
+      "pages": ["getting-started/quickstart", "developers/self-hosting", "developers/gpu-selection"]
     },
     {
       "group": "Community & support",
@@ -83,8 +78,7 @@
       "group": "Login",
       "pages": [
         "api-reference/login/request-token-from-github",
-        "api-reference/login/request-token-from-creds",
-        "api-reference/login/validate-token"
+        "api-reference/login/request-token-from-creds"
       ]
     },
     {
