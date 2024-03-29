@@ -4,13 +4,13 @@
 
 <p align="center">
   <a href="https://github.com/quack-ai/companion/actions?query=workflow%3Adocs">
-    <img alt="CI Status" src="https://img.shields.io/github/actions/workflow/status/quack-ai/companion/docs.yml?branch=main&label=CI&logo=github&style=flat-square">
+    <img alt="CI Status" src="https://img.shields.io/github/actions/workflow/status/quack-ai/companion/docs.yml?branch=main&label=CI&logo=github&style=flat-square" />
   </a>
   <a href="https://mintlify.com/">
-    <img src="https://img.shields.io/badge/Framework-Mintlify-0D9373?style=flat-square&logoColor=white" alt="Mintlify">
+    <img src="https://img.shields.io/badge/Framework-Mintlify-0D9373?style=flat-square&logoColor=white" alt="Mintlify" />
   </a>
   <a href="https://github.com/quack-ai/companion/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/quack-ai/companion.svg?label=License&logoColor=fff&style=flat-square" alt="License">
+    <img src="https://img.shields.io/github/license/quack-ai/companion.svg?label=License&logoColor=fff&style=flat-square" alt="License" />
   </a>
 </p>
 <p align="center">
@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/badge/Discord-Community-5865F2?style=flat-square&logo=discord&logoColor=white" />
   </a>
   <a href="https://twitter.com/quack_ai">
-    <img src="https://img.shields.io/badge/-@quack_ai-1D9BF0?style=flat-square&logo=twitter&logoColor=white" alt="Twitter">
+    <img src="https://img.shields.io/badge/-@quack_ai-1D9BF0?style=flat-square&logo=twitter&logoColor=white" alt="Twitter" />
   </a>
 </p>
 
