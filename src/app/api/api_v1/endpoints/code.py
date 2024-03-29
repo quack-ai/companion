@@ -8,6 +8,7 @@ from fastapi import APIRouter, Depends, Security, status
 from fastapi.responses import StreamingResponse
 
 from app.api.dependencies import get_guideline_crud, get_token_payload
+from app.core.config import settings
 from app.crud.crud_guideline import GuidelineCRUD
 from app.models import UserScope
 from app.schemas.code import ChatHistory
@@ -29,6 +30,8 @@ async def chat(
     user_guidelines = [g.content for g in await guidelines.fetch_all(filter_pair=("creator_id", token_payload.user_id))]
     # Run analysis
     return StreamingResponse(
-        ollama_client.chat(payload.model_dump()["messages"], user_guidelines).iter_content(chunk_size=8192),
+        ollama_client.chat(
+            payload.model_dump()["messages"], user_guidelines, timeout=settings.OLLAMA_TIMEOUT
+        ).iter_content(chunk_size=8192),
         media_type="text/event-stream",
     )
