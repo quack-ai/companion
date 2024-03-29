@@ -63,6 +63,7 @@ class Settings(BaseSettings):
         return v
 
     # Product analytics
+    POSTHOG_HOST: str = os.getenv("POSTHOG_HOST", "https://eu.posthog.com")
     POSTHOG_KEY: Union[str, None] = os.environ.get("POSTHOG_KEY")
 
     @field_validator("POSTHOG_KEY")
