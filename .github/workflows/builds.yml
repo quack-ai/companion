@@ -101,18 +101,3 @@ jobs:
           docker compose -f docker-compose.yml up -d --build --wait ollama db backend gradio
           docker compose -f docker-compose.yml logs
           curl http://localhost:7860
-
-  mintlify:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Install mintlify
-        run: npm i -g mintlify
-      - name: Run the docs
-        run: screen -dm mintlify dev && sleep 10 && curl http://localhost:3000
