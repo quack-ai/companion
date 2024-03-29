@@ -51,6 +51,7 @@ This project uses the following integrations to ensure proper codebase maintenan
 - [Prometheus](https://prometheus.io/) - Scraping API metrics
 - [Grafana](https://grafana.com/) - Dashboard for API monitoring (dashboard adapted from https://github.com/Kludex/fastapi-prometheus-grafana)
 - [Traefik](https://traefik.io/) - the reverse proxy and load balancer
+- [Mintlify](https://mintlify.com/) - the documentation builder
 
 As a contributor, you will only have to ensure coverage of your code by adding appropriate unit testing of your code.
 
@@ -133,6 +134,7 @@ This file contains all the information to run the project.
 - `OLLAMA_MODEL`: the model tag in [Ollama library](https://ollama.com/library) that will be used for the API.
 - `SENTRY_DSN`: the DSN for your [Sentry](https://sentry.io/) project, which monitors back-end errors and report them back.
 - `SERVER_NAME`: the server tag that will be used to report events to Sentry.
+- `POSTHOG_HOST`: the host for PostHog [PostHog](https://eu.posthog.com/settings/project-details).
 - `POSTHOG_KEY`: the project API key for PostHog [PostHog](https://eu.posthog.com/settings/project-details).
 - `SLACK_API_TOKEN`: the App key for your Slack bot (Create New App on [Slack](https://api.slack.com/apps), go to OAuth & Permissions and generate a bot User OAuth Token).
 - `SLACK_CHANNEL`: the Slack channel where your bot will post events (defaults to `#general`, you have to invite the App to your channel).
