@@ -31,7 +31,7 @@ class SessionManager:
         self._token = token
         if ph_client is not None:
             # Retrieve the user ID
-            self.user_id = requests.post(f"{self._url}/login/validate", timeout=2, headers=self.auth).json()["user_id"]
+            self.user_id = requests.get(f"{self._url}/login/validate", timeout=2, headers=self.auth).json()["user_id"]
             # Analytics
             ph_client.capture(self.user_id, event="gradio-auth")
 
