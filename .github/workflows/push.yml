@@ -67,10 +67,13 @@ jobs:
           username: ${{ secrets.SSH_DEV_USERNAME }}
           key: ${{ secrets.SSH_DEPLOY_DEV }}
           script: |
-            docker pull quackai/companion:latest
+            cd devops
             docker rmi -f $(docker images -f "dangling=true" -q)
-            cd devops && docker compose stop backend && docker compose up -d --wait && docker compose exec backend alembic upgrade head
+            docker compose pull backend gradio
+            docker compose stop backend gradio && docker compose up -d --wait && docker compose exec backend alembic upgrade head
             docker inspect -f '{{ .Created }}' $(docker compose images -q backend)
+            docker inspect -f '{{ .Created }}' $(docker compose images -q gradio)
+            docker rmi -f $(docker images -f "dangling=true" -q)
       - name: Ping server
         env:
           DEV_ENDPOINT: ${{ secrets.DEV_ENDPOINT }}

@@ -16,10 +16,10 @@ __all__ = ["telemetry_client"]
 
 
 class TelemetryClient:
-    def __init__(self, api_key: Union[str, None] = None) -> None:
+    def __init__(self, host: str, api_key: Union[str, None] = None) -> None:
         self.is_enabled = isinstance(api_key, str)
         if isinstance(api_key, str):
-            self.ph_client = Posthog(project_api_key=api_key, host="https://eu.posthog.com")
+            self.ph_client = Posthog(project_api_key=api_key, host=host)
             logger.info("PostHog enabled")
 
     def capture(self, *args, **kwargs) -> None:
@@ -35,4 +35,4 @@ class TelemetryClient:
             self.ph_client.alias(*args, **kwargs)
 
 
-telemetry_client = TelemetryClient(api_key=settings.POSTHOG_KEY)
+telemetry_client = TelemetryClient(settings.POSTHOG_HOST, settings.POSTHOG_KEY)
