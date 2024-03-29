@@ -9,6 +9,7 @@ Create Date: 2023-11-07 15:35:08.955263
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.sql import text
 
 # revision identifiers, used by Alembic.
 revision = "eb1a6567456c"
@@ -26,7 +27,7 @@ def upgrade():
     session = sa.orm.Session(bind=bind)
     try:
         # Update is_active to True where removed_at is NULL
-        session.execute("UPDATE repository SET is_active = (removed_at IS NULL)")
+        session.execute(text("UPDATE repository SET is_active = (removed_at IS NULL)"))
         session.commit()
     finally:
         session.close()
@@ -46,7 +47,7 @@ def downgrade():
         # Set removed_at to a specific time where is_active is False
         # You may choose to leave it as NULL or set it to a specific timestamp
         session.execute(
-            "UPDATE repository SET removed_at = CASE WHEN is_active = false THEN CURRENT_TIMESTAMP ELSE NULL END"
+            text("UPDATE repository SET removed_at = CASE WHEN is_active = false THEN CURRENT_TIMESTAMP ELSE NULL END")
         )
         session.commit()
     finally:
