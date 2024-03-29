@@ -46,6 +46,7 @@ optional = true
 gradio = "^4.21.0"
 requests = "^2.20.0"
 python-dotenv = "^1.0.0"
+posthog = "^3.0.0"
 
 
 [tool.poetry.group.test]
