@@ -3,8 +3,8 @@
 </h1>
 
 <p align="center">
-  <a href="https://github.com/quack-ai/companion/actions?query=workflow%3Abuilds">
-    <img alt="CI Status" src="https://img.shields.io/github/actions/workflow/status/quack-ai/companion/builds.yml?branch=main&label=CI&logo=github&style=flat-square">
+  <a href="https://github.com/quack-ai/companion/actions?query=workflow%3Adocs">
+    <img alt="CI Status" src="https://img.shields.io/github/actions/workflow/status/quack-ai/companion/docs.yml?branch=main&label=CI&logo=github&style=flat-square">
   </a>
   <a href="https://mintlify.com/">
     <img src="https://img.shields.io/badge/Framework-Mintlify-0D9373?style=flat-square&logoColor=white" alt="Mintlify">
