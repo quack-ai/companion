@@ -55,7 +55,10 @@ jobs:
           GH_OAUTH_SECRET: ${{ secrets.GH_OAUTH_SECRET }}
           OLLAMA_MODEL: tinydolphin:1.1b-v2.8-q3_K_M
         run: |
-          docker compose -f docker-compose.dev.yml up -d --build --wait
+          docker compose -f docker-compose.dev.yml up -d --build
+          sleep 20
+          docker compose -f docker-compose.dev.yml logs backend
+          docker compose -f docker-compose.dev.yml up -d --wait
           # debug
           docker compose -f docker-compose.dev.yml exec -T backend alembic current
           docker compose -f docker-compose.dev.yml exec -T backend alembic history --verbose

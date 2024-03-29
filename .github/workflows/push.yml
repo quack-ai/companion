@@ -67,13 +67,20 @@ jobs:
           username: ${{ secrets.SSH_DEV_USERNAME }}
           key: ${{ secrets.SSH_DEPLOY_DEV }}
           script: |
-            cd devops
+            # Ensure we have max disk space
+            docker rm -fv $(docker ps -aq)
             docker rmi -f $(docker images -f "dangling=true" -q)
+            docker volume rm -f $(docker volume ls -f "dangling=true" -q)
+            # Update the service
             docker compose pull backend gradio
             docker compose stop backend gradio && docker compose up -d --wait && docker compose exec backend alembic upgrade head
+            # Check update
             docker inspect -f '{{ .Created }}' $(docker compose images -q backend)
             docker inspect -f '{{ .Created }}' $(docker compose images -q gradio)
+            # Clean up
+            docker rm -fv $(docker ps -aq)
             docker rmi -f $(docker images -f "dangling=true" -q)
+            docker volume rm -f $(docker volume ls -f "dangling=true" -q)
       - name: Ping server
         env:
           DEV_ENDPOINT: ${{ secrets.DEV_ENDPOINT }}

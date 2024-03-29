@@ -8,7 +8,7 @@ Create Date: 2024-02-23 11:56:53.633856
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, text
 
 # import sqlalchemy_utils
 # import sqlmodel # added
@@ -42,7 +42,8 @@ def upgrade():
     op.add_column("guideline", sa.Column("creator_id", sa.Integer(), nullable=True))
     # Enforce the foreign key after initializing it
     op.execute(
-        """
+        text(
+            """
         DO $$
         DECLARE
             first_user_id INT;
@@ -56,6 +57,7 @@ def upgrade():
             END IF;
         END $$;
         """
+        )
     )
     op.drop_column("guideline", "repo_id")
     op.drop_column("guideline", "title")
@@ -79,7 +81,7 @@ def downgrade():
     op.add_column("repository", sa.Column("is_active", sa.Boolean(), nullable=False))
     op.add_column("repository", sa.Column("installed_by", sa.Integer(), nullable=False))
     # User table modifications
-    op.execute('DELETE FROM "user" WHERE provider_user_id IS NULL')
+    op.execute(text('DELETE FROM "user" WHERE provider_user_id IS NULL'))
     op.drop_column("user", "created_at")
     op.alter_column("user", "login", nullable=False)
     op.alter_column("user", "hashed_password", nullable=False)
