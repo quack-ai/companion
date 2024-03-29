@@ -14,7 +14,7 @@ from app.models import Provider, Repository, User, UserScope
 from app.schemas.login import TokenPayload
 from app.schemas.repos import RepoRegistration
 from app.services.github import gh_client
-from app.services.slack import slack_client
+from app.services.notifications.slack import slack_client
 from app.services.telemetry import telemetry_client
 
 logger = logging.getLogger("uvicorn.error")
