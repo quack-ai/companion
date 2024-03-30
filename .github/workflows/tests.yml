@@ -63,7 +63,6 @@ jobs:
           docker compose -f docker-compose.dev.yml exec -T backend alembic current
           docker compose -f docker-compose.dev.yml exec -T backend alembic history --verbose
           docker compose -f docker-compose.dev.yml exec -T backend alembic stamp head
-          docker compose -f docker-compose.dev.yml exec -T backend alembic history --verbose
           docker compose -f docker-compose.dev.yml exec -T backend alembic downgrade -1
           docker compose -f docker-compose.dev.yml exec -T backend alembic upgrade +1
 
