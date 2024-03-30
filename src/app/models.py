@@ -9,7 +9,7 @@ from typing import Union
 
 from sqlmodel import Field, SQLModel
 
-__all__ = ["GHRole", "Guideline", "Repository", "User", "UserScope"]
+__all__ = ["Guideline", "Repository", "User"]
 
 
 class GHRole(str, Enum):

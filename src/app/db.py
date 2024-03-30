@@ -3,6 +3,7 @@
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
+import asyncio
 import logging
 
 from sqlalchemy.ext.asyncio.engine import AsyncEngine
@@ -50,3 +51,11 @@ async def init_db() -> None:
                 )
             )
         await session.commit()
+
+
+async def main() -> None:
+    await init_db()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

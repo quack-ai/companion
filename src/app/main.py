@@ -18,7 +18,6 @@ from sentry_sdk.integrations.starlette import StarletteIntegration
 
 from app.api.api_v1.router import api_router
 from app.core.config import settings
-from app.db import init_db
 from app.schemas.base import Status
 
 logger = logging.getLogger("uvicorn.error")
@@ -48,12 +47,6 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     docs_url=None,
 )
-
-
-# Database connection
-@app.on_event("startup")
-async def startup() -> None:
-    await init_db()
 
 
 # Healthcheck
