@@ -78,7 +78,7 @@
 - changed-files:
   - any-glob-to-any-file:
     - src/alembic.ini
-    - src/alembic/*
+    - src/migrations/*
 
 'topic: ci':
 - changed-files:

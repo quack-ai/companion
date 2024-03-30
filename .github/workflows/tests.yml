@@ -63,7 +63,6 @@ jobs:
           docker compose -f docker-compose.dev.yml exec -T backend alembic current
           docker compose -f docker-compose.dev.yml exec -T backend alembic history --verbose
           docker compose -f docker-compose.dev.yml exec -T backend alembic stamp head
-          docker compose -f docker-compose.dev.yml exec -T backend alembic history --verbose
           docker compose -f docker-compose.dev.yml exec -T backend alembic downgrade -1
           docker compose -f docker-compose.dev.yml exec -T backend alembic upgrade +1
 
@@ -83,4 +82,4 @@ jobs:
           owner: 'Quack AI'
           starting-year: 2023
           ignore-files: 'version.py,__init__.py'
-          ignore-folders: 'src/tests,src/alembic/versions'
+          ignore-folders: 'src/tests,src/migrations/versions'

@@ -53,7 +53,7 @@ services:
       - DEBUG=true
     volumes:
       - ./src/:/app/
-    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 5050
+    command: "sh -c 'python app/db.py && uvicorn app.main:app --reload --host 0.0.0.0 --port 5050 --proxy-headers'"
     healthcheck:
       test: ["CMD-SHELL", "nc -vz localhost 5050"]
       interval: 10s

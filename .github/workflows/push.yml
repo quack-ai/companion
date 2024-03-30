@@ -73,7 +73,7 @@ jobs:
             docker volume rm -f $(docker volume ls -f "dangling=true" -q)
             # Update the service
             docker compose pull backend gradio
-            docker compose stop backend gradio && docker compose up -d --wait && docker compose exec backend alembic upgrade head
+            docker compose stop backend gradio && docker compose up -d --wait
             # Check update
             docker inspect -f '{{ .Created }}' $(docker compose images -q backend)
             docker inspect -f '{{ .Created }}' $(docker compose images -q gradio)
