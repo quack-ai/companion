@@ -105,6 +105,10 @@ services:
       - 7860
     environment:
       - API_URL=http://backend:5050/api/v1
+      - SUPERADMIN_LOGIN=${SUPERADMIN_LOGIN}
+      - SUPERADMIN_PWD=${SUPERADMIN_PWD}
+      - POSTHOG_HOST=${POSTHOG_HOST}
+      - POSTHOG_KEY=${POSTHOG_KEY}
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.grafana.rule=Host(`${GRADIO_HOST}`)"
