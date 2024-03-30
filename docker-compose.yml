@@ -77,6 +77,8 @@ services:
       - 7860:7860
     environment:
       - API_URL=http://backend:5050/api/v1
+      - SUPERADMIN_LOGIN=${SUPERADMIN_LOGIN}
+      - SUPERADMIN_PWD=${SUPERADMIN_PWD}
     volumes:
       - ./demo/:/app/
     command: python main.py --server-name 0.0.0.0
