@@ -68,6 +68,8 @@ def main(args):
     # Get & Fetch access
     api_request("get", f"{args.endpoint}/users/{user_id}/", superuser_auth)
     api_request("get", f"{args.endpoint}/users/", superuser_auth)
+    # Check that redirect is working
+    api_request("get", f"{args.endpoint}/users", superuser_auth)
     # Modify access
     new_pwd = "my_new_pwd"  # noqa S105
     api_request("patch", f"{args.endpoint}/users/{user_id}/", superuser_auth, {"password": new_pwd})
