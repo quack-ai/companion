@@ -7,7 +7,7 @@ from fastapi import APIRouter
 
 from app.api.api_v1.endpoints import code, guidelines, login, repos, users
 
-api_router = APIRouter()
+api_router = APIRouter(redirect_slashes=True)
 api_router.include_router(login.router, prefix="/login", tags=["login"])
 api_router.include_router(users.router, prefix="/users", tags=["users"])
 api_router.include_router(repos.router, prefix="/repos", tags=["repos"])
