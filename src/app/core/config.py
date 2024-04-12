@@ -41,7 +41,7 @@ class Settings(BaseSettings):
         return v
 
     # Security
-    SECRET_KEY: str = os.environ.get("SECRET_KEY", secrets.token_urlsafe(32))
+    JWT_SECRET: str = os.environ.get("JWT_SECRET", secrets.token_urlsafe(32))
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     ACCESS_TOKEN_UNLIMITED_MINUTES: int = 60 * 24 * 365
     JWT_ENCODING_ALGORITHM: str = "HS256"

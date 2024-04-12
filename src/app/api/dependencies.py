@@ -47,7 +47,7 @@ async def get_guideline_crud(session: AsyncSession = Depends(get_session)) -> Gu
 
 def decode_token(token: str, authenticate_value: Union[str, None] = None) -> Dict[str, str]:
     try:
-        payload = jwt_decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ENCODING_ALGORITHM])
+        payload = jwt_decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ENCODING_ALGORITHM])
     except (ExpiredSignatureError, InvalidSignatureError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -117,7 +117,7 @@ def get_token_payload(
     authenticate_value = f'Bearer scope="{security_scopes.scope_str}"' if security_scopes.scopes else "Bearer"
 
     try:
-        payload = jwt_decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ENCODING_ALGORITHM])
+        payload = jwt_decode(token, settings.JWT_SECRET, algorithms=[settings.JWT_ENCODING_ALGORITHM])
     except (ExpiredSignatureError, InvalidSignatureError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

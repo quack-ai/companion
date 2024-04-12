@@ -182,5 +182,5 @@ class SupaClient:
 
 
 supabase_client = SupaClient(
-    settings.SUPABASE_AUTH_ENDPOINT, settings.SUPABASE_API_KEY, issue_admin_token(settings.SECRET_KEY)
+    settings.SUPABASE_AUTH_ENDPOINT, settings.SUPABASE_API_KEY, issue_admin_token(settings.JWT_SECRET)
 )
