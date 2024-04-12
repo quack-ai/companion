@@ -3,7 +3,7 @@
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
-from typing import cast
+from typing import Dict, Type, TypeVar, Union, cast
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
@@ -17,6 +17,9 @@ from app.crud import GuidelineCRUD, RepositoryCRUD, UserCRUD
 from app.db import get_session
 from app.models import User, UserScope
 from app.schemas.login import TokenPayload
+from app.services.auth.supabase import SupaJWT
+
+JWTTemplate = TypeVar("JWTTemplate")
 
 __all__ = ["get_current_user", "get_guideline_crud", "get_repo_crud", "get_token_payload", "get_user_crud"]
 
@@ -42,7 +45,71 @@ async def get_guideline_crud(session: AsyncSession = Depends(get_session)) -> Gu
     return GuidelineCRUD(session=session)
 
 
-async def get_token_payload(
+def decode_token(token: str, authenticate_value: Union[str, None] = None) -> Dict[str, str]:
+    try:
+        payload = jwt_decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ENCODING_ALGORITHM])
+    except (ExpiredSignatureError, InvalidSignatureError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired.",
+            headers={"WWW-Authenticate": authenticate_value} if authenticate_value else None,
+        )
+    except DecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_406_NOT_ACCEPTABLE,
+            detail="Invalid token.",
+            headers={"WWW-Authenticate": authenticate_value} if authenticate_value else None,
+        )
+    return payload
+
+
+def process_token(
+    token: str, jwt_template: Type[JWTTemplate], authenticate_value: Union[str, None] = None
+) -> JWTTemplate:
+    payload = decode_token(token)
+    # Verify the JWT template
+    try:
+        return jwt_template(**payload)
+    except ValidationError:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid token payload.",
+            headers={"WWW-Authenticate": authenticate_value} if authenticate_value else None,
+        )
+
+
+def supa_token(
+    security_scopes: SecurityScopes,
+    token: str = Depends(oauth2_scheme),
+) -> SupaJWT:
+    authenticate_value = f'Bearer scope="{security_scopes.scope_str}"' if security_scopes.scopes else "Bearer"
+    jwt_payload = process_token(token, SupaJWT, authenticate_value=authenticate_value)
+    # Retrieve the actual role
+    if set(jwt_payload.user_metadata.quack_role).isdisjoint(security_scopes.scopes):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Incompatible token scope.",
+            headers={"WWW-Authenticate": authenticate_value},
+        )
+    return jwt_payload
+
+
+def quack_token(
+    security_scopes: SecurityScopes,
+    token: str = Depends(oauth2_scheme),
+) -> TokenPayload:
+    authenticate_value = f'Bearer scope="{security_scopes.scope_str}"' if security_scopes.scopes else "Bearer"
+    jwt_payload = process_token(token, TokenPayload)
+    if set(jwt_payload.scopes).isdisjoint(security_scopes.scopes):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Incompatible token scope.",
+            headers={"WWW-Authenticate": authenticate_value},
+        )
+    return jwt_payload
+
+
+def get_token_payload(
     security_scopes: SecurityScopes,
     token: str = Depends(oauth2_scheme),
 ) -> TokenPayload:
