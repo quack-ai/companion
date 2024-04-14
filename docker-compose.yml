@@ -41,6 +41,8 @@ services:
         condition: service_healthy
       ollama:
         condition: service_healthy
+      auth:
+        condition: service_healthy
     ports:
       - "5050:5050"
     environment:
@@ -50,7 +52,7 @@ services:
       - POSTGRES_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
       - SUPERADMIN_LOGIN=${SUPERADMIN_LOGIN}
       - SUPERADMIN_PWD=${SUPERADMIN_PWD}
-      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET}
       - OLLAMA_ENDPOINT=http://ollama:11434
       - OLLAMA_MODEL=${OLLAMA_MODEL}
       - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-60}
@@ -125,6 +127,106 @@ services:
       timeout: 3s
       retries: 3
 
+  auth:
+    image: supabase/gotrue:v2.143.0
+    depends_on:
+      auth_db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9999/health"
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    restart: unless-stopped
+    ports:
+      - 9999:9999
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: ${API_EXTERNAL_URL}
+
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${AUTH_PG_PW}@auth_db:${AUTH_PG_PORT}/${AUTH_PG_DB}
+
+      GOTRUE_SITE_URL: ${GOTRUE_SITE_URL}
+      GOTRUE_URI_ALLOW_LIST: ${ADDITIONAL_REDIRECT_URLS}
+      GOTRUE_DISABLE_SIGNUP: false
+
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: ${JWT_EXPIRY}
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: true
+      GOTRUE_MAILER_AUTOCONFIRM: true
+      # GOTRUE_MAILER_SECURE_EMAIL_CHANGE_ENABLED: true
+      # GOTRUE_SMTP_MAX_FREQUENCY: 1s
+      GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_ADMIN_EMAIL}
+      GOTRUE_SMTP_HOST: ${SMTP_HOST}
+      GOTRUE_SMTP_PORT: ${SMTP_PORT}
+      GOTRUE_SMTP_USER: ${SMTP_USER}
+      GOTRUE_SMTP_PASS: ${SMTP_PASS}
+      GOTRUE_SMTP_SENDER_NAME: ${SMTP_SENDER_NAME}
+      GOTRUE_MAILER_URLPATHS_INVITE: ${MAILER_URLPATHS_INVITE}
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: ${MAILER_URLPATHS_CONFIRMATION}
+      GOTRUE_MAILER_URLPATHS_RECOVERY: ${MAILER_URLPATHS_RECOVERY}
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: ${MAILER_URLPATHS_EMAIL_CHANGE}
+
+      GOTRUE_EXTERNAL_PHONE_ENABLED: false
+      GOTRUE_SMS_AUTOCONFIRM: true
+
+  auth_db:
+    image: supabase/postgres:15.1.0.147
+    healthcheck:
+      test: pg_isready -U postgres -h localhost
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - log_min_messages=fatal # prevents Realtime polling queries from appearing in logs
+    restart: unless-stopped
+    ports:
+      # Pass down internal port because it's set dynamically by other services
+      - ${AUTH_PG_PORT}:${AUTH_PG_PORT}
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: ${AUTH_PG_PORT}
+      POSTGRES_PORT: ${AUTH_PG_PORT}
+      PGPASSWORD: ${AUTH_PG_PW}
+      POSTGRES_PASSWORD: ${AUTH_PG_PW}
+      PGDATABASE: ${AUTH_PG_DB}
+      POSTGRES_DB: ${AUTH_PG_DB}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXP: ${JWT_EXPIRY}
+    volumes:
+      - ./auth/volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+      # Must be superuser to create event trigger
+      - ./auth/volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+      # Must be superuser to alter reserved role
+      - ./auth/volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      # Initialize the database settings with JWT_SECRET and JWT_EXP
+      - ./auth/volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
+      # PGDATA directory is persisted between restarts
+      - ./auth/volumes/db/data:/var/lib/postgresql/data:Z
+      # Changes required for Analytics support
+      - ./auth/volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
+      # Use named volume to persist pgsodium decryption key between restarts
+      - db-config:/etc/postgresql-custom
+
 volumes:
   postgres_data:
   ollama:
+  db-config:
