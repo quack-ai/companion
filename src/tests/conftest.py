@@ -103,11 +103,11 @@ async def async_session() -> AsyncSession:
         await session.rollback()
 
 
-async def mock_verify_password(plain_password, hashed_password):
+def mock_verify_password(plain_password, hashed_password):
     return hashed_password == f"hashed_{plain_password}"
 
 
-async def mock_hash_password(password):
+def mock_hash_password(password):
     return f"hashed_{password}"
 
 

@@ -25,7 +25,7 @@ router = APIRouter()
 
 
 @router.get("/authorize", summary="Request authorization code through GitHub OAuth app", include_in_schema=False)
-async def authorize_github(
+def authorize_github(
     scope: str,
     redirect_uri: HttpUrl,
 ) -> RedirectResponse:
@@ -40,7 +40,7 @@ async def authorize_github(
     summary="Request a GitHub token from authorization code",
     include_in_schema=False,
 )
-async def request_github_token_from_code(
+def request_github_token_from_code(
     payload: TokenRequest,
 ) -> GHToken:
     return gh_client.get_token_from_code(payload.code, payload.redirect_uri)
@@ -99,7 +99,7 @@ async def login_with_github_token(
 
 
 @router.get("/validate", status_code=status.HTTP_200_OK, summary="Check token validity")
-async def check_token_validity(
+def check_token_validity(
     payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> TokenPayload:
     return payload
