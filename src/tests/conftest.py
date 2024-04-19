@@ -152,9 +152,9 @@ async def guideline_session(user_session: AsyncSession, monkeypatch):
     yield user_session
 
 
-async def get_token(access_id: int, scopes: str) -> Dict[str, str]:
+def get_token(access_id: int, scopes: str) -> Dict[str, str]:
     token_data = {"sub": str(access_id), "scopes": scopes}
-    token = await create_access_token(token_data)
+    token = create_access_token(token_data)
     return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
 

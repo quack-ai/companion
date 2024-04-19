@@ -44,7 +44,7 @@ async def test_create_repo(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
+        auth = pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.post("/repos", json=payload, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -76,7 +76,7 @@ async def test_get_repo(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
+        auth = pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.get(f"/repos/{repo_id}", headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -105,7 +105,7 @@ async def test_fetch_repos(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
+        auth = pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.get("/repos", headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -138,7 +138,7 @@ async def test_delete_repo(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
+        auth = pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.delete(f"/repos/{repo_id}", headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
