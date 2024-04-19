@@ -12,7 +12,6 @@ from app.services.utils import execute_in_parallel
         (249513553, 200, None, "frgfm/torch-cam"),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_get_repo(repo_id, status_code, status_detail, expected_name):
     github_client = GitHubClient()
     if isinstance(expected_name, str):
@@ -32,7 +31,6 @@ def test_githubclient_get_repo(repo_id, status_code, status_detail, expected_nam
         (26927750, 200, None, "frgfm"),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_get_user(user_id, status_code, status_detail, expected_name):
     github_client = GitHubClient()
     if isinstance(expected_name, str):
@@ -52,7 +50,6 @@ def test_githubclient_get_user(user_id, status_code, status_detail, expected_nam
         ("frgfm/torch-cam", 200, None, "README.md"),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_get_readme(repo_name, status_code, status_detail, expected_path):
     github_client = GitHubClient()
     if isinstance(expected_path, str):
@@ -73,7 +70,6 @@ def test_githubclient_get_readme(repo_name, status_code, status_detail, expected
         ("frgfm/torch-cam", "CONTRIBUTING.md", 200, None),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_get_file(repo_name, file_path, status_code, status_detail):
     github_client = GitHubClient()
     if status_code // 100 == 2:
@@ -94,7 +90,6 @@ def test_githubclient_get_file(repo_name, file_path, status_code, status_detail)
         ("frgfm/torch-cam", 200, None),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_list_pulls(repo_name, status_code, status_detail):
     github_client = GitHubClient()
     if status_code // 100 == 2:
@@ -113,7 +108,6 @@ def test_githubclient_list_pulls(repo_name, status_code, status_detail):
         ("frgfm/torch-cam", 181, 200, None),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_list_comments_from_issue(repo_name, issue_number, status_code, status_detail):
     github_client = GitHubClient()
     if status_code // 100 == 2:
@@ -132,7 +126,6 @@ def test_githubclient_list_comments_from_issue(repo_name, issue_number, status_c
         ("frgfm/Holocron", 279, 200, None),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_list_reviews_from_pull(repo_name, pull_number, status_code, status_detail):
     github_client = GitHubClient()
     if status_code // 100 == 2:
@@ -151,7 +144,6 @@ def test_githubclient_list_reviews_from_pull(repo_name, pull_number, status_code
         ("frgfm/Holocron", 279, 200, None),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_list_review_comments_from_pull(repo_name, pull_number, status_code, status_detail):
     github_client = GitHubClient()
     if status_code // 100 == 2:
@@ -170,7 +162,6 @@ def test_githubclient_list_review_comments_from_pull(repo_name, pull_number, sta
         ("frgfm/Holocron", 200, None),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_fetch_reviews_from_repo(repo_name, status_code, status_detail):
     github_client = GitHubClient()
     if status_code // 100 == 2:
@@ -189,7 +180,6 @@ def test_githubclient_fetch_reviews_from_repo(repo_name, status_code, status_det
         ("frgfm/Holocron", 200, None),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_fetch_pull_comments_from_repo(repo_name, status_code, status_detail):
     github_client = GitHubClient()
     if status_code // 100 == 2:
@@ -220,7 +210,6 @@ def test_githubclient_fetch_pull_comments_from_repo(repo_name, status_code, stat
         ),
     ],
 )
-@pytest.mark.asyncio()
 def test_githubclient_arrange_in_threads(comments, expected_output):
     assert GitHubClient.arrange_in_threads(comments) == expected_output
 
@@ -231,7 +220,6 @@ def test_githubclient_arrange_in_threads(comments, expected_output):
         (lambda x: x**2, [1, 2, 3], [1, 4, 9]),
     ],
 )
-@pytest.mark.asyncio()
 def test_execute_in_parallel(func, arr, output):
     assert list(execute_in_parallel(func, arr, num_threads=1)) == output
     assert list(execute_in_parallel(func, arr, num_threads=2)) == output
