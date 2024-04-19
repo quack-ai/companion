@@ -65,7 +65,7 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester_id: Union
         if (await users.get_by_login(payload.login, strict=False)) is not None:
             raise HTTPException(status.HTTP_409_CONFLICT, "Login already taken")
         valid_creds = True
-        hashed_password = await hash_password(payload.password)
+        hashed_password = hash_password(payload.password)
 
     if not valid_creds:
         raise HTTPException(
@@ -135,7 +135,7 @@ async def update_user_password(
     token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
 ) -> User:
     telemetry_client.capture(token_payload.user_id, event="user-pwd", properties={"user_id": user_id})
-    pwd = await hash_password(payload.password)
+    pwd = hash_password(payload.password)
     return await users.update(user_id, CredHash(hashed_password=pwd))
 
 

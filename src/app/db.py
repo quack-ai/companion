@@ -41,7 +41,7 @@ async def init_db() -> None:
             logger.info("Initializing PostgreSQL database...")
             # Fetch authenticated GitHub User
             gh_user = gh_client.get_my_user(settings.SUPERADMIN_GH_PAT)
-            pwd = await hash_password(settings.SUPERADMIN_PWD)
+            pwd = hash_password(settings.SUPERADMIN_PWD)
             session.add(
                 User(
                     provider_user_id=gh_user["id"],
