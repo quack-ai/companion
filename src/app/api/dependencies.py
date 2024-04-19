@@ -30,19 +30,19 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 
-async def get_user_crud(session: AsyncSession = Depends(get_session)) -> UserCRUD:
+def get_user_crud(session: AsyncSession = Depends(get_session)) -> UserCRUD:
     return UserCRUD(session=session)
 
 
-async def get_repo_crud(session: AsyncSession = Depends(get_session)) -> RepositoryCRUD:
+def get_repo_crud(session: AsyncSession = Depends(get_session)) -> RepositoryCRUD:
     return RepositoryCRUD(session=session)
 
 
-async def get_guideline_crud(session: AsyncSession = Depends(get_session)) -> GuidelineCRUD:
+def get_guideline_crud(session: AsyncSession = Depends(get_session)) -> GuidelineCRUD:
     return GuidelineCRUD(session=session)
 
 
-async def get_token_payload(
+def get_token_payload(
     security_scopes: SecurityScopes,
     token: str = Depends(oauth2_scheme),
 ) -> TokenPayload:
@@ -91,5 +91,5 @@ async def get_current_user(
     users: UserCRUD = Depends(get_user_crud),
 ) -> User:
     """Dependency to use as fastapi.security.Security with scopes"""
-    token_payload = await get_token_payload(security_scopes, token)
+    token_payload = get_token_payload(security_scopes, token)
     return cast(User, await users.get(token_payload.user_id, strict=True))

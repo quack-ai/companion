@@ -7,24 +7,22 @@ from app.core.config import settings
 from app.core.security import create_access_token, hash_password, verify_password
 
 
-@pytest.mark.asyncio()
-async def test_hash_password():
+def test_hash_password():
     pwd1 = "my_password"
-    hash_pwd1 = await hash_password(pwd1)
+    hash_pwd1 = hash_password(pwd1)
 
     assert hash_pwd1 != pwd1
-    assert hash_pwd1 != await hash_password(pwd1 + "bis")
+    assert hash_pwd1 != hash_password(pwd1 + "bis")
     # Check that it's non deterministic
-    assert hash_pwd1 != await hash_password(pwd1)
+    assert hash_pwd1 != hash_password(pwd1)
 
 
-@pytest.mark.asyncio()
-async def test_verify_password():
+def test_verify_password():
     pwd1 = "my_password"
-    hash_pwd1 = await hash_password(pwd1)
+    hash_pwd1 = hash_password(pwd1)
 
-    assert await verify_password(pwd1, hash_pwd1)
-    assert not await verify_password("another_try", hash_pwd1)
+    assert verify_password(pwd1, hash_pwd1)
+    assert not verify_password("another_try", hash_pwd1)
 
 
 @pytest.mark.parametrize(
@@ -34,9 +32,8 @@ async def test_verify_password():
         ({"data": "my_data"}, None, settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     ],
 )
-@pytest.mark.asyncio()
-async def test_create_access_token(content, expires_minutes, expected_delta):
-    payload = await create_access_token(content, expires_minutes)
+def test_create_access_token(content, expires_minutes, expected_delta):
+    payload = create_access_token(content, expires_minutes)
     after = datetime.utcnow()
     assert isinstance(payload, str)
     decoded_data = jwt.decode(payload, settings.SECRET_KEY, algorithms=[settings.JWT_ENCODING_ALGORITHM])
