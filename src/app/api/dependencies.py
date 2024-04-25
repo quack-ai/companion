@@ -78,7 +78,7 @@ def process_token(
         )
 
 
-def supa_token(
+def get_supa_jwt(
     security_scopes: SecurityScopes,
     token: str = Depends(oauth2_scheme),
 ) -> SupaJWT:
@@ -94,7 +94,7 @@ def supa_token(
     return jwt_payload
 
 
-def quack_token(
+def get_quack_jwt(
     security_scopes: SecurityScopes,
     token: str = Depends(oauth2_scheme),
 ) -> TokenPayload:
@@ -115,5 +115,5 @@ async def get_current_user(
     users: UserCRUD = Depends(get_user_crud),
 ) -> User:
     """Dependency to use as fastapi.security.Security with scopes"""
-    token_payload = quack_token(security_scopes, token)
+    token_payload = get_quack_jwt(security_scopes, token)
     return cast(User, await users.get(token_payload.sub, strict=True))

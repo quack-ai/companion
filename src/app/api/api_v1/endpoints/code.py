@@ -7,7 +7,7 @@
 from fastapi import APIRouter, Depends, Security, status
 from fastapi.responses import StreamingResponse
 
-from app.api.dependencies import get_guideline_crud, quack_token
+from app.api.dependencies import get_guideline_crud, get_quack_jwt
 from app.core.config import settings
 from app.crud.crud_guideline import GuidelineCRUD
 from app.models import UserScope
@@ -23,7 +23,7 @@ router = APIRouter()
 async def chat(
     payload: ChatHistory,
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN, UserScope.USER]),
+    token_payload: TokenPayload = Security(get_quack_jwt, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> StreamingResponse:
     telemetry_client.capture(token_payload.sub, event="compute-chat")
     # Retrieve the guidelines of this user
