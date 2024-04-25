@@ -12,7 +12,7 @@ from app.core.security import create_access_token
         (["admin"], "", None, 406, None),
         (["admin"], {"user_id": "123", "scopes": ["admin"]}, None, 422, None),
         (["admin"], {"sub": "123", "scopes": ["admin"]}, -1, 401, None),
-        (["admin"], {"sub": "123", "scopes": ["admin"]}, None, None, {"user_id": 123, "scopes": ["admin"]}),
+        (["admin"], {"sub": "123", "scopes": ["admin"]}, None, None, {"sub": 123, "scopes": ["admin"]}),
         (["admin"], {"sub": "123", "scopes": ["user"]}, None, 403, None),
     ],
 )
