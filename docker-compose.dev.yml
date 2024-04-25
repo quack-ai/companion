@@ -56,7 +56,7 @@ services:
       - ./src/:/app/
     command: "sh -c 'python app/db.py && uvicorn app.main:app --reload --host 0.0.0.0 --port 5050 --proxy-headers'"
     healthcheck:
-      test: ["CMD-SHELL", "nc -vz localhost 5050"]
+      test: ["CMD-SHELL", "curl http://localhost:5050/status"]
       interval: 10s
       timeout: 3s
       retries: 3
