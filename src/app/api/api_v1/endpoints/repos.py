@@ -82,7 +82,7 @@ async def get_repo(
     repos: RepositoryCRUD = Depends(get_repo_crud),
     token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> Repository:
-    telemetry_client.capture(token_payload.user_id, event="repo-get", properties={"repo_id": repo_id})
+    telemetry_client.capture(token_payload.sub, event="repo-get", properties={"repo_id": repo_id})
     return cast(Repository, await repos.get(repo_id, strict=True))
 
 
@@ -91,7 +91,7 @@ async def fetch_repos(
     repos: RepositoryCRUD = Depends(get_repo_crud),
     token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> List[Repository]:
-    telemetry_client.capture(token_payload.user_id, event="repo-fetch")
+    telemetry_client.capture(token_payload.sub, event="repo-fetch")
     return [elt for elt in await repos.fetch_all()]
 
 
@@ -101,7 +101,7 @@ async def delete_repo(
     repos: RepositoryCRUD = Depends(get_repo_crud),
     token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> None:
-    telemetry_client.capture(token_payload.user_id, event="repo-delete", properties={"repo_id": repo_id})
+    telemetry_client.capture(token_payload.sub, event="repo-delete", properties={"repo_id": repo_id})
     await repos.delete(repo_id)
 
 

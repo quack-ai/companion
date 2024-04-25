@@ -105,7 +105,7 @@ async def create_user(
     users: UserCRUD = Depends(get_user_crud),
     token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> User:
-    return await _create_user(payload, users, token_payload.user_id)
+    return await _create_user(payload, users, token_payload.sub)
 
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK, summary="Fetch the information of a specific user")
@@ -114,7 +114,7 @@ async def get_user(
     users: UserCRUD = Depends(get_user_crud),
     token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> User:
-    telemetry_client.capture(token_payload.user_id, event="user-get", properties={"user_id": user_id})
+    telemetry_client.capture(token_payload.sub, event="user-get", properties={"user_id": user_id})
     return cast(User, await users.get(user_id, strict=True))
 
 
@@ -123,7 +123,7 @@ async def fetch_users(
     users: UserCRUD = Depends(get_user_crud),
     token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> List[User]:
-    telemetry_client.capture(token_payload.user_id, event="user-fetch")
+    telemetry_client.capture(token_payload.sub, event="user-fetch")
     return [elt for elt in await users.fetch_all()]
 
 
@@ -134,7 +134,7 @@ async def update_user_password(
     users: UserCRUD = Depends(get_user_crud),
     token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> User:
-    telemetry_client.capture(token_payload.user_id, event="user-pwd", properties={"user_id": user_id})
+    telemetry_client.capture(token_payload.sub, event="user-pwd", properties={"user_id": user_id})
     pwd = hash_password(payload.password)
     return await users.update(user_id, CredHash(hashed_password=pwd))
 
@@ -145,5 +145,5 @@ async def delete_user(
     users: UserCRUD = Depends(get_user_crud),
     token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> None:
-    telemetry_client.capture(token_payload.user_id, event="user-deletion", properties={"user_id": user_id})
+    telemetry_client.capture(token_payload.sub, event="user-deletion", properties={"user_id": user_id})
     await users.delete(user_id)

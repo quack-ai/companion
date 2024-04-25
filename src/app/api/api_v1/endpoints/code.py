@@ -25,9 +25,9 @@ async def chat(
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
     token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> StreamingResponse:
-    telemetry_client.capture(token_payload.user_id, event="compute-chat")
+    telemetry_client.capture(token_payload.sub, event="compute-chat")
     # Retrieve the guidelines of this user
-    user_guidelines = [g.content for g in await guidelines.fetch_all(filter_pair=("creator_id", token_payload.user_id))]
+    user_guidelines = [g.content for g in await guidelines.fetch_all(filter_pair=("creator_id", token_payload.sub))]
     # Run analysis
     return StreamingResponse(
         ollama_client.chat(
