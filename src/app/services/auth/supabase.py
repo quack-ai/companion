@@ -13,11 +13,9 @@ import requests
 from fastapi import HTTPException
 from pydantic import BaseModel
 
-from app.core.config import settings
-
 logger = logging.getLogger("uvicorn.error")
 
-__all__ = ["supabase_client"]
+__all__ = ["SupaJWT"]
 
 
 class Login(BaseModel):
@@ -31,7 +29,10 @@ class OauthProvider(str, Enum):
     TWITTER: str = "twitter"
 
 
-class Provider(OauthProvider):
+class Provider(str, Enum):
+    GITHUB: str = "github"
+    GOOGLE: str = "google"
+    TWITTER: str = "twitter"
     EMAIL: str = "email"
 
 
@@ -126,17 +127,17 @@ class SupaClient:
 
     def sign_up(self, payload: Login, metadata: Union[Dict[str, str], None] = None) -> LoginResponse:
         json_payload = (
-            {**payload.model_dump_json(), "data": metadata} if isinstance(metadata, dict) else payload.model_dump_json()
+            {**payload.model_dump_json(), "data": metadata} if isinstance(metadata, dict) else payload.model_dump_json()  # type: ignore[dict-item]
         )
-        return self._request("post", "/signup", json=json_payload, headers=self.headers)
+        return self._request("post", "/signup", json=json_payload, headers=self.headers)  # type: ignore[return-value]
 
     def login_with_password(self, payload: Login) -> LoginResponse:
-        return self._request(
+        return self._request(  # type: ignore[return-value]
             "post", "/token", params={"grant_type": "password"}, json=payload.model_dump_json(), headers=self.headers
         )
 
     def login_with_idtoken(self, payload: IDToken) -> LoginResponse:
-        return self._request(
+        return self._request(  # type: ignore[return-value]
             "post", "/token", params={"grant_type": "id_token"}, json=payload.model_dump_json(), headers=self.headers
         )
 
@@ -152,15 +153,15 @@ class SupaClient:
         )
 
     def get_authenticated_user(self, token: str) -> SupaUser:
-        return self._request("get", "/user", headers={**self.headers, "Authorization": f"Bearer {token}"})
+        return self._request("get", "/user", headers={**self.headers, "Authorization": f"Bearer {token}"})  # type: ignore[return-value]
 
     def get_user(self, uid: str) -> SupaUser:
-        return self._request(
+        return self._request(  # type: ignore[return-value]
             "get", f"/admin/users/{uid}", headers={**self.headers, "Authorization": f"Bearer {self.token}"}
         )
 
     def update_user(self, uid: str, payload: Dict[str, str]) -> SupaUser:
-        return self._request(
+        return self._request(  # type: ignore[return-value]
             "put",
             f"/admin/users/{uid}",
             json=payload,
@@ -181,6 +182,6 @@ class SupaClient:
         )
 
 
-supabase_client = SupaClient(
-    settings.SUPABASE_AUTH_ENDPOINT, settings.SUPABASE_API_KEY, issue_admin_token(settings.JWT_SECRET)
-)
+# supabase_client = SupaClient(
+#     settings.SUPABASE_AUTH_ENDPOINT, settings.SUPABASE_API_KEY, issue_admin_token(settings.JWT_SECRET)
+# )
