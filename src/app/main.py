@@ -85,7 +85,7 @@ if isinstance(settings.SENTRY_DSN, str):
 
 # Overrides swagger to include favicon
 @app.get("/docs", include_in_schema=False)
-async def swagger_ui_html():
+def swagger_ui_html():
     return get_swagger_ui_html(
         openapi_url=f"{settings.API_V1_STR}/openapi.json",
         title=settings.PROJECT_NAME,

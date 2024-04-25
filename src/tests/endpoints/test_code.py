@@ -61,7 +61,7 @@ async def test_chat(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
+        auth = pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.post("/code/chat", json=payload, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)

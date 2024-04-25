@@ -25,7 +25,7 @@ async def test_create_guideline(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
+        auth = pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.post("/guidelines", json=payload, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -62,7 +62,7 @@ async def test_get_guideline(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
+        auth = pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.get(f"/guidelines/{guideline_id}", headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -91,7 +91,7 @@ async def test_fetch_guidelines(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
+        auth = pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.get("/guidelines", headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -124,7 +124,7 @@ async def test_delete_guideline(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
+        auth = pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.request("DELETE", f"/guidelines/{guideline_id}", json={}, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)
@@ -159,7 +159,7 @@ async def test_update_guideline_content(
 ):
     auth = None
     if isinstance(user_idx, int):
-        auth = await pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
+        auth = pytest.get_token(pytest.user_table[user_idx]["id"], pytest.user_table[user_idx]["scope"].split())
 
     response = await async_client.patch(f"/guidelines/{guideline_id}", json=payload, headers=auth)
     assert response.status_code == status_code, print(response.__dict__)

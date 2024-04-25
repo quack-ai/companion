@@ -103,11 +103,11 @@ async def async_session() -> AsyncSession:
         await session.rollback()
 
 
-async def mock_verify_password(plain_password, hashed_password):
+def mock_verify_password(plain_password, hashed_password):
     return hashed_password == f"hashed_{plain_password}"
 
 
-async def mock_hash_password(password):
+def mock_hash_password(password):
     return f"hashed_{password}"
 
 
@@ -152,9 +152,9 @@ async def guideline_session(user_session: AsyncSession, monkeypatch):
     yield user_session
 
 
-async def get_token(access_id: int, scopes: str) -> Dict[str, str]:
+def get_token(access_id: int, scopes: str) -> Dict[str, str]:
     token_data = {"sub": str(access_id), "scopes": scopes}
-    token = await create_access_token(token_data)
+    token = create_access_token(token_data)
     return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
 

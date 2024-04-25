@@ -16,13 +16,12 @@ from app.core.security import create_access_token
         (["admin"], {"sub": "123", "scopes": ["user"]}, None, 403, None),
     ],
 )
-@pytest.mark.asyncio()
-async def test_get_token_payload(scopes, token, expires_minutes, error_code, expected_payload):
-    _token = await create_access_token(token, expires_minutes) if isinstance(token, dict) else token
+def test_get_token_payload(scopes, token, expires_minutes, error_code, expected_payload):
+    _token = create_access_token(token, expires_minutes) if isinstance(token, dict) else token
     if isinstance(error_code, int):
         with pytest.raises(HTTPException):
-            await get_token_payload(SecurityScopes(scopes), _token)
+            get_token_payload(SecurityScopes(scopes), _token)
     else:
-        payload = await get_token_payload(SecurityScopes(scopes), _token)
+        payload = get_token_payload(SecurityScopes(scopes), _token)
         if expected_payload is not None:
             assert payload.model_dump() == expected_payload

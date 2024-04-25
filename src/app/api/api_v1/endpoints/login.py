@@ -25,7 +25,7 @@ router = APIRouter()
 
 
 @router.get("/authorize", summary="Request authorization code through GitHub OAuth app", include_in_schema=False)
-async def authorize_github(
+def authorize_github(
     scope: str,
     redirect_uri: HttpUrl,
 ) -> RedirectResponse:
@@ -40,7 +40,7 @@ async def authorize_github(
     summary="Request a GitHub token from authorization code",
     include_in_schema=False,
 )
-async def request_github_token_from_code(
+def request_github_token_from_code(
     payload: TokenRequest,
 ) -> GHToken:
     return gh_client.get_token_from_code(payload.code, payload.redirect_uri)
@@ -59,16 +59,12 @@ async def login_with_creds(
     """
     # Verify credentials
     user = await users.get_by_login(form_data.username)
-    if (
-        user is None
-        or user.hashed_password is None
-        or not await verify_password(form_data.password, user.hashed_password)
-    ):
+    if user is None or user.hashed_password is None or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials.")
     telemetry_client.capture(user.id, event="user-login", properties={"method": "credentials"})
     # create access token using user user_id/user_scopes
     token_data = {"sub": str(user.id), "scopes": user.scope.split()}
-    token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
+    token = create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
 
     return Token(access_token=token, token_type="bearer")  # noqa S106
 
@@ -93,13 +89,13 @@ async def login_with_github_token(
 
     # create access token using user user_id/user_scopes
     token_data = {"sub": str(user.id), "scopes": user.scope.split()}
-    token = await create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
+    token = create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
 
     return Token(access_token=token, token_type="bearer")  # noqa S106
 
 
 @router.get("/validate", status_code=status.HTTP_200_OK, summary="Check token validity")
-async def check_token_validity(
+def check_token_validity(
     payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> TokenPayload:
     return payload
