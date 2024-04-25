@@ -8,7 +8,7 @@ from typing import List, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
-from app.api.dependencies import get_current_user, get_repo_crud, get_token_payload
+from app.api.dependencies import get_current_user, get_repo_crud, quack_token
 from app.crud import RepositoryCRUD
 from app.models import Provider, Repository, User, UserScope
 from app.schemas.login import TokenPayload
@@ -80,7 +80,7 @@ async def register_repo(
 async def get_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN, UserScope.USER]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> Repository:
     telemetry_client.capture(token_payload.user_id, event="repo-get", properties={"repo_id": repo_id})
     return cast(Repository, await repos.get(repo_id, strict=True))
@@ -89,7 +89,7 @@ async def get_repo(
 @router.get("/", status_code=status.HTTP_200_OK, summary="Fetch all repositories")
 async def fetch_repos(
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> List[Repository]:
     telemetry_client.capture(token_payload.user_id, event="repo-fetch")
     return [elt for elt in await repos.fetch_all()]
@@ -99,7 +99,7 @@ async def fetch_repos(
 async def delete_repo(
     repo_id: int = Path(..., gt=0),
     repos: RepositoryCRUD = Depends(get_repo_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> None:
     telemetry_client.capture(token_payload.user_id, event="repo-delete", properties={"repo_id": repo_id})
     await repos.delete(repo_id)

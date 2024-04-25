@@ -7,7 +7,7 @@ from typing import List, Union, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
-from app.api.dependencies import get_token_payload, get_user_crud
+from app.api.dependencies import get_user_crud, quack_token
 from app.core.security import hash_password
 from app.crud import UserCRUD
 from app.models import Provider, User, UserScope
@@ -103,7 +103,7 @@ async def _create_user(payload: UserCreate, users: UserCRUD, requester_id: Union
 async def create_user(
     payload: UserCreate,
     users: UserCRUD = Depends(get_user_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> User:
     return await _create_user(payload, users, token_payload.user_id)
 
@@ -112,7 +112,7 @@ async def create_user(
 async def get_user(
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> User:
     telemetry_client.capture(token_payload.user_id, event="user-get", properties={"user_id": user_id})
     return cast(User, await users.get(user_id, strict=True))
@@ -121,7 +121,7 @@ async def get_user(
 @router.get("/", status_code=status.HTTP_200_OK, summary="Fetch all the users")
 async def fetch_users(
     users: UserCRUD = Depends(get_user_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> List[User]:
     telemetry_client.capture(token_payload.user_id, event="user-fetch")
     return [elt for elt in await users.fetch_all()]
@@ -132,7 +132,7 @@ async def update_user_password(
     payload: Cred,
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> User:
     telemetry_client.capture(token_payload.user_id, event="user-pwd", properties={"user_id": user_id})
     pwd = hash_password(payload.password)
@@ -143,7 +143,7 @@ async def update_user_password(
 async def delete_user(
     user_id: int = Path(..., gt=0),
     users: UserCRUD = Depends(get_user_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN]),
 ) -> None:
     telemetry_client.capture(token_payload.user_id, event="user-deletion", properties={"user_id": user_id})
     await users.delete(user_id)

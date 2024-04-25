@@ -7,7 +7,7 @@ from typing import List, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Security, status
 
-from app.api.dependencies import get_guideline_crud, get_token_payload
+from app.api.dependencies import get_guideline_crud, quack_token
 from app.crud import GuidelineCRUD
 from app.models import Guideline, UserScope
 from app.schemas.guidelines import (
@@ -24,7 +24,7 @@ router = APIRouter()
 async def create_guideline(
     payload: GuidelineContent,
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN, UserScope.USER]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> Guideline:
     telemetry_client.capture(token_payload.user_id, event="guideline-creation")
     return await guidelines.create(Guideline(creator_id=token_payload.user_id, **payload.model_dump()))
@@ -34,7 +34,7 @@ async def create_guideline(
 async def get_guideline(
     guideline_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN, UserScope.USER]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> Guideline:
     telemetry_client.capture(token_payload.user_id, event="guideline-get", properties={"guideline_id": guideline_id})
     return cast(Guideline, await guidelines.get(guideline_id, strict=True))
@@ -43,7 +43,7 @@ async def get_guideline(
 @router.get("/", status_code=status.HTTP_200_OK, summary="Fetch all the guidelines")
 async def fetch_guidelines(
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.USER, UserScope.ADMIN]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> List[Guideline]:
     telemetry_client.capture(token_payload.user_id, event="guideline-fetch")
     filter_pair = ("creator_id", token_payload.user_id) if UserScope.ADMIN not in token_payload.scopes else None
@@ -55,7 +55,7 @@ async def update_guideline_content(
     payload: GuidelineContent,
     guideline_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN, UserScope.USER]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> Guideline:
     telemetry_client.capture(
         token_payload.user_id, event="guideline-update-content", properties={"guideline_id": guideline_id}
@@ -70,7 +70,7 @@ async def update_guideline_content(
 async def delete_guideline(
     guideline_id: int = Path(..., gt=0),
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
-    token_payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.ADMIN, UserScope.USER]),
+    token_payload: TokenPayload = Security(quack_token, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> None:
     telemetry_client.capture(
         token_payload.user_id, event="guideline-deletion", properties={"guideline_id": guideline_id}
