@@ -2,7 +2,7 @@ import pytest
 from fastapi import HTTPException
 from fastapi.security import SecurityScopes
 
-from app.api.dependencies import get_token_payload
+from app.api.dependencies import get_quack_jwt
 from app.core.security import create_access_token
 
 
@@ -16,12 +16,12 @@ from app.core.security import create_access_token
         (["admin"], {"sub": "123", "scopes": ["user"]}, None, 403, None),
     ],
 )
-def test_get_token_payload(scopes, token, expires_minutes, error_code, expected_payload):
+def test_get_quack_jwt(scopes, token, expires_minutes, error_code, expected_payload):
     _token = create_access_token(token, expires_minutes) if isinstance(token, dict) else token
     if isinstance(error_code, int):
         with pytest.raises(HTTPException):
-            get_token_payload(SecurityScopes(scopes), _token)
+            get_quack_jwt(SecurityScopes(scopes), _token)
     else:
-        payload = get_token_payload(SecurityScopes(scopes), _token)
+        payload = get_quack_jwt(SecurityScopes(scopes), _token)
         if expected_payload is not None:
             assert payload.model_dump() == expected_payload
