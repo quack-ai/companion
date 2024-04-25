@@ -3,7 +3,7 @@
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
-from typing import Dict, Type, TypeVar, Union
+from typing import Dict, Type, TypeVar, Union, cast
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
@@ -15,7 +15,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.core.config import settings
 from app.crud import GuidelineCRUD, RepositoryCRUD, UserCRUD
 from app.db import get_session
-from app.models import UserScope
+from app.models import User, UserScope
 from app.schemas.login import TokenPayload
 from app.services.auth.supabase import SupaJWT
 
@@ -107,3 +107,13 @@ def quack_token(
             headers={"WWW-Authenticate": authenticate_value},
         )
     return jwt_payload
+
+
+async def get_current_user(
+    security_scopes: SecurityScopes,
+    token: str = Depends(oauth2_scheme),
+    users: UserCRUD = Depends(get_user_crud),
+) -> User:
+    """Dependency to use as fastapi.security.Security with scopes"""
+    token_payload = quack_token(security_scopes, token)
+    return cast(User, await users.get(token_payload.sub, strict=True))
