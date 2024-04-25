@@ -1,3 +1,4 @@
+name: quack
 version: '3.8'
 
 services:
@@ -49,7 +50,7 @@ services:
       - POSTGRES_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db/${POSTGRES_DB}
       - SUPERADMIN_LOGIN=${SUPERADMIN_LOGIN}
       - SUPERADMIN_PWD=${SUPERADMIN_PWD}
-      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET}
       - OLLAMA_ENDPOINT=http://ollama:11434
       - OLLAMA_MODEL=${OLLAMA_MODEL}
       - OLLAMA_TIMEOUT=${OLLAMA_TIMEOUT:-60}
@@ -60,7 +61,7 @@ services:
       - ./src/:/app/
     command: "sh -c 'alembic upgrade head && python app/db.py && uvicorn app.main:app --reload --host 0.0.0.0 --port 5050 --proxy-headers'"
     healthcheck:
-      test: ["CMD-SHELL", "nc -vz localhost 5050"]
+      test: ["CMD-SHELL", "curl http://localhost:5050/status"]
       interval: 10s
       timeout: 3s
       retries: 3
@@ -83,7 +84,7 @@ services:
       - ./demo/:/app/
     command: python main.py --server-name 0.0.0.0
     healthcheck:
-      test: ["CMD-SHELL", "nc -vz localhost 7860"]
+      test: ["CMD-SHELL", "curl http://localhost:7860"]
       interval: 10s
       timeout: 3s
       retries: 3
@@ -126,4 +127,3 @@ services:
 
 volumes:
   postgres_data:
-  ollama:

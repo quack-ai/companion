@@ -10,7 +10,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import HttpUrl
 
 from app.api.api_v1.endpoints.users import _create_user
-from app.api.dependencies import get_token_payload, get_user_crud
+from app.api.dependencies import get_quack_jwt, get_user_crud
 from app.core.config import settings
 from app.core.security import create_access_token, verify_password
 from app.crud import UserCRUD
@@ -96,6 +96,6 @@ async def login_with_github_token(
 
 @router.get("/validate", status_code=status.HTTP_200_OK, summary="Check token validity")
 def check_token_validity(
-    payload: TokenPayload = Security(get_token_payload, scopes=[UserScope.USER, UserScope.ADMIN]),
+    payload: TokenPayload = Security(get_quack_jwt, scopes=[UserScope.USER, UserScope.ADMIN]),
 ) -> TokenPayload:
     return payload

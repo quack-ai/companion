@@ -24,7 +24,7 @@ class Token(BaseModel):
 
 
 class TokenPayload(BaseModel):
-    user_id: int = Field(..., gt=0)
+    sub: int = Field(..., gt=0)
     scopes: List[UserScope] = []
 
 

@@ -36,7 +36,7 @@ def test_create_access_token(content, expires_minutes, expected_delta):
     payload = create_access_token(content, expires_minutes)
     after = datetime.utcnow()
     assert isinstance(payload, str)
-    decoded_data = jwt.decode(payload, settings.SECRET_KEY, algorithms=[settings.JWT_ENCODING_ALGORITHM])
+    decoded_data = jwt.decode(payload, settings.JWT_SECRET, algorithms=[settings.JWT_ENCODING_ALGORITHM])
     # Verify data integrity
     assert all(v == decoded_data[k] for k, v in content.items())
     # Check expiration

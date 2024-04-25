@@ -20,7 +20,7 @@ def create_access_token(content: Dict[str, Any], expires_minutes: Optional[int] 
     """Encode content dict using security algorithm, setting expiration."""
     expire_delta = timedelta(minutes=expires_minutes or settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     expire = datetime.utcnow() + expire_delta
-    return jwt.encode({**content, "exp": expire}, settings.SECRET_KEY, algorithm=settings.JWT_ENCODING_ALGORITHM)
+    return jwt.encode({**content, "exp": expire}, settings.JWT_SECRET, algorithm=settings.JWT_ENCODING_ALGORITHM)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
