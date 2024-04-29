@@ -5,6 +5,9 @@ deepseek-coder:6.7b-instruct-q3_K_M,NVIDIA RTX 3060 (laptop),90.1,32.43,50.34,1.
 pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M,NVIDIA RTX 3060 (laptop),78.94,10.2,37.95,1.65
 dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M,NVIDIA RTX 3060 (laptop),126.75,31.5,50.05,0.84
 dolphin-mistral:7b-v2.6-dpo-laser-q3_K_M,NVIDIA RTX 3060 (laptop),89.47,29.91,47.09,0.67
+codeqwen:7b-chat-v1.5-q4_1,NVIDIA RTX 3060 (laptop),171.72,53.37,54.74,0.82
+dolphin-llama3:8b-v2.9-q4_K_M,NVIDIA RTX 3060 (laptop),131.89,33.37,50.81,0.66
+phi3:3.8b-mini-instruct-4k-q4_K_M,NVIDIA RTX 3060 (laptop),271.4,52.48,88.43,13.22
 deepseek-coder:6.7b-instruct-q4_K_M,NVIDIA RTX 3070 (Scaleway GPU-3070-S),266.98,95.63,75.53,1.56
 deepseek-coder:6.7b-instruct-q3_K_M,NVIDIA RTX 3070 (Scaleway GPU-3070-S),141.43,50.4,73.69,1.61
 pxlksr/opencodeinterpreter-ds:6.7b-Q4_K_M,NVIDIA RTX 3070 (Scaleway GPU-3070-S),285.81,73.55,75.14,3.13
