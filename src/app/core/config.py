@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     # LLM
     LLM_PROVIDER: str = os.environ.get("LLM_PROVIDER", "ollama")
+    LLM_TEMPERATURE: float = os.environ.get("LLM_TEMPERATURE", 0)
     OLLAMA_ENDPOINT: Union[str, None] = os.environ.get("OLLAMA_ENDPOINT")
     OLLAMA_MODEL: str = os.environ.get("OLLAMA_MODEL", "dolphin-llama3:8b-v2.9-q4_K_M")
     GROQ_API_KEY: Union[str, None] = os.environ.get("GROQ_API_KEY")

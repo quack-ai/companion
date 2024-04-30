@@ -24,10 +24,10 @@ llm_client: Union[OllamaClient, GroqClient]
 if settings.LLM_PROVIDER == LLMProvider.OLLAMA:
     if not settings.OLLAMA_ENDPOINT:
         raise ValueError("Please provide a value for `OLLAMA_ENDPOINT`")
-    llm_client = OllamaClient(settings.OLLAMA_ENDPOINT, settings.OLLAMA_MODEL)
+    llm_client = OllamaClient(settings.OLLAMA_ENDPOINT, settings.OLLAMA_MODEL, settings.LLM_TEMPERATURE)
 elif settings.LLM_PROVIDER == LLMProvider.GROQ:
     if not settings.GROQ_API_KEY:
         raise ValueError("Please provide a value for `GROQ_API_KEY`")
-    llm_client = GroqClient(settings.GROQ_API_KEY, settings.GROQ_MODEL)  # type: ignore[arg-type]
+    llm_client = GroqClient(settings.GROQ_API_KEY, settings.GROQ_MODEL, settings.LLM_TEMPERATURE)  # type: ignore[arg-type]
 else:
     raise NotImplementedError("LLM provider is not implemented")
