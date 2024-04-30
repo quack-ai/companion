@@ -74,6 +74,10 @@
     - pyproject.toml
     - poetry.lock
 
+'topic: llm':
+- changed-files:
+  - any-glob-to-any-file: src/app/services/llm/*
+
 'topic: migration':
 - changed-files:
   - any-glob-to-any-file:
