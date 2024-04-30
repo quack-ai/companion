@@ -29,14 +29,14 @@ def test_verify_password():
     ("content", "expires_minutes", "expected_delta"),
     [
         ({"data": "my_data"}, 60, 60),
-        ({"data": "my_data"}, None, settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        ({"data": "my_data"}, None, settings.JWT_EXPIRE_MINUTES),
     ],
 )
 def test_create_access_token(content, expires_minutes, expected_delta):
     payload = create_access_token(content, expires_minutes)
     after = datetime.utcnow()
     assert isinstance(payload, str)
-    decoded_data = jwt.decode(payload, settings.JWT_SECRET, algorithms=[settings.JWT_ENCODING_ALGORITHM])
+    decoded_data = jwt.decode(payload, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
     # Verify data integrity
     assert all(v == decoded_data[k] for k, v in content.items())
     # Check expiration
