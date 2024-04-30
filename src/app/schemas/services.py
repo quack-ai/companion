@@ -71,7 +71,7 @@ class _ResponseFormat(BaseModel):
 
 
 class ChatCompletion(BaseModel):
-    model: OpenAIModel = OpenAIModel.GPT3_5_TURBO
+    model: str
     messages: List[OpenAIMessage]
     functions: List[OpenAIFunction]
     function_call: Dict[str, str]
@@ -80,6 +80,7 @@ class ChatCompletion(BaseModel):
     response_format: _ResponseFormat = _ResponseFormat(type="json_object")
     user: Union[str, None] = None
     seed: int = 42
+    stream: bool = False
 
 
 class GHTokenRequest(BaseModel):
