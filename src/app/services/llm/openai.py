@@ -386,6 +386,3 @@ class OpenAIClient:
                 **kwargs,
             )
         )
-
-
-# openai_client = OpenAIClient(settings.OPENAI_API_KEY, settings.OPENAI_MODEL)
