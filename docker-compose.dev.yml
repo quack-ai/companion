@@ -54,7 +54,10 @@ services:
       - DEBUG=true
     volumes:
       - ./src/:/app/
-    command: "sh -c 'python app/db.py && uvicorn app.main:app --reload --host 0.0.0.0 --port 5050 --proxy-headers'"
+    command: >
+      sh -c "python app/db.py
+      && curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"${OLLAMA_MODEL}\"}'
+      && uvicorn app.main:app --reload --host 0.0.0.0 --port 5050 --proxy-headers"
     healthcheck:
       test: ["CMD-SHELL", "curl http://localhost:5050/status"]
       interval: 10s
