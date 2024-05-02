@@ -42,7 +42,7 @@ def test_groqclient_constructor():
         GroqClient(settings.GROQ_API_KEY, settings.GROQ_MODEL)
 
 
-@pytest.mark.skipif(settings.GROQ_API_KEY is None)
+@pytest.mark.skipif("settings.GROQ_API_KEY is None")
 def test_groqclient_chat():
     llm_client = GroqClient(settings.GROQ_API_KEY, settings.GROQ_MODEL)
     stream = llm_client.chat([{"role": "user", "content": "hello"}])
