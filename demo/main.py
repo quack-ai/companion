@@ -4,7 +4,6 @@
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
 import argparse
-import json
 import os
 from pathlib import Path
 from typing import Dict, List
@@ -93,8 +92,8 @@ def chat_response(message: str, history: List[List[str]]) -> str:
         stream=True,
     ) as response:
         reply = ""
-        for line in response.iter_lines():
-            reply += json.loads(line.decode("utf-8"))["message"]["content"]
+        for line in response.iter_content():
+            reply += line.decode("utf-8")
             yield reply
 
 

@@ -35,6 +35,12 @@ from sqlmodel.ext.asyncio.session import AsyncSession
             422,
             None,
         ),
+        (
+            0,
+            {"messages": []},
+            422,
+            "Expected a non-empty list of messages.",
+        ),
         (0, {"messages": [{"role": "user", "content": "Is Python 3.11 faster than 3.10?"}]}, 200, None),
         (
             0,

@@ -90,12 +90,16 @@ services:
       - "traefik.http.routers.backend.entrypoints=websecure"
       - "traefik.http.routers.backend.tls.certresolver=quackresolver"
       - "traefik.http.services.backend.loadbalancer.server.port=5050"
-    command: "sh -c 'alembic upgrade head && python app/db.py && uvicorn app.main:app --reload --host 0.0.0.0 --port 5050 --proxy-headers'"
+    command: >
+      sh -c "alembic upgrade head
+      && python app/db.py
+      && curl -X POST http://ollama:11434/api/pull -d '{\"name\": \"${OLLAMA_MODEL}\"}'
+      && uvicorn app.main:app --reload --host 0.0.0.0 --port 5050 --proxy-headers"
     healthcheck:
       test: ["CMD-SHELL", "curl http://localhost:5050/status"]
       interval: 10s
       timeout: 3s
-      retries: 3
+      retries: 5
 
   gradio:
     image: quackai/gradio:latest

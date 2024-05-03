@@ -64,7 +64,7 @@ async def login_with_creds(
     telemetry_client.capture(user.id, event="user-login", properties={"method": "credentials"})
     # create access token using user user_id/user_scopes
     token_data = {"sub": str(user.id), "scopes": user.scope.split()}
-    token = create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
+    token = create_access_token(token_data, settings.JWT_UNLIMITED)
 
     return Token(access_token=token, token_type="bearer")  # noqa S106
 
@@ -89,7 +89,7 @@ async def login_with_github_token(
 
     # create access token using user user_id/user_scopes
     token_data = {"sub": str(user.id), "scopes": user.scope.split()}
-    token = create_access_token(token_data, settings.ACCESS_TOKEN_UNLIMITED_MINUTES)
+    token = create_access_token(token_data, settings.JWT_UNLIMITED)
 
     return Token(access_token=token, token_type="bearer")  # noqa S106
 

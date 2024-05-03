@@ -6,18 +6,14 @@
 import json
 import logging
 import re
-from typing import Callable, Dict, List, TypeVar
+from typing import Dict, Generator, List, TypeVar, Union
 
-import requests
 from fastapi import HTTPException, status
-
-from app.core.config import settings
-from app.schemas.guidelines import GuidelineContent, GuidelineExample
+from ollama import Client
 
 logger = logging.getLogger("uvicorn.error")
 
 ValidationOut = TypeVar("ValidationOut")
-__all__ = ["ollama_client"]
 
 
 EXAMPLE_PROMPT = (
@@ -61,7 +57,9 @@ CHAT_PROMPT = (
     "(refuse to answer for the rest)."
 )
 
-GUIDELINE_PROMPT = "When answering user requests, you should at all times keep in mind the following software development guidelines:\n"
+GUIDELINE_PROMPT = (
+    "When answering user requests, you should at all times keep in mind the following software development guidelines:"
+)
 
 
 def validate_parsing_response(response: str) -> List[Dict[str, str]]:
@@ -75,132 +73,36 @@ def validate_parsing_response(response: str) -> List[Dict[str, str]]:
 
 
 class OllamaClient:
-    def __init__(self, endpoint: str, model_name: str, temperature: float = 0.0, timeout: int = 60) -> None:
-        self.endpoint = endpoint
-        # Check endpoint
-        response = requests.get(f"{self.endpoint}/api/tags", timeout=2)
-        if response.status_code != 200:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unavailable endpoint")
-        # Pull model
-        logger.info("Loading Ollama model...")
-        response = requests.post(
-            f"{self.endpoint}/api/pull", json={"name": model_name, "stream": False}, timeout=timeout
-        )
-        if response.status_code != 200 or response.json()["status"] != "success":
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Unavailable model")
+    def __init__(self, endpoint: str, model: str, temperature: float = 0.0) -> None:
+        self._client = Client(endpoint)
+        # Validate model
+        self._client.show(model)
+        self.model = model
         self.temperature = temperature
-        self.model_name = model_name
-        logger.info(f"Using Ollama model: {self.model_name}")
-
-    def _generate(
-        self,
-        system_prompt: str,
-        message: str,
-        validate_fn: Callable[[str], ValidationOut],
-        timeout: int = 20,
-    ) -> ValidationOut:
-        # Send the request
-        response = requests.post(
-            f"{self.endpoint}/api/generate",
-            json={
-                "model": self.model_name,
-                "stream": False,
-                "options": {"temperature": self.temperature},
-                "system": system_prompt,
-                "prompt": message,
-                "format": "json",
-                "keep_alive": "30s",
-            },
-            timeout=timeout,
-        )
-
-        # Check status
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail=response.json()["error"])
-
-        # Regex to locate JSON string
-        logger.info(response.json()["response"].strip())
-        return validate_fn(response.json()["response"])
-
-    def _chat(
-        self,
-        system_prompt: str,
-        messages: List[Dict[str, str]],
-        guidelines: List[str],
-        timeout: int = 20,
-    ) -> requests.Response:
-        _guideline_str = "\n-".join(guidelines)
-        _system = system_prompt if len(guidelines) == 0 else f"{system_prompt} {GUIDELINE_PROMPT}-{_guideline_str}"
-        return requests.post(
-            f"{self.endpoint}/api/chat",
-            json={
-                "model": self.model_name,
-                "stream": True,
-                "options": {"temperature": self.temperature},
-                "messages": [{"role": "system", "content": _system}, *messages],
-                "keep_alive": "30s",
-            },
-            stream=True,
-            timeout=timeout,
-        )
+        logger.info(f"Using Ollama w/ {self.model}")
 
     def chat(
         self,
         messages: List[Dict[str, str]],
-        guidelines: List[str],
-        **kwargs,
-    ) -> requests.Response:
-        return self._chat(CHAT_PROMPT, messages, guidelines, **kwargs)
-
-    def parse_guidelines_from_text(
-        self,
-        corpus: str,
-        timeout: int = 20,
-    ) -> List[GuidelineContent]:
-        if not isinstance(corpus, str):
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="The input corpus needs to be a string.",
-            )
-        if len(corpus) == 0:
-            return []
-
-        response = self._generate(
-            PARSING_PROMPT,
-            json.dumps(corpus),
-            validate_parsing_response,
-            timeout,
+        system: Union[str, None] = None,
+    ) -> Generator[str, None, None]:
+        # Prepare the request
+        _system = CHAT_PROMPT if not system else f"{CHAT_PROMPT} {system}"
+        stream = self._client.chat(
+            messages=[
+                {"role": "system", "content": _system},
+                *messages,
+            ],
+            model=self.model,
+            # Optional
+            keep_alive="30s",
+            options={"temperature": self.temperature},
+            stream=True,
         )
-
-        return [GuidelineContent(**elt) for elt in response]
-
-    def generate_examples_for_instruction(
-        self,
-        instruction: str,
-        language: str,
-        timeout: int = 20,
-    ) -> GuidelineExample:
-        if (
-            not isinstance(instruction, str)
-            or len(instruction) == 0
-            or not isinstance(language, str)
-            or len(language) == 0
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail="The instruction and language need to be non-empty strings.",
-            )
-
-        return GuidelineExample(
-            **self._generate(
-                EXAMPLE_PROMPT,
-                json.dumps({"guideline": instruction, "language": language}),
-                validate_example_response,
-                timeout,
-            ),
-        )
-
-
-ollama_client = OllamaClient(
-    settings.OLLAMA_ENDPOINT, settings.OLLAMA_MODEL, settings.LLM_TEMPERATURE, settings.OLLAMA_TIMEOUT
-)
+        for chunk in stream:
+            if isinstance(chunk["message"]["content"], str):
+                yield chunk["message"]["content"]
+            if chunk["done"]:
+                logger.info(
+                    f"Ollama ({self.model}): {chunk['prompt_eval_count']} prompt tokens | {chunk['eval_count']} completion tokens",
+                )

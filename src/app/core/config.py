@@ -42,14 +42,18 @@ class Settings(BaseSettings):
 
     # Security
     JWT_SECRET: str = os.environ.get("JWT_SECRET", secrets.token_urlsafe(32))
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
-    ACCESS_TOKEN_UNLIMITED_MINUTES: int = 60 * 24 * 365
-    JWT_ENCODING_ALGORITHM: str = "HS256"
-    # LLM Compute
-    OLLAMA_ENDPOINT: str = os.environ["OLLAMA_ENDPOINT"]
-    OLLAMA_MODEL: str = os.environ.get("OLLAMA_MODEL", "dolphin-mistral:7b-v2.6-dpo-laser-q4_K_M")
-    OLLAMA_TIMEOUT: int = int(os.getenv("OLLAMA_TIMEOUT", 60))
-    LLM_TEMPERATURE: float = float(os.getenv("LLM_TEMPERATURE", 0.0))
+    JWT_EXPIRE_MINUTES: int = 60
+    JWT_UNLIMITED: int = 60 * 24 * 365
+    JWT_ALGORITHM: str = "HS256"
+    # LLM
+    LLM_PROVIDER: str = os.environ.get("LLM_PROVIDER", "ollama")
+    LLM_TEMPERATURE: float = float(os.environ.get("LLM_TEMPERATURE") or 0)
+    OLLAMA_ENDPOINT: Union[str, None] = os.environ.get("OLLAMA_ENDPOINT")
+    OLLAMA_MODEL: str = os.environ.get("OLLAMA_MODEL", "dolphin-llama3:8b-v2.9-q4_K_M")
+    GROQ_API_KEY: Union[str, None] = os.environ.get("GROQ_API_KEY")
+    GROQ_MODEL: str = os.environ.get("GROQ_MODEL", "llama3-8b-8192")
+    OPENAI_API_KEY: Union[str, None] = os.environ.get("OPENAI_API_KEY")
+    OPENAI_MODEL: str = os.environ.get("OPENAI_MODEL", "gpt-4-turbo-2024-04-09")
 
     # Error monitoring
     SENTRY_DSN: Union[str, None] = os.environ.get("SENTRY_DSN")
