@@ -21,7 +21,7 @@ jobs:
           architecture: x64
       - uses: abatilo/actions-poetry@v3
         with:
-          poetry-version: "1.7.1"
+          poetry-version: "1.8.2"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --only quality --output requirements.txt
       - name: Install dependencies
@@ -47,7 +47,7 @@ jobs:
           architecture: x64
       - uses: abatilo/actions-poetry@v3
         with:
-          poetry-version: "1.7.1"
+          poetry-version: "1.8.2"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --with quality --output requirements.txt
       - name: Install dependencies
@@ -73,7 +73,7 @@ jobs:
           architecture: x64
       - uses: abatilo/actions-poetry@v3
         with:
-          poetry-version: "1.7.1"
+          poetry-version: "1.8.2"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --only quality --output requirements.txt
       - name: Install dependencies
@@ -99,7 +99,7 @@ jobs:
           architecture: x64
       - uses: abatilo/actions-poetry@v3
         with:
-          poetry-version: "1.7.1"
+          poetry-version: "1.8.2"
       - name: Resolve dependencies
         run: poetry export -f requirements.txt --without-hashes --only quality --output requirements.txt
       - name: Install dependencies
