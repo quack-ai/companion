@@ -35,7 +35,7 @@ ollama = "^0.1.9"
 optional = true
 
 [tool.poetry.group.quality.dependencies]
-ruff = "==0.4.1"
+ruff = "==0.4.3"
 mypy = "==1.10.0"
 types-requests = ">=2.0.0"
 types-passlib = ">=1.7.0"
