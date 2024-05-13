@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 
 import jwt
 import pytest
@@ -34,7 +34,7 @@ def test_verify_password():
 )
 def test_create_access_token(content, expires_minutes, expected_delta):
     payload = create_access_token(content, expires_minutes)
-    after = datetime.utcnow()
+    after = datetime.now(UTC)
     assert isinstance(payload, str)
     decoded_data = jwt.decode(payload, settings.JWT_SECRET, algorithms=[settings.JWT_ALGORITHM])
     # Verify data integrity
