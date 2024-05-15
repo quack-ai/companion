@@ -11,6 +11,8 @@ from typing import Dict, Generator, List, Union, cast
 from groq import Groq, Stream
 from groq.lib.chat_completion_chunk import ChatCompletionChunk
 
+from .utils import CHAT_PROMPT
+
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -18,12 +20,6 @@ class GroqModel(str, Enum):
     LLAMA3_7B: str = "llama3-8b-8192"
     LLAMA3_70B: str = "llama3-70b-8192"
     MIXTRAL_8X7b: str = "mixtral-8x7b-32768"
-
-
-CHAT_PROMPT = (
-    "You are an AI programming assistant, developed by the company Quack AI, and you only answer questions related to computer science "
-    "(refuse to answer for the rest)."
-)
 
 
 class GroqClient:

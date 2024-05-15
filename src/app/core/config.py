@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     GROQ_API_KEY: Union[str, None] = os.environ.get("GROQ_API_KEY")
     GROQ_MODEL: str = os.environ.get("GROQ_MODEL", "llama3-8b-8192")
     OPENAI_API_KEY: Union[str, None] = os.environ.get("OPENAI_API_KEY")
-    OPENAI_MODEL: str = os.environ.get("OPENAI_MODEL", "gpt-4-turbo-2024-04-09")
+    OPENAI_MODEL: str = os.environ.get("OPENAI_MODEL", "gpt-4o-2024-05-13")
 
     # Error monitoring
     SENTRY_DSN: Union[str, None] = os.environ.get("SENTRY_DSN")
