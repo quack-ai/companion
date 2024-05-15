@@ -1540,13 +1540,13 @@ files = [
 
 [[package]]
 name = "ollama"
-version = "0.1.9"
+version = "0.2.0"
 description = "The official Python client for Ollama."
 optional = false
 python-versions = "<4.0,>=3.8"
 files = [
-    {file = "ollama-0.1.9-py3-none-any.whl", hash = "sha256:46d4b4028ac5cbb30a8128ba60967171fbb523c25c832c0f3f090989e5441033"},
-    {file = "ollama-0.1.9.tar.gz", hash = "sha256:f64484b280db0fa03fb899580d8a3a85af3787fd2a85b67669b743e313b3faf1"},
+    {file = "ollama-0.2.0-py3-none-any.whl", hash = "sha256:fefe119386c8b2cb6b6e232f9c10894326675425be980403c6a7a2dbfc8b0e19"},
+    {file = "ollama-0.2.0.tar.gz", hash = "sha256:de056cada2a92433195102da2b8ff50f66335b138eff5d277765c8adf79983f0"},
 ]
 
 [package.dependencies]
@@ -3056,4 +3056,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "e534d24c22548f9876c27ffaa4dbf5afdb4123971a1edfbfb2fb3ff8b482b3a1"
+content-hash = "0fd3540a30ecce9d37000c0415c94f3b9812bbc920003505a828c6a06f553e3c"
