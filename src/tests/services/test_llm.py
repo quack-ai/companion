@@ -8,6 +8,7 @@ from ollama import ResponseError
 from app.core.config import settings
 from app.services.llm.groq import GroqClient
 from app.services.llm.ollama import OllamaClient
+from app.services.llm.openai import OpenAIClient
 
 
 @pytest.mark.parametrize(
@@ -45,6 +46,24 @@ def test_groqclient_constructor():
 @pytest.mark.skipif("settings.GROQ_API_KEY is None")
 def test_groqclient_chat():
     llm_client = GroqClient(settings.GROQ_API_KEY, settings.GROQ_MODEL)
+    stream = llm_client.chat([{"role": "user", "content": "hello"}])
+    assert isinstance(stream, types.GeneratorType)
+    for chunk in stream:
+        assert isinstance(chunk, str)
+
+
+def test_openaiclient_constructor():
+    with pytest.raises(AuthenticationError):
+        OpenAIClient("api_key", settings.OPENAI_MODEL)
+    if isinstance(settings.OPENAI_API_KEY, str):
+        with pytest.raises(NotFoundError):
+            OpenAIClient(settings.OPENAI_API_KEY, "quack")
+        OpenAIClient(settings.OPENAI_API_KEY, settings.OPENAI_MODEL)
+
+
+@pytest.mark.skipif("settings.OPENAI_API_KEY is None")
+def test_openaiclient_chat():
+    llm_client = OpenAIClient(settings.OPENAI_API_KEY, settings.OPENAI_MODEL)
     stream = llm_client.chat([{"role": "user", "content": "hello"}])
     assert isinstance(stream, types.GeneratorType)
     for chunk in stream:
