@@ -1,9 +1,12 @@
 import types
 
 import pytest
-from groq import AuthenticationError, NotFoundError
+from groq import AuthenticationError as GAuthError
+from groq import NotFoundError as GNotFoundError
 from httpx import ConnectError
 from ollama import ResponseError
+from openai import AuthenticationError as OAIAuthError
+from openai import NotFoundError as OAINotFounderError
 
 from app.core.config import settings
 from app.services.llm.groq import GroqClient
@@ -35,10 +38,10 @@ def test_ollamaclient_chat():
 
 
 def test_groqclient_constructor():
-    with pytest.raises(AuthenticationError):
+    with pytest.raises(GAuthError):
         GroqClient("api_key", settings.GROQ_MODEL)
     if isinstance(settings.GROQ_API_KEY, str):
-        with pytest.raises(NotFoundError):
+        with pytest.raises(GNotFoundError):
             GroqClient(settings.GROQ_API_KEY, "quack")
         GroqClient(settings.GROQ_API_KEY, settings.GROQ_MODEL)
 
@@ -53,10 +56,10 @@ def test_groqclient_chat():
 
 
 def test_openaiclient_constructor():
-    with pytest.raises(AuthenticationError):
+    with pytest.raises(OAIAuthError):
         OpenAIClient("api_key", settings.OPENAI_MODEL)
     if isinstance(settings.OPENAI_API_KEY, str):
-        with pytest.raises(NotFoundError):
+        with pytest.raises(OAINotFounderError):
             OpenAIClient(settings.OPENAI_API_KEY, "quack")
         OpenAIClient(settings.OPENAI_API_KEY, settings.OPENAI_MODEL)
 
