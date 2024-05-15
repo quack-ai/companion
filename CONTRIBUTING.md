@@ -77,9 +77,11 @@ If you are wondering how to do something with Companion API, or a more general q
 - [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 - [Docker](https://docs.docker.com/engine/install/)
 - [Docker compose](https://docs.docker.com/compose/)
-- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and a GPU (>= 6 Gb VRAM for good performance/latency balance)
+- [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) and a GPU (>= 6 Gb VRAM for good performance/latency balance)*
 - [Poetry](https://python-poetry.org/docs/)
 - [Make](https://www.gnu.org/software/make/) (optional)
+
+_*If you don't have a GPU, you can use alternative LLM providers (currently supported: Groq, OpenAI)_
 
 
 ### Configure your fork
@@ -130,8 +132,12 @@ This file contains all the information to run the project.
 - `SUPERADMIN_PWD`: the password of the initial admin user
 
 #### Other optional values
-- `SECRET_KEY`: if set, tokens can be reused between sessions. All instances sharing the same secret key can use the same token.
+- `JWT_SECRET`: if set, tokens can be reused between sessions. All instances sharing the same secret key can use the same token.
 - `OLLAMA_MODEL`: the model tag in [Ollama library](https://ollama.com/library) that will be used for the API.
+- `GROQ_API_KEY`: your [Groq API KEY](https://console.groq.com/keys), required if you select `groq` as `LLM_PROVIDER`.
+- `GROQ_MODEL`: the model tag in [Groq supported models](https://console.groq.com/docs/models) that will be used for the API.
+- `OPENAI_API_KEY`: your [OpenAI API KEY](https://platform.openai.com/api-keys), required if you select `openai` as `LLM_PROVIDER`.
+- `OPENAI_MODEL`: the model tag in [OpenAI supported models](https://platform.openai.com/docs/models) that will be used for the API.
 - `SENTRY_DSN`: the DSN for your [Sentry](https://sentry.io/) project, which monitors back-end errors and report them back.
 - `SERVER_NAME`: the server tag that will be used to report events to Sentry.
 - `POSTHOG_HOST`: the host for PostHog [PostHog](https://eu.posthog.com/settings/project-details).
