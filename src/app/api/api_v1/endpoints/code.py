@@ -29,7 +29,7 @@ async def chat(
     guidelines: GuidelineCRUD = Depends(get_guideline_crud),
     token_payload: TokenPayload = Security(get_quack_jwt, scopes=[UserScope.ADMIN, UserScope.USER]),
 ) -> StreamingResponse:
-    telemetry_client.capture(token_payload.sub, event="compute-chat")
+    telemetry_client.capture(token_payload.sub, event="code-chat")
     # Validate payload
     if len(payload.messages) == 0:
         raise HTTPException(
