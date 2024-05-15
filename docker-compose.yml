@@ -19,7 +19,7 @@ services:
       retries: 3
 
   ollama:
-    image: ollama/ollama:0.1.32
+    image: ollama/ollama:0.1.38
     expose:
       - 11434
     volumes:
