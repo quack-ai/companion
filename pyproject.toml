@@ -19,7 +19,7 @@ fastapi = ">=0.109.1,<1.0.0"
 sqlmodel = "^0.0.16"
 pydantic = ">=2.0.0,<3.0.0"
 pydantic-settings = ">=2.0.0,<3.0.0"
-requests = "^2.20.0"
+requests = "^2.32.0"
 PyJWT = "^2.8.0"
 passlib = { version = "^1.7.4", extras = ["bcrypt"] }
 uvicorn = ">=0.11.1,<1.0.0"
@@ -50,7 +50,7 @@ optional = true
 
 [tool.poetry.group.demo.dependencies]
 gradio = "^4.21.0"
-requests = "^2.20.0"
+requests = "^2.32.0"
 python-dotenv = "^1.0.0"
 posthog = "^3.0.0"
 
