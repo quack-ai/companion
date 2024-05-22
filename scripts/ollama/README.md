@@ -15,10 +15,10 @@ We ran our tests on the following hardware:
 *The laptop hardware setup includes an [Intel(R) Core(TM) i7-12700H](https://ark.intel.com/content/www/us/en/ark/products/132228/intel-core-i7-12700h-processor-24m-cache-up-to-4-70-ghz.html) for the CPU*
 
 with the following LLMs (cf. [Ollama hub](https://ollama.com/library)):
-- Deepseek Coder 6.7b - instruct ([Ollama](https://ollama.com/library/deepseek-coder), [HuggingFace](https://huggingface.co/deepseek-ai/deepseek-coder-6.7b-instruct))
-- OpenCodeInterpreter 6.7b ([Ollama](https://ollama.com/pxlksr/opencodeinterpreter-ds), [HuggingFace](https://huggingface.co/m-a-p/OpenCodeInterpreter-DS-6.7B), [paper](https://arxiv.org/abs/2402.14658))
-- Dolphin Mistral 7b ([Ollama](https://ollama.com/library/dolphin-mistral), [HuggingFace](https://huggingface.co/cognitivecomputations/dolphin-2.6-mistral-7b-dpo-laser), [paper](https://arxiv.org/abs/2310.06825))
-- Coming soon: StarChat v2 ([HuggingFace](https://huggingface.co/HuggingFaceH4/starchat2-15b-v0.1), [paper](https://arxiv.org/abs/2402.19173))
+- Deepseek Coder 6.7b - instruct ([Ollama](https://ollama.com/library/deepseek-coder), [Hugging Face](https://huggingface.co/deepseek-ai/deepseek-coder-6.7b-instruct))
+- OpenCodeInterpreter 6.7b ([Ollama](https://ollama.com/pxlksr/opencodeinterpreter-ds), [Hugging Face](https://huggingface.co/m-a-p/OpenCodeInterpreter-DS-6.7B), [paper](https://arxiv.org/abs/2402.14658))
+- Dolphin Mistral 7b ([Ollama](https://ollama.com/library/dolphin-mistral), [Hugging Face](https://huggingface.co/cognitivecomputations/dolphin-2.6-mistral-7b-dpo-laser), [paper](https://arxiv.org/abs/2310.06825))
+- Coming soon: StarChat v2 ([Hugging Face](https://huggingface.co/HuggingFaceH4/starchat2-15b-v0.1), [paper](https://arxiv.org/abs/2402.19173))
 
 and the following quantization formats: q3_K_M, q4_K_M, q5_K_M.
 
