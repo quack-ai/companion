@@ -4,7 +4,7 @@ build-backend = "poetry.masonry.api"
 
 [tool.poetry]
 name = "companion"
-version = "0.1.0.dev0"
+version = "0.1.1.dev0"
 description = "Quack Companion API - type smarter, ship faster"
 license = "Apache-2.0"
 authors = ["François-Guillaume Fernandez <support@quackai.com>"]
