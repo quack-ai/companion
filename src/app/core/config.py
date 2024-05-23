@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # State
     PROJECT_NAME: str = "Quack Companion API - Type smarter, ship faster"
     PROJECT_DESCRIPTION: str = "Leverage team insights with a cohesive framework to code efficiently."
-    VERSION: str = "0.1.0.dev0"
+    VERSION: str = "0.1.1.dev0"
     API_V1_STR: str = "/api/v1"
     CORS_ORIGIN: str = "*"
     SUPPORT_EMAIL: Union[str, None] = os.environ.get("SUPPORT_EMAIL")
