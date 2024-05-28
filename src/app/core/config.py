@@ -54,7 +54,9 @@ class Settings(BaseSettings):
     GROQ_MODEL: str = os.environ.get("GROQ_MODEL", "llama3-8b-8192")
     OPENAI_API_KEY: Union[str, None] = os.environ.get("OPENAI_API_KEY")
     OPENAI_MODEL: str = os.environ.get("OPENAI_MODEL", "gpt-4o-2024-05-13")
-
+    MISTRAL_MODEL: str = os.environ.get("MISTRAL_MODEL", "open-mixtral-8x7b")
+    CLAUDE_MODEL: str = os.environ.get("CLAUDE_MODEL", "claude-3-opus-20240229")
+    GEMINI_MODEL: str = os.environ.get("GEMINI_MODEL", "GeminiPro_1.5_Pro")
     # Error monitoring
     SENTRY_DSN: Union[str, None] = os.environ.get("SENTRY_DSN")
     SERVER_NAME: str = os.environ.get("SERVER_NAME", socket.gethostname())

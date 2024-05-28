@@ -14,6 +14,9 @@ from app.core.config import settings
 from .groq import GroqClient
 from .ollama import OllamaClient
 from .openai import OpenAIClient
+from .claude import ClaudeClient
+from .gemini import GeminiClient
+from .mistral import MistralClient
 
 __all__ = ["llm_client"]
 
@@ -42,9 +45,12 @@ class LLMProvider(str, Enum):
     OLLAMA: str = "ollama"
     OPENAI: str = "openai"
     GROQ: str = "groq"
+    MISTRAL: str = "mistral"
+    GEMINI: str = "gemini"
+    CLAUDE: str = "claude"
 
 
-llm_client: Union[OllamaClient, GroqClient, OpenAIClient]
+llm_client: Union[OllamaClient, GroqClient, OpenAIClient, ClaudeClient, GeminiClient, MistralClient]
 if settings.LLM_PROVIDER == LLMProvider.OLLAMA:
     if not settings.OLLAMA_ENDPOINT:
         raise ValueError("Please provide a value for `OLLAMA_ENDPOINT`")
@@ -57,5 +63,17 @@ elif settings.LLM_PROVIDER == LLMProvider.OPENAI:
     if not settings.OPENAI_API_KEY:
         raise ValueError("Please provide a value for `OPENAI_API_KEY`")
     llm_client = OpenAIClient(settings.OPENAI_API_KEY, settings.OPENAI_MODEL, settings.LLM_TEMPERATURE)  # type: ignore[arg-type]
+elif settings.LLM_PROVIDER == LLMProvider.CLAUDE:
+    if not settings.CLAUDE_API_KEY:
+        raise ValueError("Please provide a value for `CLAUDE_API_KEY`")
+    llm_client = ClaudeClient(settings.CLAUDE_API_KEY, settings.CLAUDE_MODEL, settings.LLM_TEMPERATURE)
+elif settings.LLM_PROVIDER == LLMProvider.GEMINI:
+    if not settings.GEMINI_API_KEY:
+        raise ValueError("Please provide a value for `GEMINI_API_KEY`")
+    llm_client = GeminiClient(settings.GEMINI_API_KEY, settings.GEMINI_MODEL, settings.LLM_TEMPERATURE)
+elif settings.LLM_PROVIDER == LLMProvider.MISTRAL:
+    if not settings.MISTRAL_API_KEY:
+        raise ValueError("Please provide a value for `MISTRAL_API_KEY`")
+    llm_client = MistralClient(settings.MISTRAL_API_KEY, settings.MISTRAL_MODEL, settings.LLM_TEMPERATURE)
 else:
     raise NotImplementedError("LLM provider is not implemented")
