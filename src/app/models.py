@@ -3,7 +3,7 @@
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://www.apache.org/licenses/LICENSE-2.0> for full license details.
 
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 from typing import Union
 
@@ -36,7 +36,7 @@ class User(SQLModel, table=True):
     provider_user_id: Union[int, None] = Field(None, gt=0)
     login: Union[str, None] = Field(None, min_length=2, max_length=50)
     hashed_password: Union[str, None] = Field(None, min_length=5, max_length=70)
-    created_at: datetime = Field(default_factory=datetime.utcnow, nullable=False)
+    created_at: datetime = Field(default_factory=datetime.now(UTC), nullable=False)
 
 
 class Repository(SQLModel, table=True):
