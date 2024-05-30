@@ -81,7 +81,7 @@ If you are wondering how to do something with Companion API, or a more general q
 - [Poetry](https://python-poetry.org/docs/)
 - [Make](https://www.gnu.org/software/make/) (optional)
 
-_*If you don't have a GPU, you can use alternative LLM providers (currently supported: Groq, OpenAI)_
+_*If you don't have a GPU, you can use alternative LLM providers (currently supported: Groq, OpenAI, Claude)_
 
 
 ### Configure your fork
@@ -138,6 +138,8 @@ This file contains all the information to run the project.
 - `GROQ_MODEL`: the model tag in [Groq supported models](https://console.groq.com/docs/models) that will be used for the API.
 - `OPENAI_API_KEY`: your [OpenAI API KEY](https://platform.openai.com/api-keys), required if you select `openai` as `LLM_PROVIDER`.
 - `OPENAI_MODEL`: the model tag in [OpenAI supported models](https://platform.openai.com/docs/models) that will be used for the API.
+- `CLAUDE_API_KEY`: your [CLAUDE_API_KEY](https://console.anthropic.com/settings/keys), required if you select `claude` as `LLM_PROVIDER`
+- `CLAUDE_MODEL`: the model tag in [Claude supported models](https://docs.anthropic.com/en/docs/models-overview) that will be used for the API.
 - `SENTRY_DSN`: the DSN for your [Sentry](https://sentry.io/) project, which monitors back-end errors and report them back.
 - `SERVER_NAME`: the server tag that will be used to report events to Sentry.
 - `POSTHOG_HOST`: the host for PostHog [PostHog](https://eu.posthog.com/settings/project-details).
