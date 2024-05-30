@@ -1,6 +1,8 @@
 import types
 
 import pytest
+from anthropic import AuthenticationError as CAuthError
+from anthropic import NotFoundError as CNotFoundError
 from groq import AuthenticationError as GAuthError
 from groq import NotFoundError as GNotFoundError
 from httpx import ConnectError
@@ -9,6 +11,7 @@ from openai import AuthenticationError as OAIAuthError
 from openai import NotFoundError as OAINotFounderError
 
 from app.core.config import settings
+from app.services.llm.claude import ClaudeClient
 from app.services.llm.groq import GroqClient
 from app.services.llm.ollama import OllamaClient
 from app.services.llm.openai import OpenAIClient
@@ -68,6 +71,27 @@ def test_openaiclient_constructor():
 def test_openaiclient_chat():
     llm_client = OpenAIClient(settings.OPENAI_API_KEY, settings.OPENAI_MODEL)
     stream = llm_client.chat([{"role": "user", "content": "hello"}])
+    assert isinstance(stream, types.GeneratorType)
+    for chunk in stream:
+        assert isinstance(chunk, str)
+
+
+def test_claudeclient_constructor():
+    with pytest.raises(CAuthError):
+        ClaudeClient("api_key", settings.CLAUDE_MODEL)
+    if isinstance(settings.CLAUDE_API_KEY, str):
+        with pytest.raises(CNotFoundError):
+            ClaudeClient(settings.CLAUDE_API_KEY, "quack")
+        ClaudeClient(settings.CLAUDE_API_KEY, settings.CLAUDE_MODEL)
+
+
+@pytest.mark.skipif("settings.CLAUDE_API_KEY is None")
+def test_claudeclient_chat():
+    llm_client = ClaudeClient(settings.CLAUDE_API_KEY, settings.CLAUDE_MODEL)
+    messages = [
+        {"role": "assistant", "content": "Hello, how are you?"},
+    ]
+    stream = llm_client.chat(messages=messages)
     assert isinstance(stream, types.GeneratorType)
     for chunk in stream:
         assert isinstance(chunk, str)
