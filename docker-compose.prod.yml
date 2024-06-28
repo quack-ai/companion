@@ -39,7 +39,7 @@ services:
     restart: always
 
   ollama:
-    image: ollama/ollama:0.1.38
+    image: ollama/ollama:0.1.47
     expose:
       - 11434
     volumes:
