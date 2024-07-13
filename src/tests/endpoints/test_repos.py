@@ -32,7 +32,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
         ),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_create_repo(
     async_client: AsyncClient,
     repo_session: AsyncSession,
@@ -64,7 +64,7 @@ async def test_create_repo(
         (1, 1, 200, None, 0),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_get_repo(
     async_client: AsyncClient,
     repo_session: AsyncSession,
@@ -94,7 +94,7 @@ async def test_get_repo(
         (1, 403, "Incompatible token scope.", None),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_fetch_repos(
     async_client: AsyncClient,
     repo_session: AsyncSession,
@@ -127,7 +127,7 @@ async def test_fetch_repos(
         (1, 2, 403, "Incompatible token scope."),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_delete_repo(
     async_client: AsyncClient,
     repo_session: AsyncSession,

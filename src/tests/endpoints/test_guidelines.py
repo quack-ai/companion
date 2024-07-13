@@ -14,7 +14,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
         (1, {"content": "Quacky quack"}, 201, None),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_create_guideline(
     async_client: AsyncClient,
     guideline_session: AsyncSession,
@@ -50,7 +50,7 @@ async def test_create_guideline(
         (1, 2, 200, None, 1),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_get_guideline(
     async_client: AsyncClient,
     guideline_session: AsyncSession,
@@ -80,7 +80,7 @@ async def test_get_guideline(
         (1, 200, None, pytest.guideline_table[1:]),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_fetch_guidelines(
     async_client: AsyncClient,
     guideline_session: AsyncSession,
@@ -113,7 +113,7 @@ async def test_fetch_guidelines(
         (1, 2, 200, None),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_delete_guideline(
     async_client: AsyncClient,
     guideline_session: AsyncSession,
@@ -146,7 +146,7 @@ async def test_delete_guideline(
         (1, 2, {"content": "New guideline details"}, 200, None, 1),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_update_guideline_content(
     async_client: AsyncClient,
     guideline_session: AsyncSession,

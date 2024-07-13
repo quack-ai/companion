@@ -13,7 +13,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
         ({"github_token": "foo"}, 401, "Bad credentials"),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_login_with_github_token(
     async_client: AsyncClient,
     user_session: AsyncSession,
@@ -36,7 +36,7 @@ async def test_login_with_github_token(
         ({"username": "first_login", "password": "first_pwd"}, 200, None),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_login_with_creds(
     async_client: AsyncClient,
     user_session: AsyncSession,
@@ -64,7 +64,7 @@ async def test_login_with_creds(
         ({"code": "foo", "redirect_uri": "https://quackai.com"}, 404, None, None),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_request_github_token_from_code(
     async_client: AsyncClient,
     user_session: AsyncSession,
@@ -87,7 +87,7 @@ async def test_request_github_token_from_code(
         ("read:user%20user:email%20repo", "https://app.quackai.com", 307),
     ],
 )
-@pytest.mark.asyncio()
+@pytest.mark.asyncio
 async def test_authorize_github(
     async_client: AsyncClient,
     user_session: AsyncSession,
