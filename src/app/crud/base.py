@@ -39,7 +39,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return entry
 
     async def get(self, entry_id: int, strict: bool = False) -> Union[ModelType, None]:
-        entry = await self.session.get(self.model, entry_id)
+        entry: Union[ModelType, None] = await self.session.get(self.model, entry_id)
         if strict and entry is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -48,7 +48,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return entry
 
     async def get_by(self, field_name: str, val: Union[str, int], strict: bool = False) -> Union[ModelType, None]:
-        statement = select(self.model).where(getattr(self.model, field_name) == val)
+        statement = select(self.model).where(getattr(self.model, field_name) == val)  # type: ignore[var-annotated]
         results = await self.session.exec(statement=statement)
         entry = results.one_or_none()
         if strict and entry is None:
@@ -59,10 +59,10 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return entry
 
     async def fetch_all(self, filter_pair: Union[Tuple[str, Any], None] = None) -> List[ModelType]:
-        statement = select(self.model)
+        statement = select(self.model)  # type: ignore[var-annotated]
         if isinstance(filter_pair, tuple):
             statement = statement.where(getattr(self.model, filter_pair[0]) == filter_pair[1])
-        return await self.session.exec(statement=statement)  # type: ignore[return-value]
+        return await self.session.exec(statement=statement)
 
     async def update(self, entry_id: int, payload: UpdateSchemaType) -> ModelType:
         access = cast(ModelType, await self.get(entry_id, strict=True))
@@ -79,7 +79,7 @@ class BaseCRUD(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
 
     async def delete(self, entry_id: int) -> None:
         await self.get(entry_id, strict=True)
-        statement = delete(self.model).where(self.model.id == entry_id)  # type: ignore[attr-defined]
+        statement = delete(self.model).where(self.model.id == entry_id)
 
         await self.session.exec(statement=statement)  # type: ignore[call-overload]
         await self.session.commit()

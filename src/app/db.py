@@ -23,7 +23,7 @@ engine = AsyncEngine(create_engine(settings.POSTGRES_URL, echo=False))
 
 
 async def get_session() -> AsyncSession:  # type: ignore[misc]
-    async_session = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)  # type: ignore[call-overload]
+    async_session = sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         yield session
 
@@ -34,7 +34,7 @@ async def init_db() -> None:
 
     async with AsyncSession(engine) as session:
         # Check if admin exists
-        statement = select(User).where(User.login == settings.SUPERADMIN_LOGIN)
+        statement = select(User).where(User.login == settings.SUPERADMIN_LOGIN)  # type: ignore[var-annotated]
         results = await session.exec(statement=statement)
         user = results.one_or_none()
         if not user:
