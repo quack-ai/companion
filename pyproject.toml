@@ -44,7 +44,7 @@ types-requests = ">=2.0.0"
 types-urllib3 = ">=1.26.25"
 types-passlib = ">=1.7.0"
 sqlalchemy-stubs = "^0.4"
-pre-commit = "^3.6.0"
+pre-commit = "^3.8.0"
 
 [tool.poetry.group.demo]
 optional = true
